@@ -1,6 +1,6 @@
 # dmxnow — Spécification du protocole
 
-Version du protocole : **1** (brouillon, en attente de validation)
+Version du protocole : **1** (arbitrages tranchés le 2026-09-25, en attente de validation finale)
 Documents liés : [SPEC.md](SPEC.md), [ADR 0001](adr/0001-transport-esp-now.md),
 [ADR 0011](adr/0011-esp-now-v2-trame-unique.md), [ADR 0012](adr/0012-liaison-serie-cobs.md),
 [ADR 0013](adr/0013-commandes-broadcast-ack.md), [ADR 0015](adr/0015-authentification-commandes.md).
@@ -10,7 +10,7 @@ Conventions :
   empaquetées sans alignement.
 - « Octet » = 8 bits. Les offsets sont en octets depuis le début de la structure.
 - Les mots DOIT, NE DOIT PAS, DEVRAIT, PEUT ont le sens de la RFC 2119.
-- Les éléments marqués **[PROPOSÉ]** dépendent d'un arbitrage listé dans SPEC.md §9.
+- Les arbitrages sont listés dans SPEC.md §9.
 
 ---
 
@@ -321,11 +321,11 @@ Chaque élément : `key` u8, `len` u8, `value` (`len` octets). Clé inconnue ⇒
 | `0x0A` | `gamma_x10`            | u8    | 22            | 10 (linéaire) à 30 |
 | `0x0B` | `fade_on_ms`           | u16   | 500           | 0 à 10000 |
 | `0x0C` | `pwm_freq_hz`          | u16   | 4882          | 1000 à 19531 ; la résolution est déduite (§SPEC 4.7) |
-| `0x0D` | `dmx_out_slots`        | u16   | 512           | 24 à 512 ; voir arbitrage A3 |
+| `0x0D` | `dmx_out_slots`        | u16   | 512           | 24 à 512 ; à régler à l'adresse de fin du projecteur (arbitrage A3) |
 | `0x0E` | `identify_slot`        | u16   | 0             | 0 = aucun ; sinon canal DMX forcé 255/0 pendant IDENTIFY |
 | `0x0F` | `net_id`               | u16   | 0 (non configuré) | 1 à 65535 |
 | `0x10` | `maint_password`       | 8 à 32 octets | aléatoire, cf. SPEC 4.9 | écriture seule |
-| `0x11` | `net_key` **[PROPOSÉ]**| 32 octets | absent | écriture seule (§7) |
+| `0x11` | `net_key`              | 32 octets | absent | écriture seule (§7) |
 
 Empreinte DMX du nœud à partir de `start_address` : canal relais (si `relay_dmx` = 1),
 puis PWM1..PWM4 (8 bits) ou PWM1 MSB, PWM1 LSB, … PWM4 LSB (16 bits) si la variante
@@ -344,7 +344,7 @@ En-tête : `universe` = `0xFFFF`, `seq` = `cmd_id` acquitté.
 
 ---
 
-## 7. Authentification des commandes **[PROPOSÉ — arbitrage A4]**
+## 7. Authentification des commandes (arbitrage A4 — retenu)
 
 Menace visée : un tiers (ou une autre installation dmxnow mal configurée) qui enverrait
 `MAINTENANCE` (ouvre un point d'accès et l'OTA), `FACTORY_RESET` ou `RELAY`. Le `net_id`

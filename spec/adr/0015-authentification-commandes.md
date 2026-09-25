@@ -1,6 +1,6 @@
 # ADR 0015 — Authentification des commandes par HMAC tronqué
 
-**Statut :** Proposé (arbitrage A4)
+**Statut :** Accepté (arbitrage A4, 2026-09-25)
 
 ## Contexte
 

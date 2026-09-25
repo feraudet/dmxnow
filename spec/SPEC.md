@@ -1,13 +1,13 @@
 # dmxnow — Spécification
 
-Statut : **brouillon v0.1, en attente de validation**. Aucune implémentation ne démarre
+Statut : **v0.2 — arbitrages A1 à A8 tranchés le 2026-09-25, en attente de validation finale**. Aucune implémentation ne démarre
 avant validation de ce document, de [PROTOCOL.md](PROTOCOL.md) et des [ADR](adr/).
 
 Conventions :
 - 🔴 **RELECTURE HUMAINE OBLIGATOIRE** : section touchant au 230 V ou à la sécurité des
   personnes ; à faire relire par une personne qualifiée (électricien ou électronicien de
   puissance) avant fabrication et avant toute mise sous tension.
-- **[ARBITRAGE Ax]** : point sur lequel je propose une décision et attends la tienne (§9).
+- **[ARBITRAGE Ax]** : point qui a fait l'objet d'un arbitrage (décisions en §9).
 - **[V-xx]** : hypothèse non vérifiée, listée en §10 avec la source à consulter.
 - Identifiants d'exigence : `EF-` fonctionnelle, `ENF-` non fonctionnelle, `ES-` sécurité.
 
@@ -93,7 +93,7 @@ sur un même réseau, codes de départ DMX non nuls.
 
 ```
 Secteur ─▶ J1 ─┬─ L_IN ─▶ K1 (NO) ─▶ L_SW ─▶ J4 / J4b ─▶ projecteur + alim LED externe
-               ├─ F1 ─▶ RV1 ─▶ PS1 (HLK-PM05, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
+               ├─ F1 ─▶ RV1 ─▶ PS1 (IRM-05-5, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
                └─ PE, N ───────────────────────────────▶ J4 / J4b
 +3V3 ─▶ U1 ESP32-C3-MINI-1
 U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
@@ -127,9 +127,10 @@ Mode Wi-Fi des nœuds : STA non associée, `WIFI_PS_NONE` (l'économie d'énergi
 introduirait des latences de l'ordre de l'intervalle de balise, 100 ms). Protocoles
 802.11b/g/n activés.
 
-**Repli sur changement de canal [ARBITRAGE A5]** : proposition qu'un nœud qui ne reçoit
-plus aucun paquet de son réseau depuis 60 s balaie les canaux 1 à 13 (écoute 300 ms par
-canal) jusqu'à retrouver son `net_id`, puis adopte ce canal. Évite qu'un nœud reste
+**Repli sur changement de canal [ARBITRAGE A5 — retenu]** : un nœud qui ne reçoit plus
+aucun paquet de son réseau depuis 60 s balaie les canaux 1 à 13 (écoute 300 ms par canal)
+jusqu'à retrouver son `net_id` (DMX_DATA ou BEACON), puis adopte ce canal et le persiste.
+La dernière trame DMX continue d'être émise pendant le balayage. Évite qu'un nœud reste
 orphelin après un changement de canal manqué. Aucun coût matériel.
 
 ### 4.2 Microcontrôleur et affectation des broches (ADR 0003)
@@ -140,7 +141,7 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
-| IO0    | libre             | Proposition LED d'état : [ARBITRAGE A7] |
+| IO0    | libre             | Pas de LED d'état [ARBITRAGE A7 — écartée] ; pastille de test optionnelle |
 | IO1    | BOARD_SENSE       | Entrée, pull-up interne ; GND sur la partie rubans |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
@@ -158,21 +159,19 @@ Point important : **GPIO9 à la masse pendant le reset fait entrer l'ESP32-C3 da
 chargeur ROM (mode téléchargement), pas dans notre firmware.** La demande « BOOT à la
 masse au démarrage ⇒ maintenance » est donc reformulée : maintenance si BOOT est maintenu
 à la masse ≥ 3 s **après** le démarrage de l'application (fenêtre des 10 premières
-secondes), ou à tout moment ≥ 5 s. Voir aussi l'alternative sans ouverture
-[ARBITRAGE A6].
+secondes), ou à tout moment ≥ 5 s. Entrée sans ouverture du boîtier : 3 mises sous
+tension rapprochées [ARBITRAGE A6 — retenu], §4.9.
 
 ### 4.3 Alimentation basse tension et budget 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie PS1)
 
-PS1 HLK-PM05 : 90 à 265 V AC → 5 V, 600 mA (3 W), isolation annoncée 3000 V AC
-[V-HW-01]. **[ARBITRAGE A1]** : la décision 4 retient le Hi-Link. Je signale une raison
-technique de la reconsidérer : les modules Hi-Link sont très répandus mais leurs
-certifications (UL/EN 62368-1) sont difficiles à vérifier et les contrefaçons fréquentes.
-Pour un boîtier publié et refabriqué par d'autres, un module certifié de même format,
-**Mean Well IRM-05-5** (5 V 1 A, 5 W, homologué IEC/EN/UL 62368-1 selon le fabricant
-[V-HW-09], environ 8 € contre 2 à 3 €), réduit le risque. Même principe, même brochage
-de principe (2 broches AC, 2 broches DC), empreinte différente. Je garde le HLK-PM05 par
-défaut et je prévois l'empreinte comme paramètre du script de placement si tu choisis
-l'IRM.
+PS1 **Mean Well IRM-05-5** : 85 à 264 V AC → 5 V, 1 A (5 W), homologué IEC/EN/UL 62368-1
+selon le fabricant [V-HW-09], environ 8 € **[ARBITRAGE A1 — retenu, amende la décision 4]**.
+Raison : les modules Hi-Link (HLK-PM05, décision initiale) ont des certifications
+difficiles à vérifier et sont souvent contrefaits ; pour un boîtier publié et refabriqué
+par d'autres, un module certifié réduit le risque d'isolement (R-03). Principe inchangé
+(module isolé, 2 broches AC, 2 broches DC) ; F1 et RV1 conservés sous réserve des
+recommandations de la fiche Mean Well. Le HLK-PM05 reste une empreinte de repli
+paramétrable dans le script de placement [V-HW-01], non retenue par défaut.
 
 Budget sur +5 V (valeurs à confirmer en datasheet) :
 
@@ -183,7 +182,7 @@ Budget sur +5 V (valeurs à confirmer en datasheet) :
 | SP3485 pilotant une ligne terminée 120 Ω (via U3) | ~20 mA | ~35 mA (2 terminaisons) | [V-HW-06] |
 | Bobine K1 5 V (≈ 400 mW)              | ~80 mA  | ~80 mA  | [V-HW-03] |
 | U4 + charges de grille (4 × Qg × fPWM) | < 2 mA | —       | — |
-| **Total**                             | **~200 mA** | **~420 mA** | ≤ 600 mA : marge ~30 % en crête |
+| **Total**                             | **~200 mA** | **~420 mA** | ≤ 1 A (IRM-05-5) : marge > 50 % en crête |
 
 Régulateur U3 AP2112K-3.3 (600 mA, faible chute) : dissipation moyenne
 (5 − 3,3) V × ~120 mA ≈ 0,2 W. En SOT-23-5 (RθJA de l'ordre de 150 à 250 °C/W selon le
@@ -324,15 +323,14 @@ conception matérielle Espressif [V-HW-02]).
 - Les distances seront vérifiées par règles DRC par classe de réseaux (`netclass` MAINS vs
   LV : clearance 6 mm) et par un contrôle scripté de ligne de fuite simplifié.
 
-#### 4.8.3 Chemins de puissance secteur — **[ARBITRAGE A2]**
+#### 4.8.3 Chemins de puissance secteur — **[ARBITRAGE A2 — cuivre 16 A retenu]**
 
 Le chemin de charge (J1 → K1 → J4) n'a **aucun fusible sur la carte** (F1 ne protège que
 PS1). Il est donc protégé uniquement par le disjoncteur amont, typiquement **16 A** en
 France. Une carte dimensionnée pour 10 A pourrait être surchargée durablement entre 10 et
-16 A sans déclenchement. Proposition : **dimensionner le cuivre du chemin de charge pour
-16 A** (le relais et les borniers le sont), en gardant une charge nominale déclarée de
-10 A. Alternative : fusible de charge 10 A sur la carte (porte-fusible 5 × 20, +15 mm de
-longueur, pertes supplémentaires).
+16 A sans déclenchement. Décision : **dimensionner le cuivre du chemin de charge pour
+16 A** (le relais et les borniers le sont), charge nominale déclarée de 10 A marquée sur
+le boîtier, pas de fusible de charge sur la carte.
 
 Calcul (IPC-2221, couche externe, `I = 0,048 × ΔT^0,44 × A^0,725`, A en mil²) — formule
 conservatrice ; à recouper avec les abaques IPC-2152 (par ex. Saturn PCB Toolkit) :
@@ -372,7 +370,13 @@ pour la relecture humaine.
 
 ### 4.9 Maintenance et OTA
 
-- Entrée : commande `MAINTENANCE`, action BOOT (§4.2), ou [ARBITRAGE A6].
+- Entrée : commande `MAINTENANCE`, action BOOT (§4.2), ou **3 mises sous tension
+  rapprochées [ARBITRAGE A6 — retenu]** : au démarrage, le nœud incrémente un compteur
+  NVS et le remet à zéro après 5 s de fonctionnement ; si le compteur atteint 3 (trois
+  démarrages espacés de moins de 5 s), il passe en maintenance. Usure NVS : 2 écritures
+  par démarrage, négligeable. Le relais applique son état au démarrage normalement : la
+  manœuvre coupe et rétablit aussi le projecteur, à documenter. Permet de récupérer un
+  nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier.
 - Point d'accès WPA2 `dmxnow-<nom>` sur **le même canal que le réseau ESP-NOW** : l'ESP32
   peut conserver la réception ESP-NOW en mode AP+STA sur le canal commun ; le DMX continue
   donc d'être rafraîchi en maintenance, au mieux [V-FW-05].
@@ -486,13 +490,14 @@ De plus, beaucoup de projecteurs n'appliquent les valeurs qu'en fin de trame (au
 suivant), ce qui ajoute une durée de trame complète : encore un argument pour les trames
 courtes.
 
-**[ARBITRAGE A3]** : l'objectif < 10 ms n'est tenable qu'avec des trames DMX courtes
+**[ARBITRAGE A3 — défaut 512 retenu]** : l'objectif < 10 ms n'est tenable qu'avec des trames DMX courtes
 (n'émettre que jusqu'au dernier canal utile du projecteur). Le DMX512 l'autorise (trames de
 24 à 512 canaux ; intervalle break à break ≥ 1204 µs, respecté dès 24 canaux). Certains
 appareils anciens supportent mal les trames courtes. Proposition : paramètre
 `dmx_out_slots` par nœud, **défaut 512** (compatibilité maximale), réglé par la CLI à la
-mise en service à « adresse de fin du projecteur », avec recommandation documentée. Autre
-option : défaut court (par ex. 64) et passage à 512 en cas de souci.
+mise en service à « adresse de fin du projecteur », avec recommandation documentée. La
+CLI affichera un avertissement pour tout nœud resté à 512. ENF-01 est donc vérifiée sur un
+nœud configuré en trame courte.
 
 ### 5.2 Débit et occupation radio
 
@@ -527,7 +532,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Poste                                   | Carte entière | Carte cassée |
 |-----------------------------------------|---------------|--------------|
 | ESP32-C3-MINI-1                         | 2,5 €         | 2,5 € |
-| HLK-PM05 (IRM-05-5 si A1 : +5 €)        | 2,5 €         | 2,5 € |
+| Mean Well IRM-05-5 (A1)                 | 8 €           | 8 € |
 | Omron G5RL-U1A-E                        | 2,5 €         | 2,5 € |
 | WAGO 2604 : 3 × 3 pôles (+ 2 + 5 pôles) | 6 € (+ 4 €)   | 6 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
@@ -536,9 +541,9 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Boîtier ABS-FR (~60 g) + inserts + vis  | 3 €           | 2,5 € |
 | Presse-étoupes (4 à 6)                  | 2,5 €         | 1,5 € |
 | Queue DMX : 1 m de câble 120 Ω + Neutrik NC3FXX | 5,5 € | 5,5 € |
-| **Total**                               | **≈ 44 €**    | **≈ 32 €** |
+| **Total**                               | **≈ 49 €**    | **≈ 37 €** |
 
-Dans la cible de 30 à 50 €. Le poste le plus sensible est la connectique (WAGO, Neutrik).
+Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix de l'IRM-05-5 (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
 Les composants traversants (WAGO, relais, PS1, porte-fusible) ne sont probablement pas dans
 la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant payant
 [V-HW-13].
@@ -551,7 +556,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 |------|--------|--------|-------------|--------|
 | R-01 | 🔴 Défaut d'isolement secteur/TBT (placement, fabrication, humidité) | Électrocution via la XLR ou les rubans | Faible si règles appliquées | ES-01, fente, DRC par classes, relecture humaine, test diélectrique recommandé (§8.2) |
 | R-02 | 🔴 Surcharge du chemin de charge entre 10 et 16 A | Échauffement, incendie | Moyenne sur installation mal dimensionnée | A2, marquage de la charge maximale sur le boîtier |
-| R-03 | Contrefaçon ou certification douteuse de PS1 | Défaut d'isolement | Moyenne | A1, achat chez un distributeur agréé |
+| R-03 | Contrefaçon ou certification douteuse de PS1 | Défaut d'isolement | Faible (IRM-05-5, A1) | Achat chez un distributeur agréé |
 | R-04 | `esp_dmx` incompatible avec Arduino 3.x / IDF 5.5 | Retard firmware | Moyenne | Pilote DMX maison de repli (§4.4) |
 | R-05 | Plateforme pioarduino abandonnée ou incompatible | Build cassé | Faible à moyenne | Versions épinglées dans `platformio.ini` ; repli ESP-IDF pur possible (le code `common` est indépendant d'Arduino) ; repli radio v1 fragmenté |
 | R-06 | Latence > 10 ms avec trames DMX de 512 canaux | Objectif non tenu | Certaine avec N = 512 | A3 |
@@ -570,7 +575,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 ## 8. Critères d'acceptation par livrable
 
 ### 8.1 Protocole (ce document + PROTOCOL.md)
-- Validation explicite par toi ; arbitrages A1 à A7 tranchés.
+- Validation explicite par toi ; arbitrages A1 à A8 tranchés (fait le 2026-09-25, §9).
 
 ### 8.2 PCB
 - ERC et DRC `kicad-cli` sans erreur ni avertissement non justifié (exceptions listées).
@@ -615,18 +620,18 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 
 ---
 
-## 9. Points soumis à arbitrage
+## 9. Arbitrages (tranchés le 2026-09-25)
 
-| ID | Sujet | Ma proposition | Alternative |
-|----|-------|----------------|-------------|
-| A1 | Alimentation interne (décision 4) | Garder HLK-PM05, empreinte paramétrable | Mean Well IRM-05-5 certifié, +5 € |
-| A2 | Protection du chemin de charge | Cuivre dimensionné 16 A, charge nominale déclarée 10 A, pas de fusible de charge | Fusible 10 A sur carte |
-| A3 | Longueur des trames DMX | Paramètre `dmx_out_slots`, défaut 512, réglage à la mise en service | Défaut court (64) |
-| A4 | Authentification des commandes (PROTOCOL §7) | Oui, HMAC tronqué + compteur, clé facultative (enrôlement) | Pas d'authentification (`net_id` seul) |
-| A5 | Balayage des canaux après 60 s sans réseau | Oui | Non (canal fixe strict) |
-| A6 | Entrée en maintenance sans ouvrir le boîtier si la radio est mal configurée | 3 coupures secteur rapprochées (< 5 s d'intervalle) ⇒ maintenance ; aucun composant | BOOT seulement (ouverture du couvercle TBT) |
-| A7 | LED d'état (IO0 + résistance + LED CMS, visible par un guide de lumière) | Non : l'identification passe par le projecteur et les rubans ; la LED alourdit le boîtier | Oui, aide au diagnostic sur banc |
-| A8 | ESP-NOW v2 + plateforme pioarduino (ADR 0011) | Oui, repli v1 fragmenté implémenté | v1 fragmenté seul sur plateforme officielle |
+| ID | Sujet | Décision | Alternative écartée |
+|----|-------|----------|---------------------|
+| A1 | Alimentation interne (décision 4) | **Mean Well IRM-05-5** (certifié 62368-1) ; HLK-PM05 en empreinte de repli | HLK-PM05 par défaut |
+| A2 | Protection du chemin de charge | **Cuivre dimensionné 16 A**, charge nominale déclarée 10 A, pas de fusible de charge | Fusible 10 A sur carte |
+| A3 | Longueur des trames DMX | **`dmx_out_slots` défaut 512**, réglage à la mise en service, avertissement CLI | Défaut court (64) |
+| A4 | Authentification des commandes (PROTOCOL §7) | **Oui**, HMAC tronqué + compteur, clé facultative (enrôlement) | `net_id` seul |
+| A5 | Balayage des canaux après 60 s sans réseau | **Oui** | Canal fixe strict |
+| A6 | Maintenance sans ouvrir le boîtier | **3 mises sous tension rapprochées** (< 5 s) | BOOT seulement |
+| A7 | LED d'état | **Non** | LED sur IO0 |
+| A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
 
 Question ouverte sans proposition : **J3-3V3** — programmer en injectant 3,3 V sur la
 sortie de U3 alimente la sortie d'un régulateur non alimenté ; le comportement de
@@ -639,7 +644,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 
 | ID | Hypothèse | Source à consulter | Criticité |
 |----|-----------|--------------------|-----------|
-| V-HW-01 | HLK-PM05 : brochage (AC ×2, +Vo, −Vo), dimensions ~34 × 20 × 15 mm, pas des broches, isolation 3000 V AC, 600 mA, fusible et varistance recommandés | Fiche Hi-Link HLK-PM05 (hlktech.net) | 🔴 critique |
+| V-HW-01 | HLK-PM05 (empreinte de repli uniquement) : brochage (AC ×2, +Vo, −Vo), dimensions ~34 × 20 × 15 mm, pas des broches, isolation 3000 V AC, 600 mA, fusible et varistance recommandés | Fiche Hi-Link HLK-PM05 (hlktech.net) | 🔴 critique |
 | V-HW-02 | ESP32-C3-MINI-1 : brochage des pastilles, GPIO exposés (0-10, 18-21), strapping IO2/IO8/IO9, zone d'exclusion d'antenne, consommations RX/TX, découplage recommandé | *ESP32-C3-MINI-1 Datasheet* et *ESP32-C3 Hardware Design Guidelines* (espressif.com) | critique |
 | V-HW-03 | G5RL-U1A-E DC5 : courant et résistance de bobine (~80 mA / ~62 Ω supposés), disposition et diamètres des broches, distances bobine-contacts (ligne de fuite 8 mm annoncée), courant d'appel admissible, classe TV, homologations | Omron, fiche *G5RL-U/-K* K265-E1 (non accessible depuis cet environnement : proxy) | 🔴 critique |
 | V-HW-04 | WAGO 2604-1103 (entrée latérale) / 2604-3103 (entrée par le dessus) : 3 pôles, pas 5 mm, 4 mm², 32 A / 320 V IEC (selon distributeurs), **une seule âme par point de serrage** ; références 2 et 5 pôles (2604-1102, 2604-1105 supposées) ; diamètre de perçage | Fiches WAGO 2604 (wago.com, non accessible depuis cet environnement) | 🔴 critique |
@@ -647,7 +652,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
 | V-HW-07 | AOD4184A : RDS(on) à VGS 4,5 et 5 V, Qg, énergie d'avalanche ; AO3400 : VGS(th) | Alpha & Omega Semiconductor | moyenne |
 | V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (référence type Keystone 3557-2, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
-| V-HW-09 | Mean Well IRM-05-5 : homologations, empreinte | Mean Well | pour A1 |
+| V-HW-09 | Mean Well IRM-05-5 : brochage, dimensions (~33,7 × 22,2 × 15 mm supposées), homologations, fusible et varistance recommandés en entrée | Fiche Mean Well IRM-05 | 🔴 critique |
 | V-HW-10 | Faisabilité du placement dans 90 × 50 mm | Livrable PCB | moyenne |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |

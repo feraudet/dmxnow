@@ -1,23 +1,24 @@
-# ADR 0004 — Alimentation interne isolée HLK-PM05
+# ADR 0004 — Alimentation interne isolée Mean Well IRM-05-5
 
-**Statut :** Accepté (décision 4) — réserve soumise à arbitrage A1
+**Statut :** Accepté — décision 4 du cahier des charges, amendée par l'arbitrage A1 (2026-09-25)
 
 ## Contexte
 
-Le nœud doit être alimenté depuis le secteur et sa masse est reliée au DMX et aux rubans, donc accessible.
+Le nœud doit être alimenté depuis le secteur et sa masse est reliée au DMX et aux rubans, donc accessible. La décision 4 retenait un Hi-Link HLK-PM05 ; les certifications des modules Hi-Link sont difficiles à vérifier et les contrefaçons fréquentes, ce qui pèse pour un projet publié et refabriqué par d'autres.
 
 ## Décision
 
-Module AC/DC isolé Hi-Link HLK-PM05 (5 V, 600 mA), protégé par F1 T500 mA et RV1 10D561K. Les alimentations non isolées sont exclues.
+Module AC/DC isolé **Mean Well IRM-05-5** (5 V, 1 A, homologué IEC/EN/UL 62368-1 selon le fabricant), protégé par F1 T500 mA et RV1 10D561K (à confirmer selon la fiche Mean Well). Le HLK-PM05 reste une empreinte de repli paramétrable, non retenue par défaut. Les alimentations non isolées sont exclues.
 
 ## Conséquences
 
 - Masse DMX isolée du secteur : sécurité et absence de boucle secteur.
-- Budget 5 V : ~200 mA moyen, ~420 mA crête, marge ~30 % (SPEC §4.3).
-- **Réserve (A1)** : certifications Hi-Link difficiles à vérifier, contrefaçons fréquentes. Alternative certifiée IEC/UL 62368-1 : Mean Well IRM-05-5 (+5 €). L'empreinte sera un paramètre du script de placement.
+- Budget 5 V : ~200 mA moyen, ~420 mA crête pour 1 A disponible (SPEC §4.3).
+- Coût +5 € par nœud environ : carte entière ≈ 49 €, en limite haute de la cible.
+- Empreinte différente du HLK-PM05 : brochage et cotes à relever sur la fiche Mean Well (V-HW-09).
 
 ## Alternatives écartées
 
-- Alimentations non isolées (type Shelly/Sonoff) : masse DMX au potentiel du secteur, exclu.
+- HLK-PM05 (décision initiale) : moins cher, certification incertaine.
+- Alimentations non isolées (type Shelly/Sonoff) : masse DMX au potentiel du secteur.
 - Transformateur 50 Hz : volumineux.
-- Mean Well IRM-05-5 : voir A1.

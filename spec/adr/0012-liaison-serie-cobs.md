@@ -1,6 +1,6 @@
 # ADR 0012 — Liaison série Pi ↔ dongle encadrée COBS + CRC16
 
-**Statut :** Proposé
+**Statut :** Proposé (validation finale de la spec)
 
 ## Contexte
 

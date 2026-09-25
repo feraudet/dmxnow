@@ -1,6 +1,6 @@
 # ADR 0013 — Commandes en broadcast avec acquittement applicatif
 
-**Statut :** Proposé
+**Statut :** Proposé (validation finale de la spec)
 
 ## Contexte
 
