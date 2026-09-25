@@ -1,6 +1,6 @@
 # dmxnow — Spécification
 
-Statut : **v0.2 — arbitrages A1 à A8 tranchés le 2026-09-25, en attente de validation finale**. Aucune implémentation ne démarre
+Statut : **v1.0 — validée le 2026-09-25** (arbitrages A1 à A8 tranchés, A6 révisé : bouton SW1 + option 3 coupures, remise à zéro par appui de 10 s). Aucune implémentation ne démarre
 avant validation de ce document, de [PROTOCOL.md](PROTOCOL.md) et des [ADR](adr/).
 
 Conventions :
@@ -93,7 +93,7 @@ sur un même réseau, codes de départ DMX non nuls.
 
 ```
 Secteur ─▶ J1 ─┬─ L_IN ─▶ K1 (NO) ─▶ L_SW ─▶ J4 / J4b ─▶ projecteur + alim LED externe
-               ├─ F1 ─▶ RV1 ─▶ PS1 (IRM-05-5, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
+               ├─ F1 ─▶ RV1 ─▶ PS1 (IRM-03-5, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
                └─ PE, N ───────────────────────────────▶ J4 / J4b
 +3V3 ─▶ U1 ESP32-C3-MINI-1
 U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
@@ -165,14 +165,17 @@ activable par configuration [ARBITRAGE A6 — option], §4.9.
 
 ### 4.3 Alimentation basse tension et budget 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie PS1)
 
-PS1 **Mean Well IRM-05-5** : 85 à 264 V AC → 5 V, 1 A (5 W), homologué IEC/EN/UL 62368-1
-selon le fabricant [V-HW-09], environ 8 € **[ARBITRAGE A1 — retenu, amende la décision 4]**.
-Raison : les modules Hi-Link (HLK-PM05, décision initiale) ont des certifications
-difficiles à vérifier et sont souvent contrefaits ; pour un boîtier publié et refabriqué
-par d'autres, un module certifié réduit le risque d'isolement (R-03). Principe inchangé
-(module isolé, 2 broches AC, 2 broches DC) ; F1 et RV1 conservés sous réserve des
-recommandations de la fiche Mean Well. Le HLK-PM05 reste une empreinte de repli
-paramétrable dans le script de placement [V-HW-01], non retenue par défaut.
+PS1 **Mean Well IRM-03-5** : 85 à 264 V AC → 5 V, 600 mA (3 W), homologué IEC/EN/UL
+62368-1 selon le fabricant [V-HW-09], environ 6 € **[ARBITRAGE A1 — Mean Well retenu,
+amende la décision 4]**. Raison : les modules Hi-Link (HLK-PM05, décision initiale) ont des
+certifications difficiles à vérifier et sont souvent contrefaits ; pour un boîtier publié
+et refabriqué par d'autres, un module certifié réduit le risque d'isolement (R-03).
+L'IRM-05-5 envisagé d'abord a été écarté au placement (2026-09-25) : 45,7 × 25,4 × 21,5 mm
+d'après l'empreinte KiCad, trop gros pour la zone 230 V et trop haut pour le boîtier.
+L'IRM-03-5 a le même courant que le HLK-PM05 et un encombrement voisin. Principe inchangé
+(module isolé, broches AC et DC séparées) ; F1 et RV1 conservés sous réserve des
+recommandations de la fiche Mean Well. Le HLK-PM05 reste une empreinte de repli non
+retenue [V-HW-01].
 
 Budget sur +5 V (valeurs à confirmer en datasheet) :
 
@@ -183,7 +186,7 @@ Budget sur +5 V (valeurs à confirmer en datasheet) :
 | SP3485 pilotant une ligne terminée 120 Ω (via U3) | ~20 mA | ~35 mA (2 terminaisons) | [V-HW-06] |
 | Bobine K1 5 V (≈ 400 mW)              | ~80 mA  | ~80 mA  | [V-HW-03] |
 | U4 + charges de grille (4 × Qg × fPWM) | < 2 mA | —       | — |
-| **Total**                             | **~200 mA** | **~420 mA** | ≤ 1 A (IRM-05-5) : marge > 50 % en crête |
+| **Total**                             | **~200 mA** | **~420 mA** | ≤ 600 mA (IRM-03-5) : marge ~30 % en crête |
 
 Régulateur U3 AP2112K-3.3 (600 mA, faible chute) : dissipation moyenne
 (5 − 3,3) V × ~120 mA ≈ 0,2 W. En SOT-23-5 (RθJA de l'ordre de 150 à 250 °C/W selon le
@@ -567,7 +570,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Poste                                   | Carte entière | Carte cassée |
 |-----------------------------------------|---------------|--------------|
 | ESP32-C3-MINI-1                         | 2,5 €         | 2,5 € |
-| Mean Well IRM-05-5 (A1)                 | 8 €           | 8 € |
+| Mean Well IRM-03-5 (A1)                 | 6 €           | 6 € |
 | Omron G5RL-U1A-E                        | 2,5 €         | 2,5 € |
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
 | WAGO 2604 : 3 × 3 pôles (+ 2 + 5 pôles) | 6 € (+ 4 €)   | 6 € |
@@ -577,9 +580,9 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Boîtier ABS-FR (~60 g) + inserts + vis  | 3 €           | 2,5 € |
 | Presse-étoupes (4 à 6)                  | 2,5 €         | 1,5 € |
 | Queue DMX : 1 m de câble 120 Ω + Neutrik NC3FXX | 5,5 € | 5,5 € |
-| **Total**                               | **≈ 49 €**    | **≈ 37 €** |
+| **Total**                               | **≈ 47 €**    | **≈ 35 €** |
 
-Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix de l'IRM-05-5 (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
+Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix d'un module Mean Well (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
 Les composants traversants (WAGO, relais, PS1, porte-fusible) ne sont probablement pas dans
 la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant payant
 [V-HW-13].
@@ -592,7 +595,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 |------|--------|--------|-------------|--------|
 | R-01 | 🔴 Défaut d'isolement secteur/TBT (placement, fabrication, humidité) | Électrocution via la XLR ou les rubans | Faible si règles appliquées | ES-01, fente, DRC par classes, relecture humaine, test diélectrique recommandé (§8.2) |
 | R-02 | 🔴 Surcharge du chemin de charge entre 10 et 16 A | Échauffement, incendie | Moyenne sur installation mal dimensionnée | A2, marquage de la charge maximale sur le boîtier |
-| R-03 | Contrefaçon ou certification douteuse de PS1 | Défaut d'isolement | Faible (IRM-05-5, A1) | Achat chez un distributeur agréé |
+| R-03 | Contrefaçon ou certification douteuse de PS1 | Défaut d'isolement | Faible (IRM-03-5, A1) | Achat chez un distributeur agréé |
 | R-04 | `esp_dmx` incompatible avec Arduino 3.x / IDF 5.5 | Retard firmware | Moyenne | Pilote DMX maison de repli (§4.4) |
 | R-05 | Plateforme pioarduino abandonnée ou incompatible | Build cassé | Faible à moyenne | Versions épinglées dans `platformio.ini` ; repli ESP-IDF pur possible (le code `common` est indépendant d'Arduino) ; repli radio v1 fragmenté |
 | R-06 | Latence > 10 ms avec trames DMX de 512 canaux | Objectif non tenu | Certaine avec N = 512 | A3 |
@@ -660,7 +663,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 
 | ID | Sujet | Décision | Alternative écartée |
 |----|-------|----------|---------------------|
-| A1 | Alimentation interne (décision 4) | **Mean Well IRM-05-5** (certifié 62368-1) ; HLK-PM05 en empreinte de repli | HLK-PM05 par défaut |
+| A1 | Alimentation interne (décision 4) | **Mean Well IRM-03-5** (certifié 62368-1 ; IRM-05-5 écarté au placement pour son encombrement) ; HLK-PM05 en empreinte de repli | HLK-PM05 par défaut |
 | A2 | Protection du chemin de charge | **Cuivre dimensionné 16 A**, charge nominale déclarée 10 A, pas de fusible de charge | Fusible 10 A sur carte |
 | A3 | Longueur des trames DMX | **`dmx_out_slots` défaut 512**, réglage à la mise en service, avertissement CLI | Défaut court (64) |
 | A4 | Authentification des commandes (PROTOCOL §7) | **Oui**, HMAC tronqué + compteur, clé facultative (enrôlement) | `net_id` seul |
@@ -688,7 +691,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
 | V-HW-07 | AOD4184A : RDS(on) à VGS 4,5 et 5 V, Qg, énergie d'avalanche ; AO3400 : VGS(th) | Alpha & Omega Semiconductor | moyenne |
 | V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (référence type Keystone 3557-2, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
-| V-HW-09 | Mean Well IRM-05-5 : brochage, dimensions (~33,7 × 22,2 × 15 mm supposées), homologations, fusible et varistance recommandés en entrée | Fiche Mean Well IRM-05 | 🔴 critique |
+| V-HW-09 | Mean Well IRM-03-5 : brochage (empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT`), dimensions (~33,7 × 22,2 × 15 mm supposées), hauteur, homologations, fusible et varistance recommandés en entrée | Fiche Mean Well IRM-05 | 🔴 critique |
 | V-HW-10 | Faisabilité du placement dans 90 × 50 mm | Livrable PCB | moyenne |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |

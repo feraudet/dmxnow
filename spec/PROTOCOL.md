@@ -1,6 +1,6 @@
 # dmxnow — Spécification du protocole
 
-Version du protocole : **1** (arbitrages tranchés le 2026-09-25, en attente de validation finale)
+Version du protocole : **1** (validé le 2026-09-25)
 Documents liés : [SPEC.md](SPEC.md), [ADR 0001](adr/0001-transport-esp-now.md),
 [ADR 0011](adr/0011-esp-now-v2-trame-unique.md), [ADR 0012](adr/0012-liaison-serie-cobs.md),
 [ADR 0013](adr/0013-commandes-broadcast-ack.md), [ADR 0015](adr/0015-authentification-commandes.md).
