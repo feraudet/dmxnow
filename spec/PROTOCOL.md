@@ -300,7 +300,7 @@ Mécanisme retenu (ADR 0013) :
 | `0x04` | `RELAY`         | `mode` u8 : 0 = forcer éteint, 1 = forcer allumé, 2 = automatique (suivre le canal DMX) | Voir SPEC §4.5 (priorités). Soumis à l'intervalle minimal entre commutations. |
 | `0x05` | `MAINTENANCE`   | `timeout_s` u16 (0 = défaut 600) | Passe en mode maintenance (§SPEC 4.9). |
 | `0x06` | `REBOOT`        | — | Redémarre après envoi de l'ACK (délai 200 ms). |
-| `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`), redémarre. |
+| `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
 
 ### 6.4 Clés de configuration (TLV)
 

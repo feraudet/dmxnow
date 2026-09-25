@@ -46,7 +46,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | EF-09  | Variante rubans : 4 sorties PWM LEDC ≥ 4 kHz, ≥ 12 bits, gamma configurable, 8 ou 16 bits DMX par canal, PWM forcé à 0 avant toute autre action au démarrage, fondu configurable à l'allumage. |
 | EF-10  | Le nœud émet un HEARTBEAT périodique (PROTOCOL §5.1). |
 | EF-11  | Configuration persistante (univers, adresse, nom, canal radio, etc.) modifiable par commande ESP-NOW (PROTOCOL §6.4). |
-| EF-12  | Mode maintenance (commande ESP-NOW ou action locale au démarrage) : point d'accès Wi-Fi, page de configuration, mise à jour OTA, retour automatique en exploitation. |
+| EF-12  | Mode maintenance (commande ESP-NOW, bouton SW1 accessible boîtier fermé, ou 3 mises sous tension rapprochées si activé) : point d'accès Wi-Fi, page de configuration, mise à jour OTA, retour automatique en exploitation. |
 | EF-13  | CLI Pi : liste des nœuds (nom, MAC, variante, univers, adresse, RSSI, pertes, relais, uptime, version), identification, changement d'univers/adresse/nom, relais, maintenance, configuration du dongle. Page web minimale optionnelle. |
 | EF-14  | Identification d'un nœud monté et fermé sans démontage (PROTOCOL `IDENTIFY`). |
 
@@ -150,17 +150,18 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 | IO6    | PWM1              | via U4 |
 | IO7    | PWM2              | via U4 |
 | IO8    | libre (strapping) | R3 10 kΩ pull-up, doit être haut pour le mode téléchargement |
-| IO9    | BOOT              | R2 pull-up, pastille J3-BOOT |
+| IO9    | BOOT / bouton SW1 | R2 pull-up, pastille J3-BOOT, SW1 vers GND (A6) |
 | IO10   | PWM3              | via U4 |
 | IO18/19| USB D−/D+         | J3 |
 | IO20/21| UART0             | non connectés (console via USB CDC) |
 
 Point important : **GPIO9 à la masse pendant le reset fait entrer l'ESP32-C3 dans le
 chargeur ROM (mode téléchargement), pas dans notre firmware.** La demande « BOOT à la
-masse au démarrage ⇒ maintenance » est donc reformulée : maintenance si BOOT est maintenu
-à la masse ≥ 3 s **après** le démarrage de l'application (fenêtre des 10 premières
-secondes), ou à tout moment ≥ 5 s. Entrée sans ouverture du boîtier : 3 mises sous
-tension rapprochées, activable par configuration [ARBITRAGE A6 — option], §4.9.
+masse au démarrage ⇒ maintenance » est donc reformulée : l'appui se fait **après** le
+démarrage de l'application, sur le bouton SW1 (§4.9) ou la pastille J3-BOOT. Maintenir SW1
+pendant la mise sous tension reste utile : c'est l'entrée du mode téléchargement ROM pour
+un flash par J3. Autre entrée sans ouverture du boîtier : 3 mises sous tension rapprochées,
+activable par configuration [ARBITRAGE A6 — option], §4.9.
 
 ### 4.3 Alimentation basse tension et budget 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie PS1)
 
@@ -370,11 +371,26 @@ pour la relecture humaine.
 
 ### 4.9 Maintenance et OTA
 
-- Entrée : commande `MAINTENANCE`, action BOOT (§4.2), ou **3 mises sous tension
+- **Bouton SW1 [ARBITRAGE A6 — ajouté le 2026-09-25]**, toujours monté : bouton tactile
+  entre IO9 (net BOOT, pull-up R2 existant) et GND, placé en zone basse tension loin de
+  l'antenne et de la zone 230 V, actionné depuis l'extérieur par un poussoir imprimé
+  **encastré** dans le couvercle basse tension (accès avec une pointe type trombone, pour
+  éviter les appuis accidentels). Aucune pièce conductrice accessible : le poussoir est en
+  plastique et la zone est TBT isolée. Réutiliser IO9 évite de consommer une GPIO et fait
+  de SW1 aussi le bouton BOOT pour le flash. Anti-rebond logiciel (20 ms), pas de
+  condensateur (il ralentirait le front lu au reset sur une broche de strapping).
+  Comportement, application démarrée :
+  - appui ≥ 3 s : entrée en maintenance (en maintenance : sortie immédiate) ;
+  - appui ≥ 10 s : `FACTORY_RESET` (clé `net_key` et mot de passe de maintenance
+    compris). Justification : seul moyen de récupérer un nœud dont la clé
+    d'authentification (A4) est perdue sans console USB ;
+  - appui court : aucun effet (évite les fausses manœuvres) ;
+  - maintenu pendant la mise sous tension : mode téléchargement ROM (pas notre firmware).
+  Coût : ~0,10 € + poussoir imprimé.
+- Entrée : commande `MAINTENANCE`, bouton SW1, pastille J3-BOOT, ou **3 mises sous tension
   rapprochées [ARBITRAGE A6 — option]**, activée par la clé de configuration
-  `powercycle_maint` (**activée par défaut**, désactivable par nœud ; un nœud dont la
-  radio est perdue ne peut être reconfiguré que par cette voie ou en ouvrant le
-  boîtier, d'où ce défaut). Principe : au démarrage, le nœud incrémente un compteur
+  `powercycle_maint` (**activée par défaut**, désactivable par nœud ; complémentaire de
+  SW1 quand le nœud est hors de portée de main, par exemple sur une perche). Principe : au démarrage, le nœud incrémente un compteur
   NVS et le remet à zéro après 5 s de fonctionnement ; si le compteur atteint 3 (trois
   démarrages espacés de moins de 5 s), il passe en maintenance. Usure NVS : 2 écritures
   par démarrage, négligeable. Le relais applique son état au démarrage normalement : la
@@ -453,6 +469,8 @@ pour la relecture humaine.
 - Rien de métallique devant l'antenne (inserts et vis hors d'une zone de 15 mm autour).
 - Version entière : fentes d'aération au-dessus des MOSFET, ou fenêtre + pad thermique vers
   une paroi (à choisir au livrable boîtier).
+- Poussoir de SW1 (A6) : pièce imprimée captive dans le couvercle basse tension, encastrée
+  d'au moins 2 mm sous la surface (orifice Ø 2 mm), loin de l'antenne et de la cloison 230 V.
 - Passants pour colliers de serrage (largeur 5 à 8 mm) sur le fond.
 - Parois ≥ 2,0 mm (2,5 mm sur les faces portant des presse-étoupes), impression sans
   support : fond et couvercles imprimés face plane sur le plateau, trous de presse-étoupes
@@ -551,6 +569,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | ESP32-C3-MINI-1                         | 2,5 €         | 2,5 € |
 | Mean Well IRM-05-5 (A1)                 | 8 €           | 8 € |
 | Omron G5RL-U1A-E                        | 2,5 €         | 2,5 € |
+| Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
 | WAGO 2604 : 3 × 3 pôles (+ 2 + 5 pôles) | 6 € (+ 4 €)   | 6 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
 | Partie rubans : 4 × AOD4184A, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
@@ -646,7 +665,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 | A3 | Longueur des trames DMX | **`dmx_out_slots` défaut 512**, réglage à la mise en service, avertissement CLI | Défaut court (64) |
 | A4 | Authentification des commandes (PROTOCOL §7) | **Oui**, HMAC tronqué + compteur, clé facultative (enrôlement) | `net_id` seul |
 | A5 | Balayage des canaux après 60 s sans réseau | **Oui** | Canal fixe strict |
-| A6 | Maintenance sans ouvrir le boîtier | **Option configurable** `powercycle_maint` : 3 mises sous tension rapprochées (< 5 s), activée par défaut (révisé le 2026-09-25) | Toujours active ; BOOT seulement |
+| A6 | Maintenance sans ouvrir le boîtier | **Bouton SW1** sur IO9, toujours monté, accessible par un poussoir encastré (3 s maintenance, 10 s réinitialisation) **+ option** `powercycle_maint` (3 mises sous tension < 5 s, activée par défaut) (révisé le 2026-09-25) | BOOT seulement (ouverture du couvercle) |
 | A7 | LED d'état | **Option** : empreinte D4/R19 sur IO0 toujours présente, non montée par défaut, clé `status_led` (défaut 0), option boîtier `light_pipe` (révisé le 2026-09-25) | Pas de LED ; LED systématique |
 | A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
 
@@ -674,6 +693,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |
 | V-HW-13 | Disponibilité JLCPCB/LCSC des références et coût de l'assemblage traversant | LCSC | faible |
+| V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
 | V-FW-01 | pioarduino : version exacte à épingler (Arduino ≥ 3.2 / IDF ≥ 5.4.2), support ESP32-C3 et XIAO ESP32-C3 | github.com/pioarduino/platform-espressif32 (releases) | critique |
 | V-FW-02 | `esp_now_set_peer_rate_config()` utilisable pour le pair broadcast depuis Arduino 3.x | ESP-IDF API ESP-NOW (v5.5) | moyenne |
 | V-FW-03 | `esp_dmx` compatible Arduino 3.x / IDF 5.5 sur ESP32-C3 ; `dmx_send_num()` | github.com/someweisguy/esp_dmx | moyenne (repli prévu) |
