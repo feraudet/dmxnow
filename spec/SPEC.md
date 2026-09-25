@@ -141,7 +141,7 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
-| IO0    | libre             | Pas de LED d'état [ARBITRAGE A7 — écartée] ; pastille de test optionnelle |
+| IO0    | STATUS_LED (option) | R19 1 kΩ en série, D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
 | IO1    | BOARD_SENSE       | Entrée, pull-up interne ; GND sur la partie rubans |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
@@ -160,7 +160,7 @@ chargeur ROM (mode téléchargement), pas dans notre firmware.** La demande « B
 masse au démarrage ⇒ maintenance » est donc reformulée : maintenance si BOOT est maintenu
 à la masse ≥ 3 s **après** le démarrage de l'application (fenêtre des 10 premières
 secondes), ou à tout moment ≥ 5 s. Entrée sans ouverture du boîtier : 3 mises sous
-tension rapprochées [ARBITRAGE A6 — retenu], §4.9.
+tension rapprochées, activable par configuration [ARBITRAGE A6 — option], §4.9.
 
 ### 4.3 Alimentation basse tension et budget 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie PS1)
 
@@ -371,12 +371,26 @@ pour la relecture humaine.
 ### 4.9 Maintenance et OTA
 
 - Entrée : commande `MAINTENANCE`, action BOOT (§4.2), ou **3 mises sous tension
-  rapprochées [ARBITRAGE A6 — retenu]** : au démarrage, le nœud incrémente un compteur
+  rapprochées [ARBITRAGE A6 — option]**, activée par la clé de configuration
+  `powercycle_maint` (**activée par défaut**, désactivable par nœud ; un nœud dont la
+  radio est perdue ne peut être reconfiguré que par cette voie ou en ouvrant le
+  boîtier, d'où ce défaut). Principe : au démarrage, le nœud incrémente un compteur
   NVS et le remet à zéro après 5 s de fonctionnement ; si le compteur atteint 3 (trois
   démarrages espacés de moins de 5 s), il passe en maintenance. Usure NVS : 2 écritures
   par démarrage, négligeable. Le relais applique son état au démarrage normalement : la
   manœuvre coupe et rétablit aussi le projecteur, à documenter. Permet de récupérer un
-  nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier.
+  nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier. Désactivée, le
+  compteur n'est ni lu ni écrit.
+- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (1 kΩ,
+  ~1 mA sous 3,3 V, suffisant pour un guide de lumière) est **toujours présente** sur le
+  PCB, câblée sur IO0 (broche libre, sans rôle de strapping sur l'ESP32-C3). Les deux
+  composants sont **non montés par défaut** (DNP) ; la génération des sorties produit deux
+  BOM JLCPCB : `bom_base` et `bom_led`. Côté firmware, la clé `status_led` (défaut 0)
+  active la LED : allumée fixe = flux DMX présent ; clignotement lent (1 Hz) = réseau
+  présent sans flux sur son univers ; double éclat = aucun réseau (balayage) ; clignotement
+  rapide (5 Hz) = maintenance ; pendant `IDENTIFY`, la LED clignote avec le reste. Côté
+  boîtier, le paramètre `light_pipe` (défaut `False`) ajoute un logement de guide de lumière
+  (Ø 3 mm) au droit de D4. Coût de l'option : < 0,1 € + guide de lumière.
 - Point d'accès WPA2 `dmxnow-<nom>` sur **le même canal que le réseau ESP-NOW** : l'ESP32
   peut conserver la réception ESP-NOW en mode AP+STA sur le canal commun ; le DMX continue
   donc d'être rafraîchi en maintenance, au mieux [V-FW-05].
@@ -453,7 +467,10 @@ pour la relecture humaine.
   classification V-0 porte sur le matériau à une épaisseur donnée (souvent 1,5 ou 3 mm) ;
   la pièce imprimée doit avoir des parois pleines (100 % de remplissage des parois
   ≥ épaisseur certifiée) ; fiche technique du filament à conserver [V-ENC-02].
-- Exports : STL et STEP pour chaque pièce et chaque variante, rendu PNG assemblé.
+- Option `light_pipe` (A7) : logement de guide de lumière Ø 3 mm au droit de D4, dans le
+  couvercle basse tension.
+- Exports : STL et STEP pour chaque pièce et chaque variante (avec et sans `light_pipe`),
+  rendu PNG assemblé.
 
 ---
 
@@ -582,7 +599,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 - Règles de classes de réseaux : MAINS ↔ LV ≥ 6 mm ; MAINS ↔ MAINS ≥ 3 mm ; pistes de
   puissance ≥ largeurs §4.8.3 ; aucun cuivre MAINS à < 4 mm de l'axe de découpe (vérifié
   par script).
-- Fichiers JLCPCB : Gerber, perçage, V-cut, BOM et CPL au format JLCPCB, rendus PNG
+- Fichiers JLCPCB : Gerber, perçage, V-cut, BOM (`bom_base` et `bom_led`, A7) et CPL au format JLCPCB, rendus PNG
   dessus/dessous ; génération reproductible par une commande (`make -C hardware`).
 - `hardware/REVIEW.md` : liste de contrôle de relecture humaine complétée.
 - Recommandation (hors CI) : test diélectrique secteur/TBT au premier prototype
@@ -629,8 +646,8 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 | A3 | Longueur des trames DMX | **`dmx_out_slots` défaut 512**, réglage à la mise en service, avertissement CLI | Défaut court (64) |
 | A4 | Authentification des commandes (PROTOCOL §7) | **Oui**, HMAC tronqué + compteur, clé facultative (enrôlement) | `net_id` seul |
 | A5 | Balayage des canaux après 60 s sans réseau | **Oui** | Canal fixe strict |
-| A6 | Maintenance sans ouvrir le boîtier | **3 mises sous tension rapprochées** (< 5 s) | BOOT seulement |
-| A7 | LED d'état | **Non** | LED sur IO0 |
+| A6 | Maintenance sans ouvrir le boîtier | **Option configurable** `powercycle_maint` : 3 mises sous tension rapprochées (< 5 s), activée par défaut (révisé le 2026-09-25) | Toujours active ; BOOT seulement |
+| A7 | LED d'état | **Option** : empreinte D4/R19 sur IO0 toujours présente, non montée par défaut, clé `status_led` (défaut 0), option boîtier `light_pipe` (révisé le 2026-09-25) | Pas de LED ; LED systématique |
 | A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
 
 Question ouverte sans proposition : **J3-3V3** — programmer en injectant 3,3 V sur la

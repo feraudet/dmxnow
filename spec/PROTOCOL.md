@@ -326,6 +326,8 @@ Chaque élément : `key` u8, `len` u8, `value` (`len` octets). Clé inconnue ⇒
 | `0x0F` | `net_id`               | u16   | 0 (non configuré) | 1 à 65535 |
 | `0x10` | `maint_password`       | 8 à 32 octets | aléatoire, cf. SPEC 4.9 | écriture seule |
 | `0x11` | `net_key`              | 32 octets | absent | écriture seule (§7) |
+| `0x12` | `powercycle_maint`     | u8    | 1             | 1 = 3 mises sous tension rapprochées (< 5 s) ⇒ maintenance ; 0 = désactivé (SPEC §4.9, A6) |
+| `0x13` | `status_led`           | u8    | 0             | 1 = LED d'état D4 montée et pilotée (SPEC §4.9, A7) |
 
 Empreinte DMX du nœud à partir de `start_address` : canal relais (si `relay_dmx` = 1),
 puis PWM1..PWM4 (8 bits) ou PWM1 MSB, PWM1 LSB, … PWM4 LSB (16 bits) si la variante
