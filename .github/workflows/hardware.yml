@@ -45,8 +45,9 @@ jobs:
 
       - name: DRC (KiCad 9, custom 230 V rules, schematic parity)
         run: |
+          # zones are filled in the committed board (gen/route.py, gen/fixup.py)
           kicad-cli pcb drc --severity-error --exit-code-violations --schematic-parity \
-            --refill-zones -o build/drc.rpt dmxnow.kicad_pcb
+            -o build/drc.rpt dmxnow.kicad_pcb || (cat build/drc.rpt; exit 1)
 
       - name: Fabrication outputs
         run: python3 gen/fab.py
