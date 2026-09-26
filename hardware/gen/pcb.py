@@ -305,13 +305,13 @@ def outline(board, for_routing=False):
     add_text(board, "230V", 8.0, 48.5, pcbnew.F_SilkS, 2.0)
     add_text(board, "F1 T500mA H 250V", 24.25, -10.6, pcbnew.F_SilkS, 1.0)
     # wiring marks (terminals are identical parts)
-    add_text(board, "IN L/N", 19.0, 7.3, pcbnew.F_SilkS, 1.0)
-    add_text(board, "OUT L/N", 18.0, 23.4, pcbnew.F_SilkS, 1.0)
-    add_text(board, "OUT L/N", 18.0, 38.9, pcbnew.F_SilkS, 1.0)
+    add_text(board, "IN L/N", 23.0, 7.3, pcbnew.F_SilkS, 1.0)
+    add_text(board, "OUT L/N", 22.5, 23.4, pcbnew.F_SilkS, 1.0)
+    add_text(board, "OUT L/N", 22.5, 38.9, pcbnew.F_SilkS, 1.0)
     for x, t in ((77.0, "GND"), (81.2, "B-"), (85.4, "A+")):     # J2 DMX tail
         add_text(board, t, x, 48.3, pcbnew.F_SilkS, 0.9)
     for y, t in ((30.5, "V+"), (25.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
-        add_text(board, t, 128.6, y, pcbnew.F_SilkS, 1.0)
+        add_text(board, t, 127.2, y, pcbnew.F_SilkS, 1.0)
     add_line(board, SLOT_X, 1.0, SLOT_X, 11.0, pcbnew.F_SilkS, 0.15)
     add_text(board, "dmxnow v0.3", 88.0, 45.5, pcbnew.F_SilkS, 1.0)
     # J5 polarity (a reversed LED supply short-circuits through D3; only F2 protects)
