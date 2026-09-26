@@ -49,6 +49,9 @@ jobs:
           kicad-cli pcb drc --severity-error --exit-code-violations --schematic-parity \
             -o build/drc.rpt dmxnow.kicad_pcb || (cat build/drc.rpt; exit 1)
 
+      - name: DRC canary (the custom 230 V rules must fire on injected faults)
+        run: cd gen && python3 drc_canary.py
+
       - name: Fabrication outputs
         run: python3 gen/fab.py
 

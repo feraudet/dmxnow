@@ -52,6 +52,20 @@ class Grid:
                 if inside(*a) or inside(*b) or inside((a[0] + b[0]) / 2, (a[1] + b[1]) / 2):
                     if t.GetLayer() in self.items:
                         self.items[t.GetLayer()].append(("s", a[0], a[1], b[0], b[1], _mm(t.GetWidth()) / 2))
+        # board outline and internal slots (Edge.Cuts): 0.5 mm copper-to-edge on both layers
+        for d in board.GetDrawings():
+            if d.GetLayer() != pcbnew.Edge_Cuts:
+                continue
+            if d.GetShape() == pcbnew.SHAPE_T_ARC:
+                pts = [d.GetStart(), d.GetArcMid(), d.GetEnd()]
+            else:
+                pts = [d.GetStart(), d.GetEnd()]
+            pts = [(_mm(p.x) - P.OX, _mm(p.y) - P.OY) for p in pts]
+            for (ax, ay), (bx, by) in zip(pts, pts[1:]):
+                if inside(ax, ay) or inside(bx, by) or inside((ax + bx) / 2, (ay + by) / 2):
+                    for l in self.layers:
+                        # half width 0.5 - CLEAR: the router adds CLEAR (0.25) itself
+                        self.items[l].append(("s", ax, ay, bx, by, 0.5 - CLEAR + 0.05))
         self.smd = []   # every SMD pad, own net included: no via may land on one
         for fp in board.GetFootprints():
             for pad in fp.Pads():

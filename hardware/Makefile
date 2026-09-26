@@ -42,6 +42,7 @@ check:
 	$(PY) gen/check.py netlist $(BUILD)/dmxnow.net
 	$(PY) gen/check.py pcb dmxnow.kicad_pcb
 	$(PY) gen/drc.py $(BUILD)/drc.rpt
+	cd gen && $(PY) drc_canary.py
 
 fab:
 	$(PY) gen/fab.py

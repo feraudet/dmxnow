@@ -95,14 +95,19 @@ def write_rules():
 # pins 5 mm apart, PS1 AC pins 5.08 mm apart): accepted down to {rc} mm, for the
 # pads of K1 and of PS1 only.
 (rule "mains_pad_to_pad_inside_components"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && ({a}) && ({b}) && A.Net != B.Net && ((A.insideCourtyard('K1') && B.insideCourtyard('K1')) || (A.insideCourtyard('PS1') && B.insideCourtyard('PS1')))")
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && ({a}) && ({b}) && A.Net != B.Net && ((A.intersectsCourtyard('K1') && B.intersectsCourtyard('K1')) || (A.intersectsCourtyard('PS1') && B.intersectsCourtyard('PS1')))")
   (constraint clearance (min {rc}mm)))
 
 # The plastic locating peg of the F1 holder (NPTH, between its two clips) is not a
 # conductor: ordinary hole clearance.
 (rule "mains_f1_holder_peg"
-  (condition "({a}) && B.Type == 'Pad' && !B.isPlated() && B.insideCourtyard('F1')")
+  (condition "({a}) && B.Type == 'Pad' && !B.isPlated() && B.intersectsCourtyard('F1')")
   (constraint hole_clearance (min 1mm)))
+
+# PS1 pin 5 is "NC" but sits on the module's AC pin row: treated as primary.
+(rule "ps1_nc_pin"
+  (condition "B.Type == 'Pad' && B.Pad_Number == '5' && B.intersectsCourtyard('PS1')")
+  (constraint clearance (min {lv}mm)))
 
 (rule "mains_board_edge"
   (condition "{a}")

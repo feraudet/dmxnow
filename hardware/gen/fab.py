@@ -78,12 +78,15 @@ JLC_FIX = {
     "SOT-23-5": (270, 0.0, 0.0),
     "SOIC-8_3.9x4.9mm_P1.27mm": (270, 0.0, 0.0),
     "SOIC-14_3.9x8.7mm_P1.27mm": (270, 0.0, 0.0),
-    "TO-252-2": (0, -1.8, 0.0),          # JLC origin 1.8 mm towards the leads
+    "TO-252-2": (180, -1.8, 0.0),        # JLC (C282428): tab on the left; origin 1.8 mm towards the leads
     "ESP32-C3-MINI-1": (0, 0.0, 2.7),    # JLC origin at the centre of the pad array
     # THT (JLC centroid = body centre, computed from the courtyard)
     "Relay_SPST_Omron_G5RL-1A-E-HR": (-90, None, None),
     "Converter_ACDC_MeanWell_IRM-03-xx_THT": (-90, None, None),
     "FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165": (180, None, None),
+    # WAGO 2604: JLC origin = centre of the pin array (not the body with its lever)
+    "TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal": (0, "pads", None),
+    "TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal": (0, "pads", None),
 }
 THT_DEFAULT = (0, None, None)
 
@@ -140,7 +143,11 @@ def cpl():
         name = fp.GetFPID().GetLibItemName().wx_str()
         rot0 = fp.GetOrientationDegrees()
         dr, dx, dy = JLC_FIX.get(name, (0, 0.0, 0.0) if _smt(p) else THT_DEFAULT)
-        if dx is None:   # THT: body centre from the courtyard
+        if dx == "pads":   # centre of the pad array
+            xs = [pcbnew.ToMM(pad.GetPosition().x) for pad in fp.Pads()]
+            ys = [pcbnew.ToMM(pad.GetPosition().y) for pad in fp.Pads()]
+            x, y = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        elif dx is None:   # THT: body centre from the courtyard
             c = fp.GetCourtyard(pcbnew.F_CrtYd).BBox().Centre()
             x, y = pcbnew.ToMM(c.x), pcbnew.ToMM(c.y)
         else:

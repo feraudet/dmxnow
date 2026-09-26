@@ -41,7 +41,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | 2.6 | Aucun trou de fixation dans la zone 230 V (une vis métallique annulerait l'isolement). | design.py | ☐ |
 | 2.7 | Ligne de découpe (X = 100 mm, fente + 3 languettes perforées) : aucun cuivre 230 V à moins de 4 mm, aucun composant à moins de 4 mm ; seuls PWM1-4, BOARD_SENSE, +5V et GND la traversent, sur les languettes. | SPEC 4.8.4, `check.py pcb` | ☐ |
 | 2.8 | Distances entre nets 230 V ≥ 3 mm, sauf exceptions acceptées : pastilles COM/NO de K1 (2,4 mm, fixées par le relais) et broches AC de PS1 (2,93 mm, fixées par le module). Règle `mains_pad_to_pad_inside_components`, limitée aux pastilles de K1 et de PS1. | SPEC 4.8.2 | ☐ |
-| 2.10 | Broche 5 (NC) de PS1 : elle est sur la rangée AC du module ; traitée comme primaire, aucun cuivre à moins de 7,2 mm (zone interdite `ps1_nc_keepout`). Confirmer auprès de Mean Well qu'elle n'est reliée à rien (ou mesurer : continuité et essai diélectrique). | SPEC 4.3 | ☐ |
+| 2.10 | Broche 5 (NC) de PS1 : elle est sur la rangée AC du module ; traitée comme primaire : aucun cuivre à moins de 6 mm du bord de la pastille (règle DRC `ps1_nc_pin`, zone interdite `ps1_nc_keepout`). Confirmer auprès de Mean Well qu'elle n'est reliée à rien (ou mesurer : continuité et essai diélectrique). | SPEC 4.3 | ☐ |
 | 2.11 | F1 : fusible céramique à haut pouvoir de coupure (1500 A) ; ne jamais le remplacer par un fusible en verre (35 A). | SPEC 4.3 | ☐ |
 | 2.9 | Le PE ne passe pas par le PCB : les trois conducteurs PE sont réunis par un WAGO 221-413 dans le compartiment 230 V du boîtier (arbitrage A9). | SPEC 4.12 | ☐ |
 
@@ -50,7 +50,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | # | Point | Référence | OK |
 |---|-------|-----------|----|
 | 3.1 | Chemin de charge L_IN → K1 → L_SW : L_IN 4 à 4,3 mm sur les deux faces ; L_SW en doigts de 7,4 mm et bus de 7 mm sur la face avant. Col de 1,9 mm sur ≤ 8 mm aux broches des borniers (imposé par le pas de 5 mm). Juger l'échauffement à 16 A. | SPEC 4.8.3, A2 | ☐ |
-| 3.2 | N : bus de 7,1 mm et doigts de 3,4 à 4 mm en face arrière. Juger l'échauffement à 16 A (estimation IPC-2221 : ≤ 10 °C sur le bus, ~25 °C sur les cols). | SPEC 4.8.3 | ☐ |
+| 3.2 | N : bus de 7,1 mm et doigts de 3,4 à 4 mm en face arrière ; col de 3,4 mm sur ~8 mm entre J1 et le bus (~30 °C à 16 A selon IPC-2221, à mesurer au thermocouple). Juger l'échauffement à 16 A (estimation IPC-2221 : ≤ 10 °C sur le bus, ~25 °C sur les cols). | SPEC 4.8.3 | ☐ |
 | 3.3 | Branche L_PSU / N vers PS1 et RV1 : 1 mm (courant < 50 mA, protégée par F1). | — | ☐ |
 | 3.4 | Partie rubans : VLED en plan (face avant), GND_LED en plan (face arrière), VLED_IN 4,5 mm, canaux 2,5 mm (6 A). | SPEC 4.6 | ☐ |
 | 3.5 | Sources des MOSFET (AOD2610E, 60 V) reliées au plan GND_LED par 3 vias de 0,6 mm chacune ; vérifier la capacité (≈ 4 à 6 A par MOSFET). | — | ☐ |

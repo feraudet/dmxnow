@@ -35,13 +35,24 @@ def prepare_dsn(dsn_path):
     # no via inside an SMD pad (solder wicking through an open via, see REVIEW.md)
     txt = open(dsn_path).read()
     if "via_at_smd" not in txt:
-        txt = txt.replace("(structure", "(structure\n    (control (via_at_smd off))", 1)
+        # bottom layer kept as a ground plane: signals there cost 3-4x more, so the
+        # router uses it only for short hops (long bottom tracks cut the GND pour into
+        # islands that nothing can reach)
+        txt = txt.replace("    (boundary", """    (control (via_at_smd off))
+    (autoroute_settings
+      (fanout off) (autoroute on) (postroute on) (vias on) (via_costs 30)
+      (plane_via_costs 5) (start_ripup_costs 100) (start_pass_no 1)
+      (layer_rule F.Cu (active on) (preferred_direction horizontal)
+        (preferred_direction_trace_costs 1.0) (against_preferred_direction_trace_costs 1.2))
+      (layer_rule B.Cu (active on) (preferred_direction vertical)
+        (preferred_direction_trace_costs 3.0) (against_preferred_direction_trace_costs 4.0)))
+    (boundary""", 1)   # after the layer definitions (Freerouting needs them first)
         open(dsn_path, "w").write(txt)
 
 
 def run_freerouting(dsn, ses, passes):
     cmd = ["java", "-jar", FREEROUTING, "-de", dsn, "-do", ses, "-mp", str(passes),
-           "--gui.enabled=false", "-dct", "0"]
+           "--gui.enabled=false", "-dct", "0", "--router.optimizer.max_passes=8"]
     print(" ".join(cmd))
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
     tail = "\n".join((r.stdout + r.stderr).splitlines()[-15:])
@@ -175,6 +186,9 @@ def escape_vias(board, net="GND"):
             for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0), (0.7, 0.7), (-0.7, 0.7), (0.7, -0.7), (-0.7, -0.7)):
                 x, y = cx + dx * dist, cy + dy * dist
                 if P.in_nc_keepout(x, y, P.VIA_D / 2):
+                    continue
+                # never on (or touching) the pad it escapes from
+                if max(b[0] - x, 0, x - b[2]) ** 2 + max(b[1] - y, 0, y - b[3]) ** 2 <= (P.VIA_D / 2 + 0.15) ** 2:
                     continue
                 if _free(x, y, P.VIA_D / 2, segs, circles, boxes, net, ignore_pad=pad) and \
                         all(_seg_dist(px, py, cx, cy, x, y) > 0.2 + 0.35 + (bb[2] - bb[0]) / 2

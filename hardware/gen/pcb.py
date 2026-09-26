@@ -30,12 +30,15 @@ BAND_X = 47.5                # right edge of that band
 SPLIT_X = 100.0              # breakaway line: routed slot + tabs (ADR 0007, amended)
 SPLIT_KEEP = 4.0             # no component within 4 mm of the breakaway line (SPEC 4.8.4)
 SLOT_W = 2.0                 # routed slot between the two parts (X 99..101)
-TABS = [(6.5, 11.5), (22.5, 30.0), (33.0, 44.0)]   # solid tabs (Y ranges), >= 5 mm (JLCPCB)
+TABS = [(6.5, 11.5), (23.0, 29.5), (33.0, 44.0)]   # solid tabs (Y ranges), >= 5 mm (JLCPCB)
 BITE_D, BITE_PITCH = 0.5, 0.75   # mouse-bite NPTH holes (JLCPCB: 0.5-0.8 mm, 0.2-0.3 mm apart)
 BITE_X = SPLIT_X - SLOT_W / 2 + 0.3   # one row, just inside the main part edge
 VIA_D, VIA_DRILL = 0.9, 0.35          # JLCPCB 2 oz: annular ring >= 0.254 mm
 PWR_VIA_D, PWR_VIA_DRILL = 1.2, 0.6
-NC_KEEPOUT = (68.48, 48.0, 7.2)       # PS1 pin 5 (NC, on the AC pin row): no copper within 7.2 mm
+# PS1 pin 5 (NC, on the AC pin row), treated as primary: 16-gon keep-out whose sides are
+# 7.45 mm from the pin centre = 6 mm + pad radius (1.15) + 0.3 mm margin (DRC rule
+# "ps1_nc_pin" in project.py checks the same 6 mm from the pad edge)
+NC_KEEPOUT = (68.48, 48.0, 7.6)
 MAINS_MAX_X = 46.0           # all 230 V copper at X <= this
 LV_MIN_X = 52.0              # all low-voltage copper at X >= this (6 mm)
 SLOT_X = 49.0                # 1 mm isolation slots centred here
@@ -50,7 +53,7 @@ PLACE = {
     "K1": (53.0, 15.0, -90),     # coil A1 (53,15) A2 (53,22.5) ; COM x=33 ; NO x=28
     "F1": (13.0, -4.5, 0),       # holder in the top band: pin1 L_IN (13,-4.5), pin2 L_PSU (35.5,-4.5)
     "PS1": (38.0, 48.0, 90),     # AC/L (38,48) AC/N (43.08,48) ; +Vo (63.4,30.22) -Vo (68.48,30.22)
-    "RV1": (31.0, 49.5, 90),     # L_PSU (31,49.5) ; N (32.63,42)
+    "RV1": (30.2, 49.5, 90),     # L_PSU (30.2,49.5) ; N (31.83,42) ; 12 x 6.8 mm body clear of PS1
     # --- low voltage, main part (X 52..96) -------------------------------
     "U1": (88.0, 8.9, 0),        # ESP32-C3-MINI-1, antenna at the top edge
     "Q1": (59.0, 20.0, 0),
@@ -75,7 +78,7 @@ PLACE = {
     "U2": (84.0, 39.0, 0),
     "C3": (84.0, 34.5, 0),
     "D1": (91.5, 40.0, 90),
-    "J2": (76.0, 50.5, 0),       # DMX tail wire pads (GND, B, A)
+    "J2": (77.0, 50.5, 0),       # DMX tail wire pads (GND, B, A), >= 6 mm from PS1 pin 5
     "R22": (80.0, 43.5, 90),     # DMX_TX pull-up
     "R23": (95.2, 20.5, 90),     # BOARD_SENSE pull-up (main side)
     "H1": (66.0, 4.5, 0),
@@ -160,9 +163,13 @@ ANTENNA_KEEPOUT = (79.5, 0.0, SPLIT_X - SLOT_W / 2, 6.5)   # x0, y0, x1, y1
 
 
 def in_nc_keepout(x, y, r=0.0):
-    """True if a circle (x, y, r) reaches a copper keep-out (PS1 NC pin, antenna)."""
+    """True if a circle (x, y, r) reaches a copper keep-out (PS1 NC pin, antenna, board
+    edges of the low-voltage area)."""
     cx, cy, rad = NC_KEEPOUT
     if ((x - cx) ** 2 + (y - cy) ** 2) ** 0.5 < rad + r + 0.3:
+        return True
+    edge = 0.5 + r + 0.05       # board setup: copper >= 0.5 mm from Edge.Cuts
+    if y < edge or y > H - edge or x > W - edge:
         return True
     x0, y0, x1, y1 = ANTENNA_KEEPOUT
     return x0 - r - 0.3 < x < x1 + r + 0.3 and y < y1 + r + 0.3
@@ -259,9 +266,9 @@ def mouse_bites():
     """NPTH perforation holes along the breakaway line, skipping the crossing tracks."""
     holes = []
     for t0, t1 in TABS:
-        y = t0 + 0.6
-        while y <= t1 - 0.6:
-            if all(abs(y - ty) > tw / 2 + BITE_D / 2 + 0.3 for _, ty, tw in CROSSING_STUBS):
+        y = t0 + 0.45
+        while y <= t1 - 0.45:
+            if all(abs(y - ty) > tw / 2 + BITE_D / 2 + 0.28 for _, ty, tw in CROSSING_STUBS):   # board hole clearance 0.25
                 holes.append((BITE_X, y))
             y += BITE_PITCH
     return holes
@@ -322,9 +329,6 @@ def outline(board, for_routing=False):
         # area (GND_LED pour) nor inside the VLED pour on top
         add_rule_area(board, [(113.4, 0), (W, 0), (W, H), (113.4, H)], "route_keepout_gndled",
                       footprints=False, tracks=True, vias=True, pour=False, layers=[pcbnew.B_Cu])
-        add_rule_area(board, [(106.3, 32.3), (110.7, 32.3), (110.7, 41.7), (106.3, 41.7)],
-                      "route_keepout_u4_bottom", footprints=False, tracks=True, vias=True,
-                      pour=False, layers=[pcbnew.B_Cu])
         add_rule_area(board, VLED_POLY, "route_keepout_vled",
                       footprints=False, tracks=True, vias=True, pour=False, layers=[pcbnew.F_Cu])
     else:
@@ -419,11 +423,11 @@ MAINS_ROUTES = [
     ("N", B, 4.0, [(12.0, 42.0), (20.05, 42.0)]),
     ("N", B, 7.1, [(20.05, 12.3), (20.05, 42.0)]),
     # N branch to RV1 and PS1 AC/N (internal supply only, fused by F1 on the L side)
-    ("N", B, 1.0, [(18.5, 43.3), (32.63, 43.3), (43.08, 43.3), (43.08, 48.0)]),
-    ("N", B, 1.0, [(32.63, 43.3), (32.63, 42.0)]),
+    ("N", B, 1.0, [(18.5, 43.3), (31.83, 43.3), (43.08, 43.3), (43.08, 48.0)]),
+    ("N", B, 1.0, [(31.83, 43.3), (31.83, 42.0)]),
     # L_PSU: F1 pin 2 (top band) -> PS1 AC/L, branch to RV1 pin 1
     ("L_PSU", F, 1.0, [(35.5, -4.5), (43.5, -4.5), (43.5, 27.0), (38.0, 32.5), (38.0, 48.0)]),
-    ("L_PSU", F, 1.0, [(38.0, 46.0), (31.0, 49.5)]),
+    ("L_PSU", F, 1.0, [(38.0, 46.0), (30.2, 49.5)]),
 ]
 
 LED_ROUTES = [
@@ -466,16 +470,18 @@ U4_OE = [(U4_X - 2.475, U4_Y - 3.81), (U4_X - 2.475, U4_Y - 3.81 + 3 * 1.27),
          (U4_X + 2.475, U4_Y + 3.81 - 2 * 1.27), (U4_X + 2.475, U4_Y + 3.81 - 5 * 1.27)]
 # OE pins: vias under the package body to the bottom GND pour (the autorouter is
 # kept off the bottom layer under U4 so that this pour stays whole).
-U4_OE_VIAS = [(x + 1.5, y) if x < U4_X else (x - 1.5, y) for x, y in U4_OE]
+U4_OE_VIAS = [(x + 1.7, y) if x < U4_X else (x - 1.7, y) for x, y in U4_OE]   # >= 0.25 mm from pads
 LED_ROUTES += [("GND", F, 0.3, [a, b]) for a, b in zip(U4_OE, U4_OE_VIAS)]
 # D4 (LED option) cathode to its own via
 LED_ROUTES += [("GND", F, 0.3, [(83.0, 25.79), (83.0, 27.2)])]
 # GND crossing stub: vias at both ends so the main and strip pours are joined on both layers
 # R20 pad 1 (star point) to its own via, next to the pad (no via in pad: solder wicking)
-LED_ROUTES += [("GND", F, 0.4, [(111.5 - 0.9125, 31.2), (110.55, 29.9)])]
+LED_ROUTES += [("GND", F, 0.4, [(111.5 - 0.9125, 31.2), (110.55, 29.75)])]
 GND_VIAS = [(STUB_X0, 28.5), (STUB_X1, 28.5),
-            (110.55, 29.9),                              # R20 pad 1 (star point)
+            (110.55, 29.75),                             # R20 pad 1 (star point)
             (83.0, 27.2)] + U4_OE_VIAS                   # D4 cathode, U4 OE pins
+# U1 GND pads 52 (corner) and 11 (left column) tied on top, next to the module edge
+LED_ROUTES += [("GND", F, 0.3, [(82.05, 16.55), (82.1, 15.6)])]
 # PWM pull-downs R15-R18: their GND pads (x=93.375) tied by a spine, so that routed PWM
 # tracks cannot strand one of them
 LED_ROUTES += [("GND", F, 0.4, [(93.375, 31.0), (93.375, 37.0)])]
@@ -517,9 +523,11 @@ def _seg_dist(px, py, x1, y1, x2, y2):
     return ((px - x1 - t * dx) ** 2 + (py - y1 - t * dy) ** 2) ** 0.5
 
 
-# GND SMD pads that the routed top pour tends to strand (found by DRC): own via
+# Every logic-GND SMD pad gets its own via before routing (the autorouter is not
+# deterministic and strands a different pad on each run); for U1 only these:
 GND_PAD_VIAS = {("C2", "2"), ("C5", "2"), ("U3", "2"), ("SW1", "2"), ("C3", "2"), ("U2", "5"),
-                ("U1", "51"), ("C4", "2"), ("C6", "2"), ("R15", "2"), ("R18", "2"), ("C9", "2")}
+                ("U1", "51"), ("C4", "2"), ("C6", "2"), ("R15", "2"), ("R18", "2"), ("C9", "2"),
+                ("U1", "11"), ("U1", "14")}
 
 
 def gnd_pad_vias(board):
@@ -541,10 +549,12 @@ def gnd_pad_vias(board):
     r = VIA_D / 2
     n = 0
     for box, net, pad in pads:
-        if net != "GND" or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD or \
-                (pad.GetParent().GetReference(), pad.GetNumber()) not in GND_PAD_VIAS:
+        if net != "GND" or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD:
             continue
         cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
+        if pad.GetParent().GetReference() == "U1" and (pad.GetParent().GetReference(), pad.GetNumber()) \
+                not in GND_PAD_VIAS:
+            continue      # module GND pads: the listed ones only (the others are under the module)
         half = max(box[2] - box[0], box[3] - box[1]) / 2
         done = False
         for dist in (half + 0.75, half + 1.1, half + 1.5, half + 2.0, half + 2.5):
@@ -578,7 +588,7 @@ def gnd_pad_vias(board):
 
 
 VLED_POLY = [(104.5, 53.5), (116.3, 53.5), (116.3, 47.1), (127.0, 47.1), (127.0, 41.9),
-             (145.5, 41.9), (145.5, 28.6), (129.0, 28.6), (129.0, 32.5), (114.0, 32.5),
+             (145.5, 41.9), (145.5, 28.6), (128.0, 28.6), (125.0, 31.0), (125.0, 32.5), (114.0, 32.5),
              (114.0, 44.8), (104.5, 44.8)]
 
 

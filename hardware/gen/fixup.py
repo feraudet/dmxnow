@@ -230,6 +230,83 @@ def prune_vias(board):
     return removed
 
 
+def gnd_groups(board):
+    """GND copper split into connected groups: pour fragments joined by GND vias, THT
+    pads and tracks. Returns (main group anchors, [anchors of each other group]) where an
+    anchor is a GND via or THT pad position (board mm, both layers)."""
+    frag = []
+    for z in board.Zones():
+        if z.GetNetname() != "GND" or z.GetIsRuleArea():
+            continue
+        for l in z.GetLayerSet().Seq():
+            f = z.GetFilledPolysList(l)
+            for i in range(f.OutlineCount()):
+                frag.append((l, f.Outline(i)))
+    parent = list(range(len(frag)))
+
+    def find(a):
+        while parent[a] != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    anchors = [t.GetPosition() for t in board.GetTracks()
+               if isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == "GND"]
+    anchors += [p.GetPosition() for fp in board.GetFootprints() for p in fp.Pads()
+                if p.GetNetname() == "GND" and p.GetDrillSize().x > 0]
+    where = {}
+    for k, pos in enumerate(anchors):
+        hit = [i for i, (l, ol) in enumerate(frag) if ol.PointInside(pos, pcbnew.FromMM(0.3))]
+        where[k] = hit
+        for h in hit[1:]:
+            parent[find(h)] = find(hit[0])
+    for t in board.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA) or t.GetNetname() != "GND":
+            continue
+        hit = [i for i, (l, ol) in enumerate(frag) if l == t.GetLayer() and
+               (ol.PointInside(t.GetStart(), pcbnew.FromMM(0.1)) or ol.PointInside(t.GetEnd(), pcbnew.FromMM(0.1)))]
+        for h in hit[1:]:
+            parent[find(h)] = find(hit[0])
+    groups = {}
+    for i in range(len(frag)):
+        groups.setdefault(find(i), []).append(i)
+    if not groups:
+        return [], []
+    main_root = max(groups, key=lambda r: sum(frag[i][1].Area() for i in groups[r]))
+    by_group = {}
+    for k, hit in where.items():
+        if hit:
+            pos = anchors[k]
+            by_group.setdefault(find(hit[0]), []).append((pcbnew.ToMM(pos.x) - P.OX, pcbnew.ToMM(pos.y) - P.OY))
+    others = [by_group.get(r, []) for r in groups if r != main_root]
+    return by_group.get(main_root, []), [o for o in others if o]
+
+
+def join_gnd_groups(board, rounds=6):
+    """Route a GND link (maze router) from each stray GND group to the main one."""
+    joined = 0
+    for _ in range(rounds):
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        main_pts, others = gnd_groups(board)
+        if not others or not main_pts:
+            break
+        progress = False
+        for grp in others:
+            pairs = sorted(((a, b) for a in grp for b in main_pts),
+                           key=lambda ab: (ab[0][0] - ab[1][0]) ** 2 + (ab[0][1] - ab[1][1]) ** 2)
+            for a, b in pairs[:12]:
+                if ((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2) ** 0.5 > 12:
+                    break
+                plan = maze.route(board, "GND", a, b, (0, 1), (0, 1))
+                if plan:
+                    maze.apply(board, "GND", plan)
+                    joined += 1
+                    progress = True
+                    break
+        if not progress:
+            break
+    return joined
+
+
 def main():
     txt, _, _ = drc.run(REPORT, fill=True)
     board = pcbnew.LoadBoard(P.PCB)
@@ -278,8 +355,14 @@ def main():
     rm = prune_vias(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     rm += prune_vias(board)
+    jg = join_gnd_groups(board)
+    print("GND groups joined: %d" % jg)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     print("pruned %d dangling GND vias" % rm)
+    # zero-length debris left by the autorouter
+    for t in [t for t in board.GetTracks() if not isinstance(t, pcbnew.PCB_VIA)]:
+        if (t.GetStart() - t.GetEnd()).EuclideanNorm() < pcbnew.FromMM(0.02):
+            board.Remove(t)
     board.Save(P.PCB)
     print("fixup: %d fixes, %d manual, %d island vias" % (fixed, len(MANUAL) + len(MANUAL_VIAS), iv))
 

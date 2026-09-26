@@ -181,7 +181,8 @@ ouvert Schurter 0031.8201 : si RV1 finit en court-circuit (mode de défaillance 
 varistance), le courant de défaut du réseau dépasse largement 35 A. Le support est placé
 dans une bande de 10 mm ajoutée au-dessus de la zone 230 V (seule place disponible).
 La broche 5 (NC) de PS1 est sur la rangée des broches AC du module : traitée comme
-primaire, aucun cuivre à moins de 7,2 mm (zone interdite sur le PCB). C10 (47 µF) en
+primaire : aucun cuivre à moins de 6 mm du bord de sa pastille (règle DRC `ps1_nc_pin`,
+plus une zone interdite de 7,45 mm autour de son centre pour le routeur et les plans). C10 (47 µF) en
 sortie de PS1 : Mean Well mesure l'ondulation avec 47 µF, et le +5 V porte la bobine du
 relais et les pointes d'émission Wi-Fi. Le HLK-PM05 reste une empreinte de repli non
 retenue [V-HW-01].
@@ -194,7 +195,7 @@ Budget sur +5 V (valeurs à confirmer en datasheet) :
 | ESP32-C3 en émission 802.11g ~15 dBm (heartbeats, brefs) | — | ~300 mA | [V-HW-02] |
 | SP3485 pilotant une ligne terminée 120 Ω (via U3) | ~20 mA | ~35 mA (2 terminaisons) | [V-HW-06] |
 | Bobine K1 5 V (≈ 400 mW)              | ~80 mA  | ~80 mA  | [V-HW-03] |
-| U4 + charges de grille (4 × Qg × fPWM) | < 2 mA | —       | — |
+| U4 (ΔICC 1,35-1,5 mA par entrée tenue à 3,3 V) + charges de grille (4 × Qg × fPWM) | ~7 mA | —       | — |
 | **Total**                             | **~200 mA** | **~420 mA** | ≤ 600 mA (IRM-03-5) : marge ~30 % en crête |
 
 Régulateur U3 AP2112K-3.3 (600 mA, faible chute) : dissipation moyenne
@@ -292,7 +293,8 @@ Logique (implémentée dans `common`, testée) :
   d'entrée. Justifié comme exigence firmware (EF-09).
 - D3 SMBJ28A : tension de veille 28 V (compatible 24 V + 10 % ; VLED ≤ 28 V, ne pas
   régler une alimentation 24 V au-delà), tension d'écrêtage ≈ 45 V à Ipp, sous les 60 V
-  des AOD2610E (R-10 clos). Une inversion de polarité sur J5 met D3 en court-circuit
+  des AOD2610E (R-10 clos). C7 (35 V) ne voit ces 45 V que pendant la surtension écrêtée
+  (VBR min 31,1 V < 35 V) : accepté. Une inversion de polarité sur J5 met D3 en court-circuit
   franc : seul F2 protège, marquage « + / − » sérigraphié près de J5.
 - Chemin VLED, retour GND_LED : 17 A, largeur de piste §4.8.3 ; F2, C7 et D3 collés à J5 ;
   retour de courant des rubans (J6 → MOSFET → GND_LED → J5) entièrement dans la partie
@@ -390,7 +392,10 @@ elles tombent sous 0,1 W pour une charge réaliste de 1 à 2 A. Alternative ment
 cahier des charges : fils soudés sur les broches du relais, retenue seulement si le
 placement ne permet pas les largeurs.
 
-Réalisé (rév. 0.3, après revue) : L_IN 4 à 4,3 mm sur les deux faces ; L_SW en doigts de
+Réalisé (rév. 0.3, après revue) : col N de 3,4 mm sur ~8 mm en face arrière seule entre J1
+et le bus (IPC-2221 : ~30 °C à 16 A ; impossible à doubler, le doigt L_SW est sur l'autre
+face à 1,6 mm), à mesurer au thermocouple lors de l'essai de charge ; L_IN 4 à 4,3 mm sur
+les deux faces ; L_SW en doigts de
 7,4 mm et bus de 7 mm sur la face avant ; N en bus de 7,1 mm sur la face arrière (les
 doigts L_SW le croisent sur l'autre face) ; cols de 1,9 mm sur ≤ 8 mm aux broches des
 borniers (imposés par le pas de 5 mm). Estimation IPC-2221 à 16 A : ΔT ≤ 10 °C sur les

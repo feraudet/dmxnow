@@ -55,7 +55,8 @@ toujours validés par `make check`.
 - **Local** (KiCad 7) : `make check` (netlist schéma = `design.py`, pastilles PCB =
   `design.py`, seuls PWM1-4, BOARD_SENSE, +5V, GND traversent la découpe et uniquement
   sur les languettes, aucune piste 230 V au-delà de X = 46 mm, aucun via dans une
-  pastille CMS, DRC).
+  pastille CMS, DRC, puis `gen/drc_canary.py` : des défauts injectés doivent déclencher
+  chaque règle 230 V, preuve que les règles personnalisées sont chargées).
 - **CI** (`.github/workflows/hardware.yml`, KiCad 9) : fichiers générés à jour, ERC, DRC
   avec parité schéma/PCB, sorties de fabrication, rendus 3D dessus/dessous (artefact
   `dmxnow-hardware`).
@@ -72,7 +73,7 @@ Définies dans `gen/project.py` → `dmxnow.kicad_dru` :
 | Cuivre 230 V ↔ bord de carte | ≥ 1 mm |
 
 Géométrie : cuivre 230 V à X ≤ 46 mm, basse tension à X ≥ 52 mm, fentes de 1 mm à
-X = 49 mm sous K1 et PS1, aucun cuivre à moins de 7,2 mm de la broche NC de PS1 (rangée
+X = 49 mm sous K1 et PS1, aucun cuivre à moins de 6 mm de la pastille NC de PS1 (rangée
 AC du module). Aucun trou de fixation dans la zone 230 V. Le PE ne passe pas
 par la carte (WAGO 221-413 dans le boîtier, arbitrage A9).
 
