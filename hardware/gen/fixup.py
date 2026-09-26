@@ -8,6 +8,7 @@
 Every fix is checked again by the next DRC run.
 Usage: python3 fixup.py
 """
+import math
 import os
 import re
 
@@ -136,6 +137,12 @@ MANUAL_HOP_VIAS = []
 MANUAL_VIAS = []
 
 
+def _ring(x, y, r, n=12):
+    """Points on a circle: a via is inside a pour only if its whole ring is."""
+    return [pcbnew.VECTOR2I(pcbnew.FromMM(x + r * math.cos(2 * math.pi * k / n)),
+                            pcbnew.FromMM(y + r * math.sin(2 * math.pi * k / n))) for k in range(n)]
+
+
 def island_vias(board, segs, circles, boxes):
     """Join every stray GND pour island to the other layer with a via."""
     n = 0
@@ -162,8 +169,9 @@ def island_vias(board, segs, circles, boxes):
                     y = pcbnew.ToMM(bb.GetTop()) + 0.4
                     while y < pcbnew.ToMM(bb.GetBottom()) - 0.3 and not placed:
                         v = pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y))
-                        if ol.PointInside(v, pcbnew.FromMM(0.35)) and \
-                                any(o.Contains(v) for o in other) and \
+                        ring = _ring(x, y, P.VIA_D / 2 + 0.2)
+                        if all(ol.PointInside(q) for q in ring) and \
+                                any(all(o.Contains(q) for q in ring) for o in other) and \
                                 not P.in_nc_keepout(x - P.OX, y - P.OY, P.VIA_D / 2) and \
                                 R._free(x - P.OX, y - P.OY, P.VIA_D / 2, [s[:6] for s in segs], circles,
                                         [b[:6] for b in boxes], "GND"):

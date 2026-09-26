@@ -80,14 +80,15 @@ par la carte (WAGO 221-413 dans le boîtier, arbitrage A9).
 ## Commande JLCPCB
 
 - `fab/dmxnow-gerbers.zip` : 2 couches, 1,6 mm, **2 oz**, FR-4 TG ≥ 150.
-- Séparation : fente et perforations sont dans les Gerbers (Edge.Cuts, NPTH) ; remarque
-  de commande : « single design, internal routed slot with breakaway tabs, do not
-  separate ».
+- Séparation : fente et perforations sont dans les Gerbers (Edge.Cuts, NPTH). JLCPCB
+  compte la carte comme **2 designs** : « Different Design = 2 », « Panel by Customer »
+  1×1, « Remove order number = Yes ». Remarque de commande :
+  « One circuit with an internal routed slot and 3 breakaway tabs carrying traces; deliver and assemble as one piece, do NOT separate. SMT: convey on the straight short edges X=0 and X=146; U1/Q5/R10 are close to the Y=54 edge by design. J6, J3, J2 not populated: keep holes open (no solder fill). J1, J4, J7, J5: wire entry toward board edge. RV1: form leads to the PCB holes. F2: press flat before soldering. F1/F2 fuses are not fitted. »
 - Assemblage complet (CMS + traversants, PCBA « Standard ») : `fab/bom_jlcpcb_full.csv`
   + `fab/cpl_jlcpcb_full.csv` ; CMS seuls (PCBA « Economic », traversants à la main) :
   `*_smt.csv`. Suffixe `_led` : avec la LED d'état (option A7). Positions et rotations
   converties aux conventions JLCPCB (`gen/fab.py`, `JLC_FIX`) ; contrôler l'aperçu de
-  placement à la commande. Références LCSC vérifiées le 2026-09-26 (WAGO 2604-1105 en
-  rupture chez LCSC). La cartouche de F1 (Littelfuse 0215.500MXP) et le fusible de F2
+  placement à la commande. Références LCSC vérifiées le 2026-09-26 (WAGO 2604-1105 arrêté
+  chez WAGO, exclu de la BOM JLC). La cartouche de F1 (Littelfuse 0215.500MXP) et le fusible de F2
   sont à insérer à la main.
 - Composants traversants et hors carte : `fab/bom_full.csv`.

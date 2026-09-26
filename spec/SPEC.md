@@ -142,7 +142,7 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
-| IO0    | STATUS_LED (option) | R19 100 Ω en série (LED verte VF ≈ 2,6-3,1 V), D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
+| IO0    | STATUS_LED (option) | R19 330 Ω en série (LED rouge KT-0603R, VF ≈ 2,0 V, ~4 mA ; une LED verte InGaN VF ≈ 3 V ne s'allumerait pas sous 3,3 V), D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
 | IO1    | BOARD_SENSE       | Entrée, R23 100 kΩ vers 3V3 sur la partie principale (+ pull-up interne) ; GND sur la partie rubans (R21 0 Ω) |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
@@ -193,11 +193,11 @@ Budget sur +5 V (valeurs à confirmer en datasheet) :
 | Consommateur                          | Moyen   | Crête   | Source |
 |---------------------------------------|---------|---------|--------|
 | ESP32-C3 en réception continue + CPU 160 MHz (via U3) | ~100 mA | — | [V-HW-02] |
-| ESP32-C3 en émission 802.11g ~15 dBm (heartbeats, brefs) | — | ~300 mA | [V-HW-02] |
+| ESP32-C3 en émission (heartbeats, brefs ; jusqu'à ~350 mA en 802.11b 20 dBm selon la fiche) | — | ~350 mA | [V-HW-02] |
 | SP3485 pilotant une ligne terminée 120 Ω (via U3) | ~20 mA | ~35 mA (2 terminaisons) | [V-HW-06] |
 | Bobine K1 5 V (≈ 400 mW)              | ~80 mA  | ~80 mA  | [V-HW-03] |
 | U4 (ΔICC 1,35-1,5 mA par entrée tenue à 3,3 V) + charges de grille (4 × Qg × fPWM) | ~7 mA | —       | — |
-| **Total**                             | **~200 mA** | **~420 mA** | ≤ 600 mA (IRM-03-5) : marge ~30 % en crête |
+| **Total**                             | **~200 mA** | **~470 mA** | ≤ 600 mA (IRM-03-5) : marge ~20 % en crête |
 
 Régulateur U3 AP2112K-3.3 (600 mA, faible chute) : dissipation moyenne
 (5 − 3,3) V × ~120 mA ≈ 0,2 W. En SOT-23-5 (RθJA de l'ordre de 150 à 250 °C/W selon le
@@ -476,8 +476,8 @@ contrôle pour la relecture humaine.
   manœuvre coupe et rétablit aussi le projecteur, à documenter. Permet de récupérer un
   nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier. Désactivée, le
   compteur n'est ni lu ni écrit.
-- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (100 Ω,
-  ~1 mA sous 3,3 V, suffisant pour un guide de lumière) est **toujours présente** sur le
+- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (330 Ω,
+  LED rouge VF ≈ 2,0 V : ~4 mA sous 3,3 V, suffisant pour un guide de lumière) est **toujours présente** sur le
   PCB, câblée sur IO0 (broche libre, sans rôle de strapping sur l'ESP32-C3). Les deux
   composants sont **non montés par défaut** (DNP) ; la génération des sorties produit deux
   BOM JLCPCB : `bom_base` et `bom_led`. Côté firmware, la clé `status_led` (défaut 0)
@@ -692,6 +692,7 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 | R-12 | Wi-Fi voisin intense sur le même canal (salle, festival) | Pertes, latence | Moyenne | Choix du canal (scan documenté), débit, CLI affichant les pertes |
 | R-13 | Ondulation excessive dans C7 | Vieillissement de C7 | Moyenne | Condensateur faible ESR + déphasage PWM (§4.6) |
 | R-14 | V-cut sur une carte de 50 mm de haut refusé ou non standard chez JLCPCB | Surcoût, découpe différente | Moyenne | **Réalisé** : V-cut abandonné (il coupait aussi les pistes), fente + languettes perforées |
+| R-16 | Défaut de PS1 : sa protection de surtension (OVP) déclenche entre 5,2 et 6,8 V (fiche IRM-03), au-delà des 6,5 V max absolus de l'AP2112K (U3) | Destruction de U3 / ESP32 lors d'un défaut de PS1 seulement | Faible | Accepté (cas de défaut, pas de fonctionnement normal) ; option TVS 5,6 V sur +5V si la revue le demande [V-HW-05] |
 | R-15 | Boîtier ignifugé difficile à imprimer (gauchissement) | Retard | Moyenne | Géométrie sans grands aplats, congés, bordure ; test d'impression tôt |
 
 ---
@@ -758,10 +759,12 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 | A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
 | A9 | Routage 230 V 16 A en 2 couches avec trois borniers 3 pôles (constaté infaisable proprement) | **PE hors carte** : J1, J4, J4b en WAGO 2604 2 pôles (L, N) ; PE réunis par un WAGO 221-413 dans le compartiment 230 V (2026-09-26) | PCB 4 couches ; carte plus haute |
 
-Question ouverte sans proposition : **J3-3V3** — programmer en injectant 3,3 V sur la
-sortie de U3 alimente la sortie d'un régulateur non alimenté ; le comportement de
-l'AP2112K en courant inverse est à vérifier [V-HW-05]. Si non garanti, je proposerai de
-remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateur).
+Question close (2026-09-26, 5ᵉ revue) : **alimentation de programmation** — injecter
+3,3 V sur J3-3V3 alimenterait la sortie d'un AP2112K non alimenté, courant inverse non
+garanti par la fiche [V-HW-05]. J3 reçoit une 7ᵉ pastille **J3-5V** (+5V, entrée du
+régulateur) : la carte se programme hors secteur en alimentant par J3-5V (adaptateur USB
+5 V) ; J3-3V3 sert de point de mesure seulement. Ne jamais alimenter J3-5V avec le
+secteur branché (le +5V de PS1 serait mis en parallèle).
 
 ---
 

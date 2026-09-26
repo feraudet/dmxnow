@@ -74,7 +74,7 @@ PLACE = {
     "SW1": (87.5, 24.5, 0),
     "R19": (83.0, 21.0, 90),
     "D4": (83.0, 25.0, 90),
-    "J3": (74.0, 30.0, 90),      # 1x6 programming pads, along +X
+    "J3": (74.0, 30.0, 90),      # 1x7 programming pads, along +X (pin 7 = +5V supply)
     "U2": (84.0, 39.0, 0),
     "C3": (84.0, 34.5, 0),
     "D1": (91.5, 40.0, 90),
@@ -82,10 +82,10 @@ PLACE = {
     "R22": (80.0, 43.5, 90),     # DMX_TX pull-up
     "R23": (95.2, 20.5, 90),     # BOARD_SENSE pull-up (main side)
     "H1": (66.0, 4.5, 0),
-    "R15": (94.2, 31.0, 180),    # PWM pull-downs, main side of the breakaway line (SPEC 4.6);
-    "R16": (94.2, 33.0, 180),    # GND pad towards the main pour (-X), PWM pad towards the line
-    "R17": (94.2, 35.0, 180),
-    "R18": (94.2, 37.0, 180),
+    "R15": (93.7, 31.0, 180),    # PWM pull-downs, main side of the breakaway line (SPEC 4.6);
+    "R16": (93.7, 33.0, 180),    # GND pad towards the main pour (-X), PWM pad towards the line
+    "R17": (93.7, 35.0, 180),
+    "R18": (93.7, 37.0, 180),
     "H2": (91.0, 50.0, 0),
     # --- breakaway strip part (X 104..146) -------------------------------
     "J6": (141.5, 30.5, 90),     # VLED y=30.5, CH1..CH4 y=25.5,20.5,15.5,10.5 ; entry towards +X
@@ -309,7 +309,10 @@ def outline(board, for_routing=False):
     add_text(board, "OUT L/N", 22.5, 23.4, pcbnew.F_SilkS, 1.0)
     add_text(board, "OUT L/N", 22.5, 38.9, pcbnew.F_SilkS, 1.0)
     for x, t in ((77.0, "GND"), (81.2, "B-"), (85.4, "A+")):     # J2 DMX tail
-        add_text(board, t, x, 48.3, pcbnew.F_SilkS, 0.9)
+        add_text(board, t, x, 48.3, pcbnew.F_SilkS, 1.0)
+    # J3 supply pads: program through 5V (U3 input), never back-feed 3V3 (SPEC 9, V-HW-05)
+    add_text(board, "3V3", 74.0, 28.3, pcbnew.F_SilkS, 1.0)
+    add_text(board, "5V", 89.24, 28.3, pcbnew.F_SilkS, 1.0)
     for y, t in ((30.5, "V+"), (25.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
         add_text(board, t, 127.2, y, pcbnew.F_SilkS, 1.0)
     add_line(board, SLOT_X, 1.0, SLOT_X, 11.0, pcbnew.F_SilkS, 0.15)
@@ -366,6 +369,10 @@ def add_npth(board, x, y, d):
     board.Add(fp)
 
 
+# reference texts that the library footprint puts outside the board outline
+REF_AT = {"F1": (41.5, -8.6), "F2": (107.0, 45.8)}
+
+
 def place(board):
     root = sch.uid("root")
     for p in design.PARTS:
@@ -375,6 +382,9 @@ def place(board):
         x, y, rot = PLACE[p.ref]
         fp.SetPosition(pt(x, y))
         fp.SetOrientationDegrees(rot)
+        if p.ref in REF_AT:
+            fp.Reference().SetPosition(pt(*REF_AT[p.ref]))
+            fp.Reference().SetTextAngleDegrees(0)
         units = sch.units_of(p) if not p.symbol.startswith("Mechanical:") else [1]
         fp.SetPath(pcbnew.KIID_PATH("/" + str(sch.uid("sym", p.ref, units[0]))))
         attrs = fp.GetAttributes()
@@ -498,9 +508,9 @@ GND_VIAS = [(STUB_X0, 28.5), (STUB_X1, 28.5),
             (83.0, 27.2)] + U4_OE_VIAS                   # D4 cathode, U4 OE pins
 # U1 GND pads 52 (corner) and 11 (left column) tied on top, next to the module edge
 LED_ROUTES += [("GND", F, 0.3, [(82.05, 16.55), (82.1, 15.6)])]
-# PWM pull-downs R15-R18: their GND pads (x=93.375) tied by a spine, so that routed PWM
+# PWM pull-downs R15-R18: their GND pads (x=92.875) tied by a spine, so that routed PWM
 # tracks cannot strand one of them
-LED_ROUTES += [("GND", F, 0.4, [(93.375, 31.0), (93.375, 37.0)])]
+LED_ROUTES += [("GND", F, 0.4, [(92.875, 31.0), (92.875, 37.0)])]
 # U3 (AP2112K) GND pin is boxed in by pins 1 and 3: tie it to C5 pin 2 directly
 LED_ROUTES += [("GND", F, 0.3, [(74.36, 21.0), (73.2, 21.0), (72.0, 20.225)])]
 # D3 anode and C8 pin 2 to the GND_LED pour (bottom)

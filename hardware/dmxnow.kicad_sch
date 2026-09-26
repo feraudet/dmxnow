@@ -3287,7 +3287,7 @@
         )
       )
     )
-    (symbol "Connector_Generic:Conn_01x06"
+    (symbol "Connector_Generic:Conn_01x07"
       (pin_names
         (offset 1.016)
         hide
@@ -3295,14 +3295,14 @@
       (in_bom yes)
       (on_board yes)
       (property "Reference" "J"
-        (at 0 7.62 0)
+        (at 0 10.16 0)
         (effects
           (font
             (size 1.27 1.27)
           )
         )
       )
-      (property "Value" "Conn_01x06"
+      (property "Value" "Conn_01x07"
         (at 0 -10.16 0)
         (effects
           (font
@@ -3337,7 +3337,7 @@
           hide
         )
       )
-      (property "ki_description" "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+      (property "ki_description" "Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
         (at 0 0 0)
         (effects
           (font
@@ -3355,7 +3355,7 @@
           hide
         )
       )
-      (symbol "Conn_01x06_1_1"
+      (symbol "Conn_01x07_1_1"
         (rectangle
           (start -1.27 -7.493)
           (end 0 -7.747)
@@ -3423,7 +3423,18 @@
           )
         )
         (rectangle
-          (start -1.27 6.35)
+          (start -1.27 7.747)
+          (end 0 7.493)
+          (stroke
+            (width 0.1524)
+            (type default)
+          )
+          (fill
+            (type none)
+          )
+        )
+        (rectangle
+          (start -1.27 8.89)
           (end 1.27 -8.89)
           (stroke
             (width 0.254)
@@ -3434,7 +3445,7 @@
           )
         )
         (pin passive line
-          (at -5.08 5.08 0)
+          (at -5.08 7.62 0)
           (length 3.81)
           (name "Pin_1"
             (effects
@@ -3452,7 +3463,7 @@
           )
         )
         (pin passive line
-          (at -5.08 2.54 0)
+          (at -5.08 5.08 0)
           (length 3.81)
           (name "Pin_2"
             (effects
@@ -3470,7 +3481,7 @@
           )
         )
         (pin passive line
-          (at -5.08 0 0)
+          (at -5.08 2.54 0)
           (length 3.81)
           (name "Pin_3"
             (effects
@@ -3488,7 +3499,7 @@
           )
         )
         (pin passive line
-          (at -5.08 -2.54 0)
+          (at -5.08 0 0)
           (length 3.81)
           (name "Pin_4"
             (effects
@@ -3506,7 +3517,7 @@
           )
         )
         (pin passive line
-          (at -5.08 -5.08 0)
+          (at -5.08 -2.54 0)
           (length 3.81)
           (name "Pin_5"
             (effects
@@ -3524,7 +3535,7 @@
           )
         )
         (pin passive line
-          (at -5.08 -7.62 0)
+          (at -5.08 -5.08 0)
           (length 3.81)
           (name "Pin_6"
             (effects
@@ -3534,6 +3545,24 @@
             )
           )
           (number "6"
+            (effects
+              (font
+                (size 1.27 1.27)
+              )
+            )
+          )
+        )
+        (pin passive line
+          (at -5.08 -7.62 0)
+          (length 3.81)
+          (name "Pin_7"
+            (effects
+              (font
+                (size 1.27 1.27)
+              )
+            )
+          )
+          (number "7"
             (effects
               (font
                 (size 1.27 1.27)
@@ -10080,15 +10109,15 @@
     (uuid "322375ca-df25-5209-885c-f31eeccde5f7")
   )
   (symbol
-    (lib_id "Connector_Generic:Conn_01x06")
-    (at 325.12 147.32 0)
+    (lib_id "Connector_Generic:Conn_01x07")
+    (at 327.66 149.86 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp yes)
     (uuid "0329d2a8-8a2e-5a99-8f45-33e958b2d030")
     (property "Reference" "J3"
-      (at 325.12 139.7 0)
+      (at 327.66 139.7 0)
       (id 0)
       (effects
         (font
@@ -10096,8 +10125,8 @@
         )
       )
     )
-    (property "Value" "PROG (3V3 GND D- D+ EN BOOT)"
-      (at 325.12 157.48 0)
+    (property "Value" "PROG (3V3 GND D- D+ EN BOOT 5V)"
+      (at 327.66 160.02 0)
       (id 1)
       (effects
         (font
@@ -10105,8 +10134,8 @@
         )
       )
     )
-    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
-      (at 325.12 147.32 0)
+    (property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical"
+      (at 327.66 149.86 0)
       (id 2)
       (effects
         (font
@@ -10116,7 +10145,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 325.12 147.32 0)
+      (at 327.66 149.86 0)
       (id 3)
       (effects
         (font
@@ -10126,7 +10155,7 @@
       )
     )
     (property "MPN" ""
-      (at 325.12 147.32 0)
+      (at 327.66 149.86 0)
       (id 4)
       (effects
         (font
@@ -10136,7 +10165,7 @@
       )
     )
     (property "LCSC" ""
-      (at 325.12 147.32 0)
+      (at 327.66 149.86 0)
       (id 5)
       (effects
         (font
@@ -10146,7 +10175,7 @@
       )
     )
     (property "Section" "main"
-      (at 325.12 147.32 0)
+      (at 327.66 149.86 0)
       (id 6)
       (effects
         (font
@@ -10173,6 +10202,9 @@
     (pin "6"
       (uuid "1434aa0e-009e-5829-8ac8-087427f20b01")
     )
+    (pin "7"
+      (uuid "b52ffc38-acab-5fc1-8f87-2018991208cd")
+    )
     (instances
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
@@ -10184,8 +10216,8 @@
   )
   (wire
     (pts
+      (xy 322.58 142.24)
       (xy 320.04 142.24)
-      (xy 317.5 142.24)
     )
     (stroke
       (width 0)
@@ -10194,7 +10226,7 @@
     (uuid "4a8e695e-1d80-537d-a7c7-dd8bb83136ce")
   )
   (label "+3V3"
-    (at 317.5 142.24 180)
+    (at 320.04 142.24 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10206,8 +10238,8 @@
   )
   (wire
     (pts
+      (xy 322.58 144.78)
       (xy 320.04 144.78)
-      (xy 317.5 144.78)
     )
     (stroke
       (width 0)
@@ -10216,7 +10248,7 @@
     (uuid "57d60668-9f08-5124-bcfa-788d73a44708")
   )
   (label "GND"
-    (at 317.5 144.78 180)
+    (at 320.04 144.78 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10228,8 +10260,8 @@
   )
   (wire
     (pts
+      (xy 322.58 147.32)
       (xy 320.04 147.32)
-      (xy 317.5 147.32)
     )
     (stroke
       (width 0)
@@ -10238,7 +10270,7 @@
     (uuid "a7448241-0303-5bf1-8626-83ae0218d9d4")
   )
   (label "USB_DM"
-    (at 317.5 147.32 180)
+    (at 320.04 147.32 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10250,8 +10282,8 @@
   )
   (wire
     (pts
+      (xy 322.58 149.86)
       (xy 320.04 149.86)
-      (xy 317.5 149.86)
     )
     (stroke
       (width 0)
@@ -10260,7 +10292,7 @@
     (uuid "52eb20b7-3ab9-5ecc-a7df-83e266ebd329")
   )
   (label "USB_DP"
-    (at 317.5 149.86 180)
+    (at 320.04 149.86 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10272,8 +10304,8 @@
   )
   (wire
     (pts
+      (xy 322.58 152.4)
       (xy 320.04 152.4)
-      (xy 317.5 152.4)
     )
     (stroke
       (width 0)
@@ -10282,7 +10314,7 @@
     (uuid "d003341b-e460-533c-b224-20d5de66fad4")
   )
   (label "EN"
-    (at 317.5 152.4 180)
+    (at 320.04 152.4 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10294,8 +10326,8 @@
   )
   (wire
     (pts
+      (xy 322.58 154.94)
       (xy 320.04 154.94)
-      (xy 317.5 154.94)
     )
     (stroke
       (width 0)
@@ -10304,7 +10336,7 @@
     (uuid "dcaea9de-9433-56cb-82eb-eb8779d83aa6")
   )
   (label "BOOT"
-    (at 317.5 154.94 180)
+    (at 320.04 154.94 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10314,16 +10346,38 @@
     )
     (uuid "096d33b9-6f59-55bb-83ad-23e2652425b3")
   )
+  (wire
+    (pts
+      (xy 322.58 157.48)
+      (xy 320.04 157.48)
+    )
+    (stroke
+      (width 0)
+      (type default)
+    )
+    (uuid "05666d26-cdf8-5922-bed4-044497334bc2")
+  )
+  (label "+5V"
+    (at 320.04 157.48 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27)
+      )
+      (justify right bottom)
+    )
+    (uuid "5b4adb70-e6ab-5ea8-9c46-51731ac45564")
+  )
   (symbol
     (lib_id "Device:R")
-    (at 360.68 144.78 0)
+    (at 363.22 144.78 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp yes)
     (uuid "fef3c773-35eb-5b50-903e-1b4003eeeb4a")
     (property "Reference" "R19"
-      (at 362.712 144.78 90)
+      (at 365.252 144.78 90)
       (id 0)
       (effects
         (font
@@ -10331,8 +10385,8 @@
         )
       )
     )
-    (property "Value" "100R"
-      (at 360.68 144.78 90)
+    (property "Value" "330R"
+      (at 363.22 144.78 90)
       (id 1)
       (effects
         (font
@@ -10341,7 +10395,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 358.902 144.78 90)
+      (at 361.442 144.78 90)
       (id 2)
       (effects
         (font
@@ -10351,7 +10405,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 360.68 144.78 0)
+      (at 363.22 144.78 0)
       (id 3)
       (effects
         (font
@@ -10361,7 +10415,7 @@
       )
     )
     (property "MPN" ""
-      (at 360.68 144.78 0)
+      (at 363.22 144.78 0)
       (id 4)
       (effects
         (font
@@ -10370,8 +10424,8 @@
         hide
       )
     )
-    (property "LCSC" "C22775"
-      (at 360.68 144.78 0)
+    (property "LCSC" "C23138"
+      (at 363.22 144.78 0)
       (id 5)
       (effects
         (font
@@ -10381,7 +10435,7 @@
       )
     )
     (property "Section" "main"
-      (at 360.68 144.78 0)
+      (at 363.22 144.78 0)
       (id 6)
       (effects
         (font
@@ -10391,7 +10445,7 @@
       )
     )
     (property "Variant" "led"
-      (at 360.68 144.78 0)
+      (at 363.22 144.78 0)
       (id 7)
       (effects
         (font
@@ -10417,8 +10471,8 @@
   )
   (wire
     (pts
-      (xy 360.68 140.97)
-      (xy 360.68 138.43)
+      (xy 363.22 140.97)
+      (xy 363.22 138.43)
     )
     (stroke
       (width 0)
@@ -10427,7 +10481,7 @@
     (uuid "13e18209-ef58-5c5f-9b84-1907a3bdfc07")
   )
   (label "STATUS_LED"
-    (at 360.68 138.43 90)
+    (at 363.22 138.43 90)
     (fields_autoplaced)
     (effects
       (font
@@ -10439,8 +10493,8 @@
   )
   (wire
     (pts
-      (xy 360.68 148.59)
-      (xy 360.68 151.13)
+      (xy 363.22 148.59)
+      (xy 363.22 151.13)
     )
     (stroke
       (width 0)
@@ -10449,7 +10503,7 @@
     (uuid "a7847807-fe17-5d9f-ab38-25ccc735db0c")
   )
   (label "LED_A"
-    (at 360.68 151.13 270)
+    (at 363.22 151.13 270)
     (fields_autoplaced)
     (effects
       (font
@@ -10461,14 +10515,14 @@
   )
   (symbol
     (lib_id "Device:LED")
-    (at 396.24 139.7 0)
+    (at 398.78 139.7 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp yes)
     (uuid "eca33c63-7550-57b4-a88f-df91265e33b6")
     (property "Reference" "D4"
-      (at 396.24 137.16 0)
+      (at 398.78 137.16 0)
       (id 0)
       (effects
         (font
@@ -10476,8 +10530,8 @@
         )
       )
     )
-    (property "Value" "LED green 0603"
-      (at 396.24 142.24 0)
+    (property "Value" "LED red 0603"
+      (at 398.78 142.24 0)
       (id 1)
       (effects
         (font
@@ -10486,7 +10540,7 @@
       )
     )
     (property "Footprint" "LED_SMD:LED_0603_1608Metric"
-      (at 396.24 139.7 0)
+      (at 398.78 139.7 0)
       (id 2)
       (effects
         (font
@@ -10496,7 +10550,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 396.24 139.7 0)
+      (at 398.78 139.7 0)
       (id 3)
       (effects
         (font
@@ -10505,8 +10559,8 @@
         hide
       )
     )
-    (property "MPN" "KT-0603G"
-      (at 396.24 139.7 0)
+    (property "MPN" "KT-0603R"
+      (at 398.78 139.7 0)
       (id 4)
       (effects
         (font
@@ -10515,8 +10569,8 @@
         hide
       )
     )
-    (property "LCSC" "C12624"
-      (at 396.24 139.7 0)
+    (property "LCSC" "C2286"
+      (at 398.78 139.7 0)
       (id 5)
       (effects
         (font
@@ -10526,7 +10580,7 @@
       )
     )
     (property "Section" "main"
-      (at 396.24 139.7 0)
+      (at 398.78 139.7 0)
       (id 6)
       (effects
         (font
@@ -10536,7 +10590,7 @@
       )
     )
     (property "Variant" "led"
-      (at 396.24 139.7 0)
+      (at 398.78 139.7 0)
       (id 7)
       (effects
         (font
@@ -10562,8 +10616,8 @@
   )
   (wire
     (pts
+      (xy 394.97 139.7)
       (xy 392.43 139.7)
-      (xy 389.89 139.7)
     )
     (stroke
       (width 0)
@@ -10572,7 +10626,7 @@
     (uuid "c1e06a10-2150-57a6-a09d-7cb4eb397ee9")
   )
   (label "GND"
-    (at 389.89 139.7 180)
+    (at 392.43 139.7 180)
     (fields_autoplaced)
     (effects
       (font
@@ -10584,8 +10638,8 @@
   )
   (wire
     (pts
-      (xy 400.05 139.7)
       (xy 402.59 139.7)
+      (xy 405.13 139.7)
     )
     (stroke
       (width 0)
@@ -10594,7 +10648,7 @@
     (uuid "0abc2447-f914-5f04-8bd7-b880fce4d7f5")
   )
   (label "LED_A"
-    (at 402.59 139.7 0)
+    (at 405.13 139.7 0)
     (fields_autoplaced)
     (effects
       (font

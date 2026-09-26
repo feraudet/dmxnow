@@ -77,9 +77,9 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | # | Point | OK |
 |---|-------|----|
 | 5.1 | JLCPCB : 2 couches, 1,6 mm, **cuivre 2 oz**, FR-4 TG ≥ 150, finition HASL sans plomb ou ENIG. | ☐ |
-| 5.2 | Séparation : fente fraisée et trous de perforation inclus dans les Gerbers (Edge.Cuts, NPTH). Préciser en remarque de commande : « single design, internal routed slot with breakaway tabs, do not separate ». JLCPCB peut la compter comme panneau de 2 designs : accepter ou discuter. | ☐ |
-| 5.3 | Fentes internes de 1 mm présentes sur le calque Edge.Cuts. | ☐ |
-| 5.4 | BOM et CPL (`fab/*_full.csv` pour CMS + traversants, `*_smt.csv` pour CMS seuls) : références LCSC vérifiées le 2026-09-26 (revérifier le stock ; WAGO 2604-1105 (J6) en rupture chez LCSC : consigner ou souder à la main). Rotations et centres convertis aux conventions JLCPCB (`fab.py`, `JLC_FIX`) ; F1 (support Schurter) sans correction connue ; rotations des composants à contrôler dans l'aperçu JLCPCB. | ☐ |
+| 5.2 | Séparation : fente fraisée et trous de perforation inclus dans les Gerbers (Edge.Cuts, NPTH). Préciser en remarque de commande : « single design, internal routed slot with breakaway tabs, do not separate ». JLCPCB la compte comme **2 designs** : commander avec « Different Design = 2 », « Panel by Customer » 1×1. Remarque de commande complète : « One circuit with an internal routed slot and 3 breakaway tabs carrying traces; deliver and assemble as one piece, do NOT separate. SMT: convey on the straight short edges X=0 and X=146; U1/Q5/R10 are close to the Y=54 edge by design. J6, J3, J2 not populated: keep holes open (no solder fill). J1, J4, J7, J5: wire entry toward board edge. RV1: form leads to the PCB holes. F2: press flat before soldering. F1/F2 fuses are not fitted. » | ☐ |
+| 5.3 | Fentes d'isolement de 1,2 mm (bouts arrondis) présentes sur le calque Edge.Cuts. | ☐ |
+| 5.4 | BOM et CPL (`fab/*_full.csv` pour CMS + traversants, `*_smt.csv` pour CMS seuls) : références LCSC vérifiées le 2026-09-26 (revérifier le stock ; WAGO 2604-1105 (J6) **arrêté chez WAGO** et à 0 chez LCSC : remplacement à arbitrer, hors BOM JLC en attendant). Rotations et centres convertis aux conventions JLCPCB (`fab.py`, `JLC_FIX`) ; F1 (support Schurter) vérifié sur l'empreinte EasyEDA C3204125 ; rotations des composants à contrôler dans l'aperçu JLCPCB. | ☐ |
 | 5.5 | Composants traversants (WAGO, K1, PS1, F1, RV1, F2, C7) soudés à la main ou en assemblage traversant. | ☐ |
 
 ## 6. Essais du premier prototype (personne équipée et qualifiée)
@@ -103,3 +103,6 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | 7.4 | Mise en route : démarrage à froid répété, ligne DMX terminée par 120 Ω, à la tension secteur mini et maxi (limite de courant repliée de l'AP2112K) ; F1 face à l'appel de courant de PS1. | ☐ |
 | 7.5 | Rubans : charge totale ≤ 16 A en continu avec le fusible F2 de 20 A (≤ 80 %) ; polarité de J5 (une inversion avec une alimentation limitée en courant fait chauffer D3 sans fondre F2). | ☐ |
 
+| 7.6 | Programmation hors secteur : alimenter par **J3-5V** (pastille 7, entrée de U3), jamais par J3-3V3 (sortie de U3, courant inverse non garanti) ; ne pas alimenter J3-5V secteur branché. | ☐ |
+| 7.7 | Bornier WAGO : sens d'insertion (levier côté bord de carte, entrée des fils vers l'extérieur) à contrôler sur l'aperçu JLCPCB ; F2 (porte-fusible ATO conçu pour 1,5 mm) plaqué avant soudure ; trous de J2, J3, J6 laissés ouverts. | ☐ |
+| 7.8 | Remarque de commande : voir 5.2 (2 designs, convoyage par les bords courts X=0 / X=146, pièce unique non séparée). | ☐ |

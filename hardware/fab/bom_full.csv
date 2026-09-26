@@ -19,9 +19,9 @@ R2,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
 R3,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
 R4,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
 SW1,PTS810 (BOOT/maintenance),Button_Switch_SMD:SW_SPST_PTS810,C&K PTS810 SJM 250 SMTR LFS,C116501,main,yes,SMT,
-J3,PROG (3V3 GND D- D+ EN BOOT),Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,,,main,no,THT,"Pads only, header not fitted"
-R19,100R,Resistor_SMD:R_0603_1608Metric,,C22775,main,DNP (option A7),SMT,
-D4,LED green 0603,LED_SMD:LED_0603_1608Metric,KT-0603G,C12624,main,DNP (option A7),SMT,
+J3,PROG (3V3 GND D- D+ EN BOOT 5V),Connector_PinHeader_2.54mm:PinHeader_1x07_P2.54mm_Vertical,,,main,no,THT,"Pads only, header not fitted"
+R19,330R,Resistor_SMD:R_0603_1608Metric,,C23138,main,DNP (option A7),SMT,
+D4,LED red 0603,LED_SMD:LED_0603_1608Metric,KT-0603R,C2286,main,DNP (option A7),SMT,
 R5,100R,Resistor_SMD:R_0603_1608Metric,,C22775,main,yes,SMT,
 R6,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,
 Q1,AO3400A,Package_TO_SOT_SMD:SOT-23,,C20917,main,yes,SMT,

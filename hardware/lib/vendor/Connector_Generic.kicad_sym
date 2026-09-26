@@ -170,7 +170,7 @@
       )
     )
   )
-  (symbol "Conn_01x06"
+  (symbol "Conn_01x07"
     (pin_names
       (offset 1.016)
       hide
@@ -178,14 +178,14 @@
     (in_bom yes)
     (on_board yes)
     (property "Reference" "J"
-      (at 0 7.62 0)
+      (at 0 10.16 0)
       (effects
         (font
           (size 1.27 1.27)
         )
       )
     )
-    (property "Value" "Conn_01x06"
+    (property "Value" "Conn_01x07"
       (at 0 -10.16 0)
       (effects
         (font
@@ -220,7 +220,7 @@
         hide
       )
     )
-    (property "ki_description" "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+    (property "ki_description" "Generic connector, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
       (at 0 0 0)
       (effects
         (font
@@ -238,7 +238,7 @@
         hide
       )
     )
-    (symbol "Conn_01x06_1_1"
+    (symbol "Conn_01x07_1_1"
       (rectangle
         (start -1.27 -7.493)
         (end 0 -7.747)
@@ -306,7 +306,18 @@
         )
       )
       (rectangle
-        (start -1.27 6.35)
+        (start -1.27 7.747)
+        (end 0 7.493)
+        (stroke
+          (width 0.1524)
+          (type default)
+        )
+        (fill
+          (type none)
+        )
+      )
+      (rectangle
+        (start -1.27 8.89)
         (end 1.27 -8.89)
         (stroke
           (width 0.254)
@@ -317,7 +328,7 @@
         )
       )
       (pin passive line
-        (at -5.08 5.08 0)
+        (at -5.08 7.62 0)
         (length 3.81)
         (name "Pin_1"
           (effects
@@ -335,7 +346,7 @@
         )
       )
       (pin passive line
-        (at -5.08 2.54 0)
+        (at -5.08 5.08 0)
         (length 3.81)
         (name "Pin_2"
           (effects
@@ -353,7 +364,7 @@
         )
       )
       (pin passive line
-        (at -5.08 0 0)
+        (at -5.08 2.54 0)
         (length 3.81)
         (name "Pin_3"
           (effects
@@ -371,7 +382,7 @@
         )
       )
       (pin passive line
-        (at -5.08 -2.54 0)
+        (at -5.08 0 0)
         (length 3.81)
         (name "Pin_4"
           (effects
@@ -389,7 +400,7 @@
         )
       )
       (pin passive line
-        (at -5.08 -5.08 0)
+        (at -5.08 -2.54 0)
         (length 3.81)
         (name "Pin_5"
           (effects
@@ -407,7 +418,7 @@
         )
       )
       (pin passive line
-        (at -5.08 -7.62 0)
+        (at -5.08 -5.08 0)
         (length 3.81)
         (name "Pin_6"
           (effects
@@ -417,6 +428,24 @@
           )
         )
         (number "6"
+          (effects
+            (font
+              (size 1.27 1.27)
+            )
+          )
+        )
+      )
+      (pin passive line
+        (at -5.08 -7.62 0)
+        (length 3.81)
+        (name "Pin_7"
+          (effects
+            (font
+              (size 1.27 1.27)
+            )
+          )
+        )
+        (number "7"
           (effects
             (font
               (size 1.27 1.27)
