@@ -1,0 +1,38 @@
+name: enclosure
+
+on:
+  push:
+    paths: ["enclosure/**", ".github/workflows/enclosure.yml"]
+  pull_request:
+    paths: ["enclosure/**", ".github/workflows/enclosure.yml"]
+
+jobs:
+  cadquery:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: enclosure
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install CadQuery and offscreen OpenGL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libosmesa6 libegl1 libgl1
+          pip install -r requirements.txt
+
+      - name: Checks (SPEC 8.6)
+        run: make check
+
+      - name: STEP / STL exports and renders
+        run: make export render
+
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: enclosure
+          path: enclosure/out

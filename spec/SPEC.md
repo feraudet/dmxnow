@@ -58,7 +58,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | ENF-02 | Rafraîchissement DMX ≥ 44 Hz, pas de trou > 100 ms en conditions nominales. | Mesure, compteur `lost_frames`. |
 | ENF-03 | Taux de perte radio < 1 % à 20 m en vue directe, 4 univers actifs. | Mesure heartbeat. |
 | ENF-04 | Coût matière ≤ 50 € par nœud en série de 20 (hors alimentation LED, hors XLR si fournie). | BOM chiffrée §6. |
-| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. | STEP. |
+| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. **Non tenu (2026-09-26)** : 208 × 72 × 34 mm (entière), 145 × 72 × 34 mm (cassée), hors oreilles et bossages ; longueur : chambres de presse-étoupes et étriers imposés par ES-05, largeur : bande de F1 (§4.12, « Réalisation »). | STEP. |
 | ENF-06 | Nœud configurable, identifiable et mis à jour sans ouverture du boîtier. | Recette. |
 | ENF-07 | Reproductibilité : tout est généré par scripts versionnés ; CI verte. | CI. |
 
@@ -570,6 +570,24 @@ contrôle pour la relecture humaine.
   couvercle basse tension.
 - Exports : STL et STEP pour chaque pièce et chaque variante (avec et sans `light_pipe`),
   rendu PNG assemblé.
+- **Réalisation (livrable 8.6, 2026-09-26)** — détails et justifications dans
+  `enclosure/README.md` :
+  - géométrie de la carte exportée du PCB (`hardware/gen/export_board.py` →
+    `enclosure/board.json`, contrôlé en CI) plutôt qu'un STEP : plusieurs empreintes du
+    projet n'ont pas de modèle 3D ; hauteurs relevées sur les fiches [V-ENC-03] ;
+  - **chambres de câblage** aux deux extrémités : le contre-écrou d'un M16 (22 mm) ne peut
+    pas traverser le plan du PCB ; côté secteur, 34 mm pour l'écrou, l'étrier et le WAGO
+    221-413 ; d'où le dépassement d'ENF-05 ;
+  - cloison 🔴 en trois parties (paroi du fond, languettes dans les fentes d'isolement,
+    jupe du couvercle 230 V passant à 0,5 mm du PCB et au-dessus de K1 et PS1, qui
+    enjambent la ligne), couvercle 230 V recouvrant le bord du couvercle TBT ;
+  - H1 (13,5 mm de l'antenne) sans insert : ergot imprimé + tube presseur ; variante cassée
+    sans vis dans le coin supérieur droit ;
+  - DMX en **M12** (serrage jusqu'à 7 mm, les câbles DMX dépassant souvent les 6 mm du
+    PG7), sorties rubans et alimentation LED en M16 ;
+  - aérations : fentes dans le couvercle TBT au-dessus de Q2 à Q5 et entrées basses sous
+    la partie sécable ; aucune ouverture dans le couvercle 230 V ;
+  - hauteur intérieure 31 mm (F2 + fusible), PCB à 5 mm du fond.
 
 ---
 
@@ -651,14 +669,14 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Mean Well IRM-03-5 (A1)                 | 6 €           | 6 € |
 | Omron G5RL-1A-E-HR                      | 2,5 €         | 2,5 € |
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
-| WAGO 2604 : 3 × 2 pôles (+ 2 + 5 pôles), WAGO 221-413 | 5,5 € (+ 4 €) | 5,5 € |
+| WAGO 2604 : 3 × 2 pôles (+ 2 × 2 + 3 pôles), WAGO 221-413 | 5,5 € (+ 5 €) | 5,5 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
 | Partie rubans : 4 × AOD2610E, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
 | PCB 2 couches 2 oz + assemblage CMS JLCPCB (répartis) | 5 € | 5 € |
-| Boîtier ABS-FR (~60 g) + inserts + vis  | 3 €           | 2,5 € |
-| Presse-étoupes (4 à 6)                  | 2,5 €         | 1,5 € |
+| Boîtier ABS-FR V-0 (~150 g / ~115 g, pièces pleines) + inserts + vis | 7 € | 5,5 € |
+| Presse-étoupes (5 × M16 + M12 / 3 × M16 + M12) | 3,5 € | 2,5 € |
 | Queue DMX : 1 m de câble 120 Ω + Neutrik NC3FXX | 5,5 € | 5,5 € |
-| **Total**                               | **≈ 47 €**    | **≈ 35 €** |
+| **Total**                               | **≈ 53 €**    | **≈ 39 €** |
 
 Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix d'un module Mean Well (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
 **Prix LCSC relevés le 2026-09-26** (API JLCPCB, toutes les références de `design.py`) :
@@ -797,6 +815,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
+| V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
 | V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
 | V-SYS-02 | XLR 3 ou 5 broches sur le parc | Toi | faible |
 
@@ -831,6 +850,6 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | Java (OpenJDK 21) | présent | nécessaire à Freerouting |
 | KiCad 8+ / `kicad-cli` | KiCad **7.0.11** installé (PPA KiCad bloqué par le proxy) : génération, API pcbnew et DRC local. ERC, DRC de référence et rendus 3D en **KiCad 9** dans la CI (image `kicad/kicad:9.0`) | — |
 | SKiDL | non utilisé (dépendances non installables ; génération directe des fichiers KiCad) | — |
-| CadQuery | **absent**, disponible sur PyPI (2.8.0) | `pip install cadquery` |
+| CadQuery | 2.8.0 installé (`pip install -r enclosure/requirements.txt`) ; rendus via OSMesa (`libosmesa6`) | — |
 | Freerouting | 2.1.0 installé (`/opt/freerouting/freerouting.jar`) | — |
 | PlatformIO | **absent**, disponible sur PyPI | `pip install platformio` + plateforme pioarduino |

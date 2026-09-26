@@ -46,6 +46,7 @@ check:
 
 fab:
 	$(PY) gen/fab.py
+	cd gen && $(PY) export_board.py   # enclosure/board.json (boîtier, SPEC 4.12)
 
 clean:
 	rm -rf $(BUILD) fab

@@ -2,9 +2,9 @@ name: hardware
 
 on:
   push:
-    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "enclosure/board.json", ".github/workflows/hardware.yml"]
   pull_request:
-    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+    paths: ["hardware/**", "enclosure/board.json", ".github/workflows/hardware.yml"]
 
 jobs:
   kicad:
@@ -54,6 +54,11 @@ jobs:
 
       - name: Fabrication outputs
         run: python3 gen/fab.py
+
+      - name: Enclosure board geometry up to date (enclosure/board.json)
+        run: |
+          cd gen && python3 export_board.py && cd ..
+          git diff --stat --exit-code -- ../enclosure/board.json
 
       - name: 3D renders
         continue-on-error: true   # needs an OpenGL-capable container

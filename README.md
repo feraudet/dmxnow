@@ -15,7 +15,7 @@ projecteur par relais et, dans sa version complète, pilote 4 canaux PWM de ruba
 | `hardware/`  | Projet KiCad, scripts de génération, sorties JLCPCB (à venir)   |
 | `firmware/`  | `common/`, `node/`, `dongle/` (à venir)                         |
 | `pi/`        | Démon Python, systemd, udev, CLI (à venir)                      |
-| `enclosure/` | Boîtier CadQuery (à venir)                                      |
+| `enclosure/` | Boîtier CadQuery paramétrique, deux variantes, STL/STEP         |
 | `docs/`      | Assemblage, câblage, flash, mise en service, sécurité (à venir) |
 
 ⚠️ Ce projet manipule du 230 V. Toute la partie secteur est soumise à relecture

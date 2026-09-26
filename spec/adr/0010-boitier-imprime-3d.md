@@ -10,6 +10,15 @@ Petite série, deux longueurs, besoin de cloison 230 V et d'arrêts de traction.
 
 Modèle CadQuery unique générant les deux variantes, en matériau ignifugé (ABS-FR V-0 recommandé, SPEC §4.12), inserts M3 à chaud, couvercle d'accès aux borniers vissé.
 
+## Amendement (2026-09-26, livrable 8.6)
+
+- Géométrie issue de `enclosure/board.json` (export du PCB) plutôt que d'un STEP.
+- Chambres de câblage aux extrémités pour les presse-étoupes et les étriers : 208 × 72 × 34 mm
+  (carte entière), 145 × 72 × 34 mm (cassée), au-delà de l'objectif ENF-05, qui n'était
+  qu'indicatif. Réduire la longueur supposerait de renoncer à l'étrier indépendant (ES-05)
+  ou aux presse-étoupes : non retenu, sauf arbitrage contraire.
+- Cloison en trois parties (fond, languettes dans les fentes, jupe du couvercle 230 V).
+
 ## Conséquences
 
 - Adaptation facile ; exports STL/STEP versionnés.
