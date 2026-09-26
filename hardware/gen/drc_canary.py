@@ -10,6 +10,7 @@ reject, runs DRC and requires every expected violation.
 import os
 import re
 import shutil
+import subprocess
 import sys
 
 import pcbnew
@@ -40,21 +41,32 @@ def main():
     board = pcbnew.LoadBoard(os.path.join(HW, "dmxnow.kicad_pcb"))
     for net, layer, a, b, w, _ in CANARIES:
         P.add_track(board, net, layer, w, [a, b])
-    board.Save(os.path.join(OUT, "dmxnow.kicad_pcb"))   # for inspection only
+    path = os.path.join(OUT, "dmxnow.kicad_pcb")
+    board.Save(path)
     rpt = os.path.join(OUT, "drc.rpt")
-    # the millimetre enum was renamed between KiCad versions
-    name = next(n for n in ("EDA_UNITS_MILLIMETRES", "EDA_UNITS_MM") + tuple(
-        n for n in dir(pcbnew) if n.startswith("EDA_UNITS_") and ("MILLI" in n or n.endswith("_MM")))
-        if hasattr(pcbnew, n))
-    units = getattr(pcbnew, name)
-    pcbnew.WriteDRCReport(board, rpt, units, False)
+    # prefer the same engine as the CI DRC step (kicad-cli, KiCad 8+); KiCad 7 has no
+    # `pcb drc` in kicad-cli, so fall back to the pcbnew API on the in-memory board
+    r = subprocess.run(["kicad-cli", "pcb", "drc", "--severity-error", "-o", rpt, path],
+                       capture_output=True, text=True) if shutil.which("kicad-cli") else None
+    if r is None or r.returncode != 0 or not os.path.exists(rpt):
+        name = next(n for n in ("EDA_UNITS_MILLIMETRES", "EDA_UNITS_MM") + tuple(
+            n for n in dir(pcbnew) if n.startswith("EDA_UNITS_") and ("MILLI" in n or n.endswith("_MM")))
+            if hasattr(pcbnew, n))
+        pcbnew.WriteDRCReport(board, rpt, getattr(pcbnew, name), False)
+        engine = "pcbnew API"
+    else:
+        engine = "kicad-cli"
     txt = open(rpt).read()
-    fired = set(re.findall(r"Rule: (\w+); Severity: error", txt))
+    # "Rule: <name>; Severity: error" (KiCad 7) or "Rule: <name>; error" (KiCad 8+)
+    fired = set(re.findall(r"Rule: (\w+);", txt))
+    print("DRC engine:", engine)
     missing = [r for *_, r in CANARIES if r not in fired]
     for *_, r in CANARIES:
         print("%-24s %s" % (r, "fired" if r in fired else "NOT FIRED"))
     if missing:
         print("DRC canary FAILED: custom rules not active:", ", ".join(missing))
+        print("---- report (rules seen: %s) ----" % ", ".join(sorted(fired)))
+        print("\n".join(l for l in txt.splitlines() if "Rule:" in l or l.startswith("[")) [:4000])
         return 1
     print("DRC canary: all custom 230 V rules active")
     return 0
