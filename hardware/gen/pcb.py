@@ -66,6 +66,10 @@ PLACE = {
     "D1": (91.5, 40.0, 90),
     "J2": (76.0, 50.5, 0),       # DMX tail wire pads (GND, B, A)
     "H1": (66.0, 4.5, 0),
+    "R15": (94.2, 31.0, 180),    # PWM pull-downs, main side of the V-cut (SPEC 4.6);
+    "R16": (94.2, 33.0, 180),    # GND pad towards the main pour (-X), PWM pad towards the V-cut
+    "R17": (94.2, 35.0, 180),
+    "R18": (94.2, 37.0, 180),
     "H2": (91.0, 50.0, 0),
     # --- breakaway strip part (X 104..146) -------------------------------
     "J6": (141.5, 30.0, 90),     # VLED y=30, CH1..CH4 y=25,20,15,10 ; entry towards +X
@@ -87,13 +91,10 @@ PLACE = {
     "R7": (111.5, 24.7, 0),
     "R11": (111.5, 27.5, 0),
     "U4": (108.5, 37.0, 0),
-    "C9": (108.5, 31.0, 0),
-    "R15": (105.2, 14.0, 90),
-    "R16": (105.2, 17.5, 90),
-    "R17": (105.2, 21.0, 90),
-    "R18": (105.2, 24.5, 90),
-    "NT1": (108.5, 43.5, 0),
-    "NT2": (105.5, 9.0, 90),
+    "C9": (107.6, 31.0, 0),
+
+    "R20": (111.5, 31.2, 0),     # 0R GND (pad 1) / GND_LED (pad 2 -> via)
+    "R21": (105.5, 9.0, 0),      # 0R BOARD_SENSE (pad 1, crossing stub) / GND (pad 2)
     "H3": (139.0, 3.5, 0),
 }
 
@@ -165,7 +166,7 @@ def add_via(board, net, x, y, dia=1.2, drill=0.6):
     board.Add(v)
 
 
-def add_zone(board, net, layers, poly, clearance=0.3, min_w=0.25, priority=0, solid=False,
+def add_zone(board, net, layers, poly, clearance=0.3, min_w=0.3, priority=0, solid=False,
              name=""):
     z = pcbnew.ZONE(board)
     ls = pcbnew.LSET()
@@ -182,6 +183,7 @@ def add_zone(board, net, layers, poly, clearance=0.3, min_w=0.25, priority=0, so
     z.SetMinThickness(mm(min_w))
     z.SetAssignedPriority(priority)
     z.SetPadConnection(pcbnew.ZONE_CONNECTION_FULL if solid else pcbnew.ZONE_CONNECTION_THERMAL)
+    z.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
     z.SetThermalReliefGap(mm(0.4))
     z.SetThermalReliefSpokeWidth(mm(0.5))
     if name:
@@ -190,12 +192,13 @@ def add_zone(board, net, layers, poly, clearance=0.3, min_w=0.25, priority=0, so
     return z
 
 
-def add_rule_area(board, poly, name, footprints=True, tracks=False, vias=False, pour=False):
+def add_rule_area(board, poly, name, footprints=True, tracks=False, vias=False, pour=False,
+                  layers=None):
     z = pcbnew.ZONE(board)
     z.SetIsRuleArea(True)
     ls = pcbnew.LSET()
-    ls.AddLayer(pcbnew.F_Cu)
-    ls.AddLayer(pcbnew.B_Cu)
+    for l in layers or [pcbnew.F_Cu, pcbnew.B_Cu]:
+        ls.AddLayer(l)
     z.SetLayerSet(ls)
     o = z.Outline()
     o.NewOutline()
@@ -231,9 +234,17 @@ def outline(board, for_routing=False):
         # crossing stubs cross it) and the 230 V zone (+6 mm) is closed.
         add_rule_area(board, [(0, 0), (LV_MIN_X, 0), (LV_MIN_X, H), (0, H)],
                       "route_keepout_mains", footprints=False, tracks=True, vias=True, pour=False)
-        add_rule_area(board, [(VCUT - VCUT_KEEP, 0), (VCUT + VCUT_KEEP, 0), (VCUT + VCUT_KEEP, H),
-                              (VCUT - VCUT_KEEP, H)],
+        add_rule_area(board, [(VCUT - 3.0, 0), (VCUT + 3.0, 0), (VCUT + 3.0, H), (VCUT - 3.0, H)],
                       "route_keepout_vcut", footprints=False, tracks=True, vias=True, pour=False)
+        # keep the LED power pours whole: no signal on the bottom layer of the power
+        # area (GND_LED pour) nor inside the VLED pour on top
+        add_rule_area(board, [(113.4, 0), (W, 0), (W, H), (113.4, H)], "route_keepout_gndled",
+                      footprints=False, tracks=True, vias=True, pour=False, layers=[pcbnew.B_Cu])
+        add_rule_area(board, [(106.3, 32.3), (110.7, 32.3), (110.7, 41.7), (106.3, 41.7)],
+                      "route_keepout_u4_bottom", footprints=False, tracks=True, vias=True,
+                      pour=False, layers=[pcbnew.B_Cu])
+        add_rule_area(board, VLED_POLY, "route_keepout_vled",
+                      footprints=False, tracks=True, vias=True, pour=False, layers=[pcbnew.F_Cu])
     else:
         add_rule_area(board, [(VCUT - VCUT_KEEP, 0), (VCUT + VCUT_KEEP, 0), (VCUT + VCUT_KEEP, H),
                               (VCUT - VCUT_KEEP, H)], "vcut_keepout")
@@ -251,8 +262,10 @@ def place(board):
         units = sch.units_of(p) if not p.symbol.startswith("Mechanical:") else [1]
         fp.SetPath(pcbnew.KIID_PATH("/" + str(sch.uid("sym", p.ref, units[0]))))
         attrs = fp.GetAttributes()
-        if p.dnp:
+        if p.dnp and not p.variant:
             attrs |= pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_EXCLUDE_FROM_POS_FILES
+        elif p.dnp:
+            attrs |= pcbnew.FP_EXCLUDE_FROM_BOM   # option part: kept in the placement file
         if p.symbol.startswith("Mechanical:"):
             attrs |= pcbnew.FP_EXCLUDE_FROM_BOM | pcbnew.FP_EXCLUDE_FROM_POS_FILES | pcbnew.FP_BOARD_ONLY
         fp.SetAttributes(attrs)
@@ -328,19 +341,53 @@ LED_ROUTES = [
     ("CH1", F, 2.5, [(122.3, 27.0), (126.5, 27.0), (128.5, 25.0), (141.5, 25.0)]),
 ]
 
+R21_PAD1_X = 105.5 - 0.825   # R_0603: pads at +-0.825 mm
+R20_PAD2_X = 111.5 + 0.95    # R_0805: pads at +-0.95 mm
+
 # The only copper crossing the V-cut (SPEC 4.8.4): short fixed stubs, the
 # autorouter connects to their ends. (net, y, width)
-CROSSING_STUBS = [("BOARD_SENSE", 9.0, 0.25), ("PWM1", 14.0, 0.25), ("PWM2", 17.5, 0.25),
-                  ("PWM3", 21.0, 0.25), ("PWM4", 24.5, 0.25), ("+5V", 28.0, 0.6), ("GND", 30.5, 0.6)]
-LED_ROUTES += [(n, F, w, [(VCUT - VCUT_KEEP - 0.8, y), (VCUT + VCUT_KEEP + 0.4, y)])
-               for n, y, w in CROSSING_STUBS]
+CROSSING_STUBS = [("BOARD_SENSE", 9.0, 0.25), ("+5V", 24.0, 0.6), ("PWM4", 26.0, 0.25),
+                  ("GND", 28.5, 0.6), ("PWM1", 34.46, 0.25), ("PWM2", 38.27, 0.25),
+                  ("PWM3", 42.6, 0.25)]
+STUB_X0, STUB_X1 = VCUT - 3.8, VCUT + 3.8   # stub ends just outside the router barrier
+LED_ROUTES += [(n, F, w, [(STUB_X0, y), (STUB_X1, y)]) for n, y, w in CROSSING_STUBS]
+# BOARD_SENSE stub straight onto NT2 pad 1; NT1 GND_LED pad to a via into the GND_LED pour
+LED_ROUTES += [("BOARD_SENSE", F, 0.25, [(STUB_X1, 9.0), (R21_PAD1_X, 9.0)]),
+               ("GND_LED", F, 0.4, [(R20_PAD2_X, 31.2), (114.0, 31.5)])]
+# Gate pull-downs R11..R14 (pad 2) to the GND_LED via next to each MOSFET source
+LED_ROUTES += [("GND_LED", F, 0.4, [(112.275, y + 0.5), (114.0, y + 2.28 - 0.7)])
+               for y in (4.5, 12.0, 19.5, 27.0)]
+# F2 pin 1 is four pads (two per blade): tie them together
+LED_ROUTES += [("VLED_IN", F, 2.0, [(118.0, 49.0), (121.5, 49.0)]),
+               ("VLED_IN", F, 2.0, [(118.0, 51.5), (121.5, 51.5)]),
+               ("VLED_IN", F, 1.5, [(118.0, 49.0), (118.0, 51.5)])]
+# U4 output-enable pins (1, 4, 10, 13) to GND through their own vias (bottom pour)
+U4_X, U4_Y = 108.5, 37.0
+U4_OE = [(U4_X - 2.475, U4_Y - 3.81), (U4_X - 2.475, U4_Y - 3.81 + 3 * 1.27),
+         (U4_X + 2.475, U4_Y + 3.81 - 2 * 1.27), (U4_X + 2.475, U4_Y + 3.81 - 5 * 1.27)]
+# OE pins: vias under the package body to the bottom GND pour (the autorouter is
+# kept off the bottom layer under U4 so that this pour stays whole).
+U4_OE_VIAS = [(x + 1.5, y) if x < U4_X else (x - 1.5, y) for x, y in U4_OE]
+LED_ROUTES += [("GND", F, 0.3, [a, b]) for a, b in zip(U4_OE, U4_OE_VIAS)]
+# D4 (LED option) cathode to its own via
+LED_ROUTES += [("GND", F, 0.3, [(83.0, 25.79), (83.0, 27.2)])]
+# GND crossing stub: vias at both ends so the main and strip pours are joined on both layers
+GND_VIAS = [(STUB_X0, 28.5), (STUB_X1, 28.5),
+            (111.5 - 0.9125, 31.2),                      # R20 pad 1 (star point): via in pad
+            (83.0, 27.2)] + U4_OE_VIAS                   # D4 cathode, U4 OE pins
+# U3 (AP2112K) GND pin is boxed in by pins 1 and 3: tie it to C5 pin 2 directly
+LED_ROUTES += [("GND", F, 0.3, [(74.36, 21.0), (73.2, 21.0), (72.0, 20.225)])]
+# D3 anode and C8 pin 2 to the GND_LED pour (bottom)
+LED_ROUTES += [("GND_LED", F, 1.0, [(130.85, 37.0), (130.85, 39.6)]),
+               ("GND_LED", F, 1.0, [(141.9, 37.0), (141.9, 39.6)])]
 # VLED: F2 pin 2 -> C7 + (keeps the VLED pour in one piece whatever the autorouter does)
 LED_ROUTES += [("VLED", F, 3.0, [(108.7, 49.0), (112.2, 49.0)]),
                ("VLED", F, 3.0, [(110.45, 49.0), (110.45, 45.5), (114.5, 41.5), (116.5, 38.5), (116.5, 36.5)])]
 
 # MOSFET sources and other GND_LED pads to the bottom pour: via arrays
 Q_Y = (4.5, 12.0, 19.5, 27.0)
-GND_LED_VIAS = [(114.0, y + 2.28 + dy) for y in Q_Y for dy in (-0.7, 0.7)]
+GND_LED_VIAS = [(114.0, y + 2.28 + dy) for y in Q_Y for dy in (-0.7, 0.7)] + \
+    [(114.0, 31.5), (130.85, 39.6), (141.9, 39.6)]
 LED_ROUTES += [("GND_LED", F, 1.4, [(115.96, y + 2.28), (114.0, y + 2.28)]) for y in Q_Y]
 
 
@@ -350,6 +397,13 @@ def route_power(board):
         add_track(board, net, layer, w, pts)
     for x, y in GND_LED_VIAS:
         add_via(board, "GND_LED", x, y, 1.0, 0.5)
+    for x, y in GND_VIAS:
+        add_via(board, "GND", x, y, 0.6, 0.3)
+
+
+VLED_POLY = [(104.5, 53.5), (115.0, 53.5), (115.0, 45.8), (127.0, 45.8), (127.0, 41.9),
+             (145.5, 41.9), (145.5, 28.6), (129.0, 28.6), (129.0, 32.5), (114.0, 32.5),
+             (114.0, 44.8), (104.5, 44.8)]
 
 
 def zones(board):
@@ -360,17 +414,21 @@ def zones(board):
     add_rule_area(board, [(79.5, 0), (VCUT - 0.5, 0), (VCUT - 0.5, 6.5), (79.5, 6.5)],
                   "antenna_keepout", footprints=False, tracks=True, vias=True, pour=True)
     # LED return on the strip part, bottom layer
-    strip = [(VCUT + 0.5, 0.3), (W - 0.3, 0.3), (W - 0.3, H - 0.3), (VCUT + 0.5, H - 0.3)]
+    strip = [(113.4, 0.3), (W - 0.3, 0.3), (W - 0.3, H - 0.3), (113.4, H - 0.3)]
     add_zone(board, "GND_LED", [B], strip, clearance=0.4, name="GND_LED", solid=True)
     # VLED on the top layer: F2 pin 2 -> C7 / D3 / C8 -> J6 pin 1 (17 A path)
-    vled = [(104.5, 53.5), (115.0, 53.5), (115.0, 45.8), (127.0, 45.8), (127.0, 41.9),
-            (145.5, 41.9), (145.5, 28.6), (129.0, 28.6), (129.0, 32.5), (114.0, 32.5),
-            (114.0, 42.0), (104.5, 42.0)]
-    add_zone(board, "VLED", [F], vled, clearance=0.4, name="VLED", solid=True, priority=1)
+    add_zone(board, "VLED", [F], VLED_POLY, clearance=0.4, name="VLED", solid=True, priority=1)
+    # Logic ground of the strip part (U4, pull-downs, net ties), top layer only
+    logic = [(VCUT + 0.5, 0.5), (113.2, 0.5), (113.2, 44.3), (VCUT + 0.5, 44.3)]
+    add_zone(board, "GND", [F, B], logic, clearance=0.3, name="GND_STRIP", priority=2)
 
 
 def build(for_routing=False):
-    board = pcbnew.NewBoard(PCB)
+    # NewBoard() writes an empty board at the given path: never point it at the real
+    # board file when building the routing variant.
+    path = os.path.join(HW, "build", "route", "routing_variant.kicad_pcb") if for_routing else PCB
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    board = pcbnew.NewBoard(path)
     ds = board.GetDesignSettings()
     ds.SetCopperLayerCount(2)
     ds.SetBoardThickness(mm(1.6))

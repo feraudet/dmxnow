@@ -59,6 +59,15 @@ def check_pcb(path):
             errors.append("net %s crosses the V-cut" % t.GetNetname())
         if t.GetNetname() in design.MAINS_NETS and max(xs) + t.GetWidth() // 2 > lim:
             errors.append("230 V track %s beyond X=%.1f mm" % (t.GetNetname(), P.MAINS_MAX_X))
+    # every crossing stub must still carry its own net (a stub touching a foreign pad
+    # would be silently renamed by KiCad when the board is reloaded)
+    for net, y, w in P.CROSSING_STUBS:
+        ok = any(not isinstance(t, pcbnew.PCB_VIA) and t.GetNetname() == net
+                 and abs(pcbnew.ToMM(t.GetStart().y) - P.OY - y) < 0.01
+                 and min(t.GetStart().x, t.GetEnd().x) < vx < max(t.GetStart().x, t.GetEnd().x)
+                 for t in board.GetTracks())
+        if not ok:
+            errors.append("crossing stub %s at y=%.2f missing or renamed" % (net, y))
     for z in board.Zones():
         if z.GetIsRuleArea():
             continue

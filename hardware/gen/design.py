@@ -148,17 +148,18 @@ PARTS = [
     Part("J6", "Connector:Screw_Terminal_01x05", "dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal",
          "WAGO 2604-1105 (VLED CH1-CH4)",
          {"1": "VLED", "2": "CH1", "3": "CH2", "4": "CH3", "5": "CH4"}, mpn="2604-1105", section="strip"),
-    # Net ties: single deliberate connection points on the strip part
-    Part("NT1", "Device:NetTie_2", "NetTie:NetTie-2_SMD_Pad0.5mm", "NetTie GND/GND_LED",
-         {"1": "GND", "2": "GND_LED"}, section="strip", note="Logic ground reference, see SPEC 4.8.4"),
-    Part("NT2", "Device:NetTie_2", "NetTie:NetTie-2_SMD_Pad0.5mm", "NetTie BOARD_SENSE/GND",
-         {"1": "BOARD_SENSE", "2": "GND"}, section="strip", note="Variant detection, SPEC 4.2"),
+    # 0 ohm links: single deliberate connection points on the strip part (SPEC 4.8.4, 4.2)
+    Part("R20", "Device:R", "Resistor_SMD:R_0805_2012Metric", "0R", {"1": "GND", "2": "GND_LED"},
+         lcsc="C17477", section="strip", note="Logic ground to LED ground star point"),
+    Part("R21", "Device:R", FP_R, "0R", {"1": "BOARD_SENSE", "2": "GND"},
+         lcsc="C21189", section="strip", note="Variant detection (GPIO1 low = strip part present)"),
 ]
 
 for i in range(4):
     n = i + 1
     PARTS += [
-        R("R%d" % (15 + i), "100k", "PWM%d" % n, "GND", lcsc="C25803", section="strip"),
+        R("R%d" % (15 + i), "100k", "PWM%d" % n, "GND", lcsc="C25803", section="main",
+          note="PWM pull-down, main side of the V-cut (layout), SPEC 4.6"),
         R("R%d" % (7 + i), "100R", "DRV%d" % n, "GATE%d" % n, lcsc="C22775", section="strip"),
         R("R%d" % (11 + i), "100k", "GATE%d" % n, "GND_LED", lcsc="C25803", section="strip"),
         Part("Q%d" % (2 + i), "Device:Q_NMOS_GDS", "Package_TO_SOT_SMD:TO-252-2", "AOD4184A",
@@ -179,7 +180,7 @@ NETCLASSES = {
     "MAINS_PWR": {"nets": ["L_IN", "L_SW", "N"], "track": 5.0, "clearance": 3.0},
     "MAINS": {"nets": ["L_PSU"], "track": 1.0, "clearance": 3.0},
     "LED_PWR": {"nets": ["VLED_IN", "VLED", "GND_LED", "CH1", "CH2", "CH3", "CH4"],
-                "track": 5.0, "clearance": 0.3},
+                "track": 5.0, "clearance": 0.2},
     "PWR": {"nets": ["+5V", "+3V3", "GND", "RELAY_DRV"], "track": 0.6, "clearance": 0.2},
 }
 MAINS_NETS = NETCLASSES["MAINS_PWR"]["nets"] + NETCLASSES["MAINS"]["nets"]

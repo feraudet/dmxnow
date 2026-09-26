@@ -1,0 +1,65 @@
+Ref,Value,Footprint,MPN,LCSC,Section,Fitted,Assembly,Note
+J1,WAGO 2604-1102 (L N in),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+J4,WAGO 2604-1102 (L_SW N out 1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+J7,"WAGO 2604-1102 (L_SW N out 2, J4b)",dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+F1,TR5 T500mA 250V,Fuse:Fuse_Littelfuse_372_D8.50mm,Littelfuse 37405000410,,main,yes,hand/THT,
+RV1,10D561K,Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm,,,main,yes,hand/THT,
+PS1,IRM-03-5,Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT,MEAN WELL IRM-03-5,,main,yes,hand/THT,
+K1,G5RL-U1A-E DC5,dmxnow:Relay_SPST_Omron_G5RL-U1A-E,Omron G5RL-U1A-E DC5,,main,yes,hand/THT,
+U3,AP2112K-3.3,Package_TO_SOT_SMD:SOT-23-5,AP2112K-3.3TRG1,C51118,main,yes,SMT,
+C5,1uF 16V,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
+C6,1uF 16V,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
+C1,47uF 10V,Capacitor_SMD:C_1206_3216Metric,,,main,yes,SMT,
+C2,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,main,yes,SMT,
+U1,ESP32-C3-MINI-1-N4,Espressif:ESP32-C3-MINI-1,ESP32-C3-MINI-1-N4,,main,yes,SMT,
+R1,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
+C4,1uF 16V,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
+R2,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
+R3,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
+R4,10k,Resistor_SMD:R_0603_1608Metric,,C25804,main,yes,SMT,
+SW1,PTS810 (BOOT/maintenance),Button_Switch_SMD:SW_SPST_PTS810,C&K PTS810 SJM 250 SMTR LFS,,main,yes,SMT,
+J3,PROG (3V3 GND D- D+ EN BOOT),Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical,,,main,no,hand/THT,"Pads only, header not fitted"
+R19,1k,Resistor_SMD:R_0603_1608Metric,,C21190,main,DNP (option A7),SMT,
+D4,LED green 0603,LED_SMD:LED_0603_1608Metric,,,main,DNP (option A7),SMT,
+R5,100R,Resistor_SMD:R_0603_1608Metric,,C22775,main,yes,SMT,
+R6,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,
+Q1,AO3400A,Package_TO_SOT_SMD:SOT-23,,C20917,main,yes,SMT,
+D2,1N4148W,Diode_SMD:D_SOD-123,,C81598,main,yes,SMT,
+U2,SP3485EN,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,SP3485EEN-L/TR,C8963,main,yes,SMT,
+C3,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,main,yes,SMT,
+D1,SM712,Package_TO_SOT_SMD:SOT-23,SM712.TCT,,main,yes,SMT,
+J2,DMX tail (1 GND 2 B 3 A),Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm,,,main,no,hand/THT,Wire pads
+J5,WAGO 2604-1102 (VLED_IN GND_LED),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,strip,yes,hand/THT,
+F2,ATO holder + 20A fuse,Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165,Littelfuse 178.6165.0002,,strip,yes,hand/THT,
+D3,SMBJ28A,Diode_SMD:D_SMB,SMBJ28A,,strip,yes,SMT,
+C7,470uF 35V low ESR,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,,,strip,yes,hand/THT,
+C8,1uF 50V,Capacitor_SMD:C_1206_3216Metric,,,strip,yes,SMT,
+U4,74AHCT125,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,SN74AHCT125DR,,strip,yes,SMT,
+C9,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,strip,yes,SMT,
+J6,WAGO 2604-1105 (VLED CH1-CH4),dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal,2604-1105,,strip,yes,hand/THT,
+R20,0R,Resistor_SMD:R_0805_2012Metric,,C17477,strip,yes,SMT,Logic ground to LED ground star point
+R21,0R,Resistor_SMD:R_0603_1608Metric,,C21189,strip,yes,SMT,Variant detection (GPIO1 low = strip part present)
+R15,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,"PWM pull-down, main side of the V-cut (layout), SPEC 4.6"
+R7,100R,Resistor_SMD:R_0603_1608Metric,,C22775,strip,yes,SMT,
+R11,100k,Resistor_SMD:R_0603_1608Metric,,C25803,strip,yes,SMT,
+Q2,AOD4184A,Package_TO_SOT_SMD:TO-252-2,AOD4184A,,strip,yes,SMT,
+R16,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,"PWM pull-down, main side of the V-cut (layout), SPEC 4.6"
+R8,100R,Resistor_SMD:R_0603_1608Metric,,C22775,strip,yes,SMT,
+R12,100k,Resistor_SMD:R_0603_1608Metric,,C25803,strip,yes,SMT,
+Q3,AOD4184A,Package_TO_SOT_SMD:TO-252-2,AOD4184A,,strip,yes,SMT,
+R17,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,"PWM pull-down, main side of the V-cut (layout), SPEC 4.6"
+R9,100R,Resistor_SMD:R_0603_1608Metric,,C22775,strip,yes,SMT,
+R13,100k,Resistor_SMD:R_0603_1608Metric,,C25803,strip,yes,SMT,
+Q4,AOD4184A,Package_TO_SOT_SMD:TO-252-2,AOD4184A,,strip,yes,SMT,
+R18,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,"PWM pull-down, main side of the V-cut (layout), SPEC 4.6"
+R10,100R,Resistor_SMD:R_0603_1608Metric,,C22775,strip,yes,SMT,
+R14,100k,Resistor_SMD:R_0603_1608Metric,,C25803,strip,yes,SMT,
+Q5,AOD4184A,Package_TO_SOT_SMD:TO-252-2,AOD4184A,,strip,yes,SMT,
+-,WAGO 221-413,-,221-413,,full+cut,x1,off-board,"PE junction, 230 V compartment (arbitrage A9)"
+-,ATO blade fuse 20 A,-,Littelfuse 0257020,,full,x1,off-board,F2 fuse
+-,Fuse TR5 T500 mA,-,,,full+cut,x0,off-board,F1 (if the holder-less TR5 is socketed)
+-,Neutrik NC3FXX,-,NC3FXX,,full+cut,x1,off-board,DMX tail connector
+-,"DMX cable 120 ohm, 1 m",-,,,full+cut,x1,off-board,DMX tail
+-,Cable gland M16 (or PG9),-,,,full+cut,x3,off-board,"mains in, projector out, LED PSU out"
+-,Cable gland PG7,-,,,full+cut,x3,off-board,DMX tail; LED in/out on full board
+-,M3 heat-set insert + M3 nylon screw,-,,,full+cut,x6,off-board,PCB and lid fixing

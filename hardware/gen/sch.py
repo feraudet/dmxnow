@@ -28,7 +28,7 @@ GROUPS = [
      ["U1", "R1", "C4", "R2", "R3", "R4", "SW1", "J3", "R19", "D4"]),
     ("Sortie DMX", ["U2", "C3", "D1", "J2"]),
     ("Partie sécable rubans LED : entrée 12/24 V et commande",
-     ["J5", "F2", "D3", "C7", "C8", "U4", "C9", "NT1", "NT2",
+     ["J5", "F2", "D3", "C7", "C8", "U4", "C9", "R20", "R21",
       "R15", "R16", "R17", "R18"]),
     ("Partie sécable rubans LED : étages de puissance",
      ["R7", "R11", "Q2", "R8", "R12", "Q3", "R9", "R13", "Q4", "R10", "R14", "Q5", "J6"]),

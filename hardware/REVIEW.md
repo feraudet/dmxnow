@@ -52,7 +52,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | 3.3 | Branche L_PSU / N vers PS1 et RV1 : 1 mm (courant < 50 mA, protégée par F1). | — | ☐ |
 | 3.4 | Partie rubans : VLED en plan (face avant), GND_LED en plan (face arrière), VLED_IN 4,5 mm, canaux 2,5 mm (6 A). | SPEC 4.6 | ☐ |
 | 3.5 | Sources des MOSFET reliées au plan GND_LED par 2 vias chacune ; vérifier la capacité (≈ 4 A par MOSFET). | — | ☐ |
-| 3.6 | GND logique et GND_LED reliées en un seul point (NT1, près de U4). | SPEC 4.8.4 | ☐ |
+| 3.6 | GND logique et GND_LED reliées en un seul point : R20 (0 Ω 0805) près de U4. BOARD_SENSE relié à GND par R21 (0 Ω) sur la partie sécable. Plans : GND logique (deux faces, X 100-113) et GND_LED (face arrière, X ≥ 113) séparés. | SPEC 4.8.4 | ☐ |
 
 ## 4. Basse tension
 

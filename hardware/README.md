@@ -17,7 +17,9 @@ X = 100 mm (partie principale « projecteur » 100 × 54 mm, partie sécable « 
 | `gen/sch.py` | Génère `dmxnow.kicad_sch` (schéma à étiquettes, symboles embarqués) |
 | `gen/project.py` | Génère `dmxnow.kicad_pro` (classes de nets) et `dmxnow.kicad_dru` (règles 230 V) |
 | `gen/pcb.py` | Génère `dmxnow.kicad_pcb` : contour, fentes, V-cut, placement, routage 230 V et LED, plans |
-| `gen/route.py` | Routage des signaux basse tension par Freerouting |
+| `gen/route.py` | Routage des signaux basse tension par Freerouting, vias d'échappement et de couture GND |
+| `gen/fixup.py` | Passe de finition : ferme les liaisons laissées par le routeur (segments directs, vias vers les plans) |
+| `gen/vendor.py` | Copie figée des symboles et empreintes KiCad utilisés (`lib/vendor/`) |
 | `gen/check.py` | Contrôles de cohérence : netlist du schéma, pastilles du PCB, traversée de la découpe |
 | `gen/drc.py` | DRC local via l'API pcbnew (KiCad 7+) |
 | `gen/fab.py` | Sorties JLCPCB dans `fab/` |
@@ -35,12 +37,15 @@ Prérequis : KiCad ≥ 7 (module Python `pcbnew`, `kicad-cli`), Java ≥ 17, Fre
 ```sh
 cd hardware
 make lib sch project   # empreintes, schéma, projet et règles
-make pcb route         # PCB puis routage automatique (plusieurs minutes)
+make pcb route         # PCB puis routage automatique + finition (~15 min)
 make check             # netlist, cohérence PCB, DRC local
 make fab               # Gerbers, perçages, BOM/CPL JLCPCB
 ```
 
-`make pcb` repart de zéro : il faut relancer `make route` ensuite.
+`make pcb` repart de zéro : il faut relancer `make route` ensuite (ou `make reimport`
+pour réappliquer la dernière session Freerouting si aucun composant n'a bougé).
+Freerouting n'est pas déterministe : deux passages donnent des routages différents,
+toujours validés par `make check`.
 
 ## Contrôles
 

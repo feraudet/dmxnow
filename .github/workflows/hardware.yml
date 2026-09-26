@@ -30,7 +30,7 @@ jobs:
           python3 gen/sch.py
           python3 gen/project.py
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
-          git diff --stat --exit-code -- lib dmxnow.kicad_sch dmxnow.kicad_pro dmxnow.kicad_dru
+          git diff --stat --exit-code -- lib dmxnow.kicad_sch dmxnow.kicad_dru   # .kicad_pro is rewritten by pcbnew on save
 
       - name: ERC (KiCad 9)
         run: |

@@ -143,7 +143,7 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
 | IO0    | STATUS_LED (option) | R19 1 kΩ en série, D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
-| IO1    | BOARD_SENSE       | Entrée, pull-up interne ; GND sur la partie rubans |
+| IO1    | BOARD_SENSE       | Entrée, pull-up interne ; GND sur la partie rubans (R21 0 Ω) |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
 | IO4    | DMX_TX            | UART1 TX vers SP3485 DI |
@@ -251,6 +251,10 @@ Logique (implémentée dans `common`, testée) :
   4,5 V [V-HW-07]). Commande en 5 V par U4 74AHCT125 (entrées compatibles TTL, VIH 2 V,
   donc attaquables en 3,3 V ; sortie 5 V pour une meilleure saturation que 3,3 V).
   R15-R18 100 kΩ maintiennent les entrées de U4 à 0 pendant le démarrage ; /OE à GND.
+  Au placement (2026-09-26), R15-R18 ont été mises **sur la partie principale**, juste
+  avant la découpe, faute de place autour de U4 : même fonction (les nets PWM1-4 sont
+  tenus à 0 dès la mise sous tension), et elles restent inoffensives sur une carte cassée
+  (tirage de 100 kΩ sur des GPIO inutilisées).
 - Courant : 200 W sous 12 V = 16,7 A total, soit ~4,2 A par canal en RGBW équilibré ;
   on dimensionne chaque canal pour **6 A** et le total pour 17 A (F2 20 A).
 - Pertes par MOSFET à 4,2 A : conduction I²R ≈ 4,2² × 0,010 ≈ 0,18 W ; commutation à
@@ -367,6 +371,11 @@ placement ne permet pas les largeurs.
 - 4 mm sans composant de chaque côté ; cuivre à ≥ 0,5 mm de l'axe du V-cut [V-HW-12].
 - La GND qui traverse n'est qu'une référence (pistes fines, ~0,5 mm) : le courant des
   rubans ne doit pas pouvoir y circuler en fonctionnement normal. Cf. R-09.
+- Sur la partie sécable, GND logique (U4, pull-downs) et GND_LED (retour des rubans) sont
+  deux plans distincts reliés en un seul point par **R20 (0 Ω 0805)** près de U4 ; BOARD_SENSE
+  est relié à GND par **R21 (0 Ω 0603)**. Deux résistances 0 Ω plutôt que des ponts de
+  cuivre (« net ties ») : le DRC et le remplissage des plans les traitent sans ambiguïté,
+  pour un coût négligeable.
 
 #### 4.8.5 Méthode de production
 
