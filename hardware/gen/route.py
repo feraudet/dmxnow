@@ -23,11 +23,10 @@ FREEROUTING = os.environ.get("FREEROUTING_JAR", "/opt/freerouting/freerouting.ja
 
 
 def prepare_dsn(dsn_path):
-    board = P.build(for_routing=True)
-    for t in board.GetTracks():
-        t.SetLocked(True)
-    if not pcbnew.ExportSpecctraDSN(board, dsn_path):
-        raise SystemExit("DSN export failed")
+    # separate process: pcbnew does not cope with a NewBoard() and a LoadBoard()
+    # of the same file in one interpreter (the second board comes back empty)
+    subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcb.py"),
+                    "--dsn", dsn_path], check=True)
 
 
 def run_freerouting(dsn, ses, passes):
@@ -89,6 +88,65 @@ def import_ses(board, ses_path):
     return n_wires, n_vias
 
 
+def _seg_dist(px, py, x1, y1, x2, y2):
+    dx, dy = x2 - x1, y2 - y1
+    L = dx * dx + dy * dy
+    t = 0.0 if L == 0 else max(0.0, min(1.0, ((px - x1) * dx + (py - y1) * dy) / L))
+    return ((px - x1 - t * dx) ** 2 + (py - y1 - t * dy) ** 2) ** 0.5
+
+
+def stitch_gnd(board, pitch=2.5, dia=0.6, drill=0.3, margin=0.35):
+    """Add GND vias on a grid in the low-voltage area wherever they clear everything,
+    so that the top and bottom GND pours form one piece."""
+    mm = pcbnew.ToMM
+    ox, oy = P.OX, P.OY
+    obstacles = []   # (kind, geometry..., net)
+    for t in board.GetTracks():
+        if isinstance(t, pcbnew.PCB_VIA):
+            obstacles.append(("c", mm(t.GetPosition().x) - ox, mm(t.GetPosition().y) - oy,
+                              mm(t.GetWidth()) / 2, t.GetNetname()))
+        else:
+            obstacles.append(("s", mm(t.GetStart().x) - ox, mm(t.GetStart().y) - oy,
+                              mm(t.GetEnd().x) - ox, mm(t.GetEnd().y) - oy, mm(t.GetWidth()) / 2,
+                              t.GetNetname()))
+    boxes = []
+    for fp in board.GetFootprints():
+        for pad in fp.Pads():
+            bb = pad.GetBoundingBox()
+            boxes.append((mm(bb.GetLeft()) - ox, mm(bb.GetTop()) - oy, mm(bb.GetRight()) - ox,
+                          mm(bb.GetBottom()) - oy, pad.GetNetname(), pad.GetDrillSize().x > 0))
+    r = dia / 2
+    added = []
+    y = 1.5
+    while y < P.H - 1.0:
+        x = P.LV_MIN_X + 1.5
+        while x < P.VCUT - P.VCUT_KEEP - 0.5:
+            ok = not (x > 79.0 and y < 7.5)            # antenna keep-out
+            for b in boxes:
+                if not ok:
+                    break
+                gap = 0.5 if (b[4] == "GND" and not b[5]) else margin
+                if b[0] - r - gap < x < b[2] + r + gap and b[1] - r - gap < y < b[3] + r + gap:
+                    ok = False
+            for o in obstacles:
+                if not ok:
+                    break
+                if o[0] == "c":
+                    ok = ((x - o[1]) ** 2 + (y - o[2]) ** 2) ** 0.5 > o[3] + r + max(margin, 0.5)
+                else:
+                    ok = o[6] == "GND" or _seg_dist(x, y, *o[1:5]) > o[5] + r + margin
+            for ax, ay in added:
+                if not ok:
+                    break
+                ok = ((x - ax) ** 2 + (y - ay) ** 2) ** 0.5 > 2.0
+            if ok:
+                P.add_via(board, "GND", x, y, dia, drill)
+                added.append((x, y))
+            x += pitch
+        y += pitch
+    return len(added)
+
+
 def main():
     passes = 30
     if "--passes" in sys.argv:
@@ -96,11 +154,16 @@ def main():
     work = os.path.join(P.HW, "build", "route")
     os.makedirs(work, exist_ok=True)
     dsn, ses = os.path.join(work, "dmxnow.dsn"), os.path.join(work, "dmxnow.ses")
-    prepare_dsn(dsn)
-    run_freerouting(dsn, ses, passes)
+    if "--ses" in sys.argv:
+        ses = sys.argv[sys.argv.index("--ses") + 1]   # re-import an existing session
+    else:
+        prepare_dsn(dsn)
+        run_freerouting(dsn, ses, passes)
     board = pcbnew.LoadBoard(P.PCB)
     w, v = import_ses(board, ses)
+    n = stitch_gnd(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    print("GND stitching vias:", n)
     board.Save(P.PCB)
     print("imported %d track segments, %d vias" % (w, v))
 

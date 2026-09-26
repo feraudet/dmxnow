@@ -20,9 +20,16 @@ _DROP = {"exclude_from_sim", "in_pos_files", "duplicate_pin_numbers_are_jumpers"
 _cache = {}
 
 
+VENDOR_DIR = os.path.join(HERE, "..", "lib", "vendor")
+
+
 def _lib_path(lib):
+    """Project libraries, then the vendored snapshot (vendor.py), then the KiCad install."""
     if lib in EXTRA_LIBS:
         return EXTRA_LIBS[lib]
+    vendored = os.path.join(VENDOR_DIR, lib + ".kicad_sym")
+    if os.path.exists(vendored):
+        return vendored
     return os.path.join(KICAD_SYMBOL_DIR, lib + ".kicad_sym")
 
 

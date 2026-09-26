@@ -5,7 +5,6 @@
   (paper A2)
   (title_block
     (title "dmxnow - noeud DMX / relais / rubans LED")
-    (date "2026-09-26")
     (rev "0.1")
     (company "dmxnow")
     (comment 1 "Généré par hardware/gen/sch.py depuis design.py - ne pas éditer à la main")

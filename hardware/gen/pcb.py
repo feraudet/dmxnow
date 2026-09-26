@@ -94,7 +94,7 @@ PLACE = {
     "R18": (105.2, 24.5, 90),
     "NT1": (108.5, 43.5, 0),
     "NT2": (105.5, 9.0, 90),
-    "H3": (135.0, 3.5, 0),
+    "H3": (139.0, 3.5, 0),
 }
 
 
@@ -108,7 +108,9 @@ def pt(x, y):
 
 def load_fp(lib_id):
     lib, name = lib_id.split(":", 1)
-    path = LOCAL_LIBS.get(lib, os.path.join(KICAD_FP, lib + ".pretty"))
+    vendored = os.path.join(HW, "lib", "vendor", lib + ".pretty")
+    default = vendored if os.path.isdir(vendored) else os.path.join(KICAD_FP, lib + ".pretty")
+    path = LOCAL_LIBS.get(lib, default)
     fp = pcbnew.FootprintLoad(path, name)
     if fp is None:
         raise SystemExit("footprint not found: " + lib_id)
@@ -225,9 +227,13 @@ def outline(board, for_routing=False):
     # no component within 4 mm of the V-cut; tracks allowed (crossing nets)
     if for_routing:
         # Specctra treats any rule area as a routing barrier: for the autorouter
-        # the V-cut keep-out is dropped and the 230 V zone (+6 mm) is closed instead.
+        # the V-cut keep-out is replaced by a routing barrier (only the scripted
+        # crossing stubs cross it) and the 230 V zone (+6 mm) is closed.
         add_rule_area(board, [(0, 0), (LV_MIN_X, 0), (LV_MIN_X, H), (0, H)],
                       "route_keepout_mains", footprints=False, tracks=True, vias=True, pour=False)
+        add_rule_area(board, [(VCUT - VCUT_KEEP, 0), (VCUT + VCUT_KEEP, 0), (VCUT + VCUT_KEEP, H),
+                              (VCUT - VCUT_KEEP, H)],
+                      "route_keepout_vcut", footprints=False, tracks=True, vias=True, pour=False)
     else:
         add_rule_area(board, [(VCUT - VCUT_KEEP, 0), (VCUT + VCUT_KEEP, 0), (VCUT + VCUT_KEEP, H),
                               (VCUT - VCUT_KEEP, H)], "vcut_keepout")
@@ -322,6 +328,16 @@ LED_ROUTES = [
     ("CH1", F, 2.5, [(122.3, 27.0), (126.5, 27.0), (128.5, 25.0), (141.5, 25.0)]),
 ]
 
+# The only copper crossing the V-cut (SPEC 4.8.4): short fixed stubs, the
+# autorouter connects to their ends. (net, y, width)
+CROSSING_STUBS = [("BOARD_SENSE", 9.0, 0.25), ("PWM1", 14.0, 0.25), ("PWM2", 17.5, 0.25),
+                  ("PWM3", 21.0, 0.25), ("PWM4", 24.5, 0.25), ("+5V", 28.0, 0.6), ("GND", 30.5, 0.6)]
+LED_ROUTES += [(n, F, w, [(VCUT - VCUT_KEEP - 0.8, y), (VCUT + VCUT_KEEP + 0.4, y)])
+               for n, y, w in CROSSING_STUBS]
+# VLED: F2 pin 2 -> C7 + (keeps the VLED pour in one piece whatever the autorouter does)
+LED_ROUTES += [("VLED", F, 3.0, [(108.7, 49.0), (112.2, 49.0)]),
+               ("VLED", F, 3.0, [(110.45, 49.0), (110.45, 45.5), (114.5, 41.5), (116.5, 38.5), (116.5, 36.5)])]
+
 # MOSFET sources and other GND_LED pads to the bottom pour: via arrays
 Q_Y = (4.5, 12.0, 19.5, 27.0)
 GND_LED_VIAS = [(114.0, y + 2.28 + dy) for y in Q_Y for dy in (-0.7, 0.7)]
@@ -379,6 +395,16 @@ def build(for_routing=False):
 
 
 if __name__ == "__main__":
-    b = build()
-    b.Save(PCB)
-    print("written", PCB)
+    if "--dsn" in sys.argv:
+        # routing variant, exported to Specctra DSN for route.py (board file untouched)
+        b = build(for_routing=True)
+        for t in b.GetTracks():
+            t.SetLocked(True)
+        dsn = sys.argv[sys.argv.index("--dsn") + 1]
+        if not pcbnew.ExportSpecctraDSN(b, dsn):
+            raise SystemExit("DSN export failed")
+        print("exported", dsn)
+    else:
+        b = build()
+        b.Save(PCB)
+        print("written", PCB)

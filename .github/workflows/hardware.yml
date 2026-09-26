@@ -12,6 +12,9 @@ jobs:
     container:
       image: kicad/kicad:9.0
       options: --user root
+    env:
+      # vendored footprints reference KiCad 7 3D model paths
+      KICAD7_3DMODEL_DIR: /usr/share/kicad/3dmodels
     defaults:
       run:
         working-directory: hardware
