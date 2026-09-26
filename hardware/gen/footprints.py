@@ -34,8 +34,14 @@ DIMS = {
 }
 
 
+_NS = uuid.UUID("0b7c7a1e-3f5e-4a53-9d2b-1f4a7f0c9e11")
+_count = [0]
+
+
 def _uid():
-    return str(uuid.uuid4())
+    """Deterministic UUIDs: regenerating gives an identical file."""
+    _count[0] += 1
+    return str(uuid.uuid5(_NS, str(_count[0])))
 
 
 def _text(kind, txt, x, y, layer, size=1.0, hide=False):
@@ -80,7 +86,7 @@ def relay_g5rl():
                 "relay omron G5RL 16A inrush")
     s += _text("reference", "REF**", 3.75, -3.8, "F.SilkS")
     s += _text("value", name, 3.75, 28.0, "F.Fab")
-    s += _text("user", "PROVISOIRE - vérifier fiche Omron K265-E1", 3.75, 12.0, "User.Comments", 0.8)
+    s += _text("user", "PROVISOIRE - vérifier fiche Omron K265-E1", 3.75, 12.0, "Cmts.User", 0.8)
     s += _rect(x1, y1, x2, y2, "F.Fab", 0.1)
     s += _rect(x1 - 0.12, y1 - 0.12, x2 + 0.12, y2 + 0.12, "F.SilkS", 0.12)
     s += _rect(x1 - 0.5, y1 - 0.5, x2 + 0.5, y2 + 0.5, "F.CrtYd", 0.05)
@@ -102,17 +108,17 @@ def wago_2604(poles):
     name = "TerminalBlock_WAGO_2604-110%d_1x%02d_P5.00mm_Horizontal" % (poles, poles)
     p = d["pitch"]
     w = (poles - 1) * p
-    x1, x2 = -p / 2 - 0.5, w + p / 2 + 0.5
+    x1, x2 = -p / 2, w + p / 2
     y1, y2 = -d["body_back"], d["body_front"]
     s = _header(name, "WAGO 2604-110%d lever PCB terminal block, %d poles, pitch 5.0 mm, "
                       "4 mm2, side wire entry towards +Y. %s" % (poles, poles, d["source"]),
                 "WAGO 2604 lever terminal block")
     s += _text("reference", "REF**", w / 2, y1 - 1.5, "F.SilkS")
     s += _text("value", name, w / 2, y2 + 1.5, "F.Fab", 0.8)
-    s += _text("user", "PROVISOIRE - vérifier fiche WAGO 2604", w / 2, -8.0, "User.Comments", 0.8)
+    s += _text("user", "PROVISOIRE - vérifier fiche WAGO 2604", w / 2, -8.0, "Cmts.User", 0.8)
     s += _rect(x1, y1, x2, y2, "F.Fab", 0.1)
     s += _rect(x1 - 0.12, y1 - 0.12, x2 + 0.12, y2 + 0.12, "F.SilkS", 0.12)
-    s += _rect(x1 - 0.5, y1 - 0.5, x2 + 0.5, y2 + 0.5, "F.CrtYd", 0.05)
+    s += _rect(x1 - 0.25, y1 - 0.25, x2 + 0.25, y2 + 0.25, "F.CrtYd", 0.05)
     # wire entry arrows
     for i in range(poles):
         x = i * p
@@ -131,6 +137,6 @@ def wago_2604(poles):
 
 if __name__ == "__main__":
     relay_g5rl()
-    for n in (2, 3, 5):
+    for n in (2, 5):
         wago_2604(n)
     print("footprints written to", os.path.normpath(OUT))

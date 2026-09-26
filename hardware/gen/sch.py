@@ -4,7 +4,6 @@ Label-based schematic: every connected pin gets a short wire stub ending on a ne
 label; unconnected pins get a no-connect flag. Written in KiCad 7 syntax
 (readable by KiCad 7, 8 and 9).
 """
-import datetime
 import os
 import sys
 import uuid
@@ -33,7 +32,7 @@ GROUPS = [
       "R15", "R16", "R17", "R18"]),
     ("Partie sécable rubans LED : étages de puissance",
      ["R7", "R11", "Q2", "R8", "R12", "Q3", "R9", "R13", "Q4", "R10", "R14", "Q5", "J6"]),
-    ("Fixations", ["H1", "H2", "H3", "H4", "H5"]),
+    ("Fixations", ["H1", "H2", "H3"]),
 ]
 POWER_FLAG_NETS = ["L_PSU", "N"]
 
@@ -225,11 +224,10 @@ def build():
 
 
 def write(sh):
-    today = datetime.date.today().isoformat()
     doc = ["kicad_sch", ["version", "20230121"], ["generator", "eeschema"], ["uuid", sh.root],
            ["paper", "A2"],
            ["title_block", ["title", QStr("dmxnow - noeud DMX / relais / rubans LED")],
-            ["date", QStr(today)], ["rev", QStr("0.1")], ["company", QStr("dmxnow")],
+            ["rev", QStr("0.1")], ["company", QStr("dmxnow")],
             ["comment", "1", QStr("Généré par hardware/gen/sch.py depuis design.py - ne pas éditer à la main")],
             ["comment", "2", QStr("Parties 230 V : RELECTURE HUMAINE OBLIGATOIRE")],
             ["comment", "3", QStr("K1, J1, J4, J7, J5, J6 : empreintes PROVISOIRES (fiches non vérifiées)")]],

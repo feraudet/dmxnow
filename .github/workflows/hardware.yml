@@ -1,0 +1,64 @@
+name: hardware
+
+on:
+  push:
+    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+  pull_request:
+    paths: ["hardware/**", ".github/workflows/hardware.yml"]
+
+jobs:
+  kicad:
+    runs-on: ubuntu-latest
+    container:
+      image: kicad/kicad:9.0
+      options: --user root
+    defaults:
+      run:
+        working-directory: hardware
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Versions
+        run: kicad-cli version && python3 --version
+
+      - name: Regenerate schematic and compare (generated files must be committed)
+        run: |
+          python3 gen/footprints.py
+          python3 gen/sch.py
+          python3 gen/project.py
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git diff --stat --exit-code -- lib dmxnow.kicad_sch dmxnow.kicad_pro dmxnow.kicad_dru
+
+      - name: ERC (KiCad 9)
+        run: |
+          mkdir -p build
+          kicad-cli sch erc --severity-error --exit-code-violations -o build/erc.rpt dmxnow.kicad_sch
+
+      - name: Netlist and PCB consistency
+        run: |
+          kicad-cli sch export netlist -o build/dmxnow.net dmxnow.kicad_sch
+          python3 gen/check.py netlist build/dmxnow.net
+          python3 gen/check.py pcb dmxnow.kicad_pcb
+
+      - name: DRC (KiCad 9, custom 230 V rules, schematic parity)
+        run: |
+          kicad-cli pcb drc --severity-error --exit-code-violations --schematic-parity \
+            --refill-zones -o build/drc.rpt dmxnow.kicad_pcb
+
+      - name: Fabrication outputs
+        run: python3 gen/fab.py
+
+      - name: 3D renders
+        continue-on-error: true   # needs an OpenGL-capable container
+        run: |
+          kicad-cli pcb render --side top --quality high -w 2400 -h 1200 -o build/render_top.png dmxnow.kicad_pcb
+          kicad-cli pcb render --side bottom --quality high -w 2400 -h 1200 -o build/render_bottom.png dmxnow.kicad_pcb
+
+      - name: Upload
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmxnow-hardware
+          path: |
+            hardware/build/
+            hardware/fab/

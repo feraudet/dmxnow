@@ -5,7 +5,7 @@
   (paper A2)
   (title_block
     (title "dmxnow - noeud DMX / relais / rubans LED")
-    (date "2026-09-25")
+    (date "2026-09-26")
     (rev "0.1")
     (company "dmxnow")
     (comment 1 "Généré par hardware/gen/sch.py depuis design.py - ne pas éditer à la main")
@@ -13,7 +13,7 @@
     (comment 3 "K1, J1, J4, J7, J5, J6 : empreintes PROVISOIRES (fiches non vérifiées)")
   )
   (lib_symbols
-    (symbol "Connector:Screw_Terminal_01x03"
+    (symbol "Connector:Screw_Terminal_01x02"
       (pin_names
         (offset 1.016)
         hide
@@ -21,14 +21,14 @@
       (in_bom yes)
       (on_board yes)
       (property "Reference" "J"
-        (at 0 5.08 0)
+        (at 0 2.54 0)
         (effects
           (font
             (size 1.27 1.27)
           )
         )
       )
-      (property "Value" "Screw_Terminal_01x03"
+      (property "Value" "Screw_Terminal_01x02"
         (at 0 -5.08 0)
         (effects
           (font
@@ -63,7 +63,7 @@
           hide
         )
       )
-      (property "ki_description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+      (property "ki_description" "Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
         (at 0 0 0)
         (effects
           (font
@@ -81,9 +81,9 @@
           hide
         )
       )
-      (symbol "Screw_Terminal_01x03_1_1"
+      (symbol "Screw_Terminal_01x02_1_1"
         (rectangle
-          (start -1.27 3.81)
+          (start -1.27 1.27)
           (end 1.27 -3.81)
           (stroke
             (width 0.254)
@@ -132,19 +132,6 @@
         )
         (polyline
           (pts
-            (xy -0.5334 2.8702)
-            (xy 0.3302 2.032)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
             (xy -0.3556 -2.032)
             (xy 0.508 -2.8702)
           )
@@ -169,19 +156,6 @@
             (type none)
           )
         )
-        (polyline
-          (pts
-            (xy -0.3556 3.048)
-            (xy 0.508 2.2098)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
         (circle
           (center 0 0)
           (radius 0.635)
@@ -193,19 +167,8 @@
             (type none)
           )
         )
-        (circle
-          (center 0 2.54)
-          (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
         (pin passive line
-          (at -5.08 2.54 0)
+          (at -5.08 0 0)
           (length 3.81)
           (name "Pin_1"
             (effects
@@ -223,7 +186,7 @@
           )
         )
         (pin passive line
-          (at -5.08 0 0)
+          (at -5.08 -2.54 0)
           (length 3.81)
           (name "Pin_2"
             (effects
@@ -233,24 +196,6 @@
             )
           )
           (number "2"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-        )
-        (pin passive line
-          (at -5.08 -2.54 0)
-          (length 3.81)
-          (name "Pin_3"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-          (number "3"
             (effects
               (font
                 (size 1.27 1.27)
@@ -4409,198 +4354,6 @@
         )
       )
     )
-    (symbol "Connector:Screw_Terminal_01x02"
-      (pin_names
-        (offset 1.016)
-        hide
-      )
-      (in_bom yes)
-      (on_board yes)
-      (property "Reference" "J"
-        (at 0 2.54 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-        )
-      )
-      (property "Value" "Screw_Terminal_01x02"
-        (at 0 -5.08 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-        )
-      )
-      (property "Footprint" ""
-        (at 0 0 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-          hide
-        )
-      )
-      (property "Datasheet" "~"
-        (at 0 0 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-          hide
-        )
-      )
-      (property "ki_keywords" "screw terminal"
-        (at 0 0 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-          hide
-        )
-      )
-      (property "ki_description" "Generic screw terminal, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-        (at 0 0 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-          hide
-        )
-      )
-      (property "ki_fp_filters" "TerminalBlock*:*"
-        (at 0 0 0)
-        (effects
-          (font
-            (size 1.27 1.27)
-          )
-          hide
-        )
-      )
-      (symbol "Screw_Terminal_01x02_1_1"
-        (rectangle
-          (start -1.27 1.27)
-          (end 1.27 -3.81)
-          (stroke
-            (width 0.254)
-            (type default)
-          )
-          (fill
-            (type background)
-          )
-        )
-        (circle
-          (center 0 -2.54)
-          (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.5334 -2.2098)
-            (xy 0.3302 -3.048)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.5334 0.3302)
-            (xy 0.3302 -0.508)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.3556 -2.032)
-            (xy 0.508 -2.8702)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.3556 0.508)
-            (xy 0.508 -0.3302)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (circle
-          (center 0 0)
-          (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (pin passive line
-          (at -5.08 0 0)
-          (length 3.81)
-          (name "Pin_1"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-          (number "1"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-        )
-        (pin passive line
-          (at -5.08 -2.54 0)
-          (length 3.81)
-          (name "Pin_2"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-          (number "2"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-        )
-      )
-    )
     (symbol "Device:D_Zener"
       (pin_numbers hide)
       (pin_names
@@ -6304,15 +6057,15 @@
     (uuid "9787e43b-2524-5bb1-93da-50c53a588a5a")
   )
   (symbol
-    (lib_id "Connector:Screw_Terminal_01x03")
-    (at 35.56 43.18 0)
+    (lib_id "Connector:Screw_Terminal_01x02")
+    (at 33.02 40.64 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "7098ad28-90c1-5b51-a5d6-bed7bc66e802")
     (property "Reference" "J1"
-      (at 35.56 38.1 0)
+      (at 33.02 38.1 0)
       (id 0)
       (effects
         (font
@@ -6320,8 +6073,8 @@
         )
       )
     )
-    (property "Value" "WAGO 2604-1103 (L N PE in)"
-      (at 35.56 48.26 0)
+    (property "Value" "WAGO 2604-1102 (L N in)"
+      (at 33.02 45.72 0)
       (id 1)
       (effects
         (font
@@ -6329,8 +6082,8 @@
         )
       )
     )
-    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal"
-      (at 35.56 43.18 0)
+    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal"
+      (at 33.02 40.64 0)
       (id 2)
       (effects
         (font
@@ -6340,7 +6093,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 35.56 43.18 0)
+      (at 33.02 40.64 0)
       (id 3)
       (effects
         (font
@@ -6349,8 +6102,8 @@
         hide
       )
     )
-    (property "MPN" "2604-1103"
-      (at 35.56 43.18 0)
+    (property "MPN" "2604-1102"
+      (at 33.02 40.64 0)
       (id 4)
       (effects
         (font
@@ -6360,7 +6113,7 @@
       )
     )
     (property "LCSC" ""
-      (at 35.56 43.18 0)
+      (at 33.02 40.64 0)
       (id 5)
       (effects
         (font
@@ -6370,7 +6123,7 @@
       )
     )
     (property "Section" "main"
-      (at 35.56 43.18 0)
+      (at 33.02 40.64 0)
       (id 6)
       (effects
         (font
@@ -6385,9 +6138,6 @@
     (pin "2"
       (uuid "4d819501-b8bc-52ee-9153-3546ee31bd50")
     )
-    (pin "3"
-      (uuid "0e384dea-90b5-54f0-8fda-53ed47d98045")
-    )
     (instances
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
@@ -6399,8 +6149,8 @@
   )
   (wire
     (pts
-      (xy 30.48 40.64)
       (xy 27.94 40.64)
+      (xy 25.4 40.64)
     )
     (stroke
       (width 0)
@@ -6409,7 +6159,7 @@
     (uuid "523123ca-44e2-5a37-abb4-677297ded236")
   )
   (label "L_IN"
-    (at 27.94 40.64 180)
+    (at 25.4 40.64 180)
     (fields_autoplaced)
     (effects
       (font
@@ -6421,8 +6171,8 @@
   )
   (wire
     (pts
-      (xy 30.48 43.18)
       (xy 27.94 43.18)
+      (xy 25.4 43.18)
     )
     (stroke
       (width 0)
@@ -6431,7 +6181,7 @@
     (uuid "e736760a-6ac5-511c-afe0-74542fcfeffc")
   )
   (label "N"
-    (at 27.94 43.18 180)
+    (at 25.4 43.18 180)
     (fields_autoplaced)
     (effects
       (font
@@ -6441,38 +6191,16 @@
     )
     (uuid "0ec469f3-29b1-5618-ba0e-27f3e9d36575")
   )
-  (wire
-    (pts
-      (xy 30.48 45.72)
-      (xy 27.94 45.72)
-    )
-    (stroke
-      (width 0)
-      (type default)
-    )
-    (uuid "00a7b02a-bc66-5359-b641-e428c1e992d8")
-  )
-  (label "PE"
-    (at 27.94 45.72 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify right bottom)
-    )
-    (uuid "4475d16e-50c7-5feb-9a6d-276dba51afb3")
-  )
   (symbol
     (lib_id "Device:Fuse")
-    (at 66.04 43.18 0)
+    (at 63.5 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "885ec43a-247d-5a4b-8cb0-e2c228c513f1")
     (property "Reference" "F1"
-      (at 68.072 43.18 90)
+      (at 65.532 43.18 90)
       (id 0)
       (effects
         (font
@@ -6481,7 +6209,7 @@
       )
     )
     (property "Value" "TR5 T500mA 250V"
-      (at 64.135 43.18 90)
+      (at 61.595 43.18 90)
       (id 1)
       (effects
         (font
@@ -6490,7 +6218,7 @@
       )
     )
     (property "Footprint" "Fuse:Fuse_Littelfuse_372_D8.50mm"
-      (at 64.262 43.18 90)
+      (at 61.722 43.18 90)
       (id 2)
       (effects
         (font
@@ -6500,7 +6228,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 66.04 43.18 0)
+      (at 63.5 43.18 0)
       (id 3)
       (effects
         (font
@@ -6510,7 +6238,7 @@
       )
     )
     (property "MPN" "Littelfuse 37405000410"
-      (at 66.04 43.18 0)
+      (at 63.5 43.18 0)
       (id 4)
       (effects
         (font
@@ -6520,7 +6248,7 @@
       )
     )
     (property "LCSC" ""
-      (at 66.04 43.18 0)
+      (at 63.5 43.18 0)
       (id 5)
       (effects
         (font
@@ -6530,7 +6258,7 @@
       )
     )
     (property "Section" "main"
-      (at 66.04 43.18 0)
+      (at 63.5 43.18 0)
       (id 6)
       (effects
         (font
@@ -6556,8 +6284,8 @@
   )
   (wire
     (pts
-      (xy 66.04 39.37)
-      (xy 66.04 36.83)
+      (xy 63.5 39.37)
+      (xy 63.5 36.83)
     )
     (stroke
       (width 0)
@@ -6566,7 +6294,7 @@
     (uuid "14835fe2-34b1-58b2-ac99-fd2d3bf187ae")
   )
   (label "L_IN"
-    (at 66.04 36.83 90)
+    (at 63.5 36.83 90)
     (fields_autoplaced)
     (effects
       (font
@@ -6578,8 +6306,8 @@
   )
   (wire
     (pts
-      (xy 66.04 46.99)
-      (xy 66.04 49.53)
+      (xy 63.5 46.99)
+      (xy 63.5 49.53)
     )
     (stroke
       (width 0)
@@ -6588,7 +6316,7 @@
     (uuid "e7227e65-e157-5db5-8f26-9f8ec2c87965")
   )
   (label "L_PSU"
-    (at 66.04 49.53 270)
+    (at 63.5 49.53 270)
     (fields_autoplaced)
     (effects
       (font
@@ -6600,14 +6328,14 @@
   )
   (symbol
     (lib_id "Device:Varistor")
-    (at 91.44 43.18 0)
+    (at 88.9 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "6e5213f0-893d-5f2a-8546-7fabfe5ff731")
     (property "Reference" "RV1"
-      (at 94.615 43.18 90)
+      (at 92.075 43.18 90)
       (id 0)
       (effects
         (font
@@ -6616,7 +6344,7 @@
       )
     )
     (property "Value" "10D561K"
-      (at 88.265 43.18 90)
+      (at 85.725 43.18 90)
       (id 1)
       (effects
         (font
@@ -6625,7 +6353,7 @@
       )
     )
     (property "Footprint" "Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm"
-      (at 89.662 43.18 90)
+      (at 87.122 43.18 90)
       (id 2)
       (effects
         (font
@@ -6635,7 +6363,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 91.44 43.18 0)
+      (at 88.9 43.18 0)
       (id 3)
       (effects
         (font
@@ -6645,7 +6373,7 @@
       )
     )
     (property "MPN" ""
-      (at 91.44 43.18 0)
+      (at 88.9 43.18 0)
       (id 4)
       (effects
         (font
@@ -6655,7 +6383,7 @@
       )
     )
     (property "LCSC" ""
-      (at 91.44 43.18 0)
+      (at 88.9 43.18 0)
       (id 5)
       (effects
         (font
@@ -6665,7 +6393,7 @@
       )
     )
     (property "Section" "main"
-      (at 91.44 43.18 0)
+      (at 88.9 43.18 0)
       (id 6)
       (effects
         (font
@@ -6691,8 +6419,8 @@
   )
   (wire
     (pts
-      (xy 91.44 39.37)
-      (xy 91.44 36.83)
+      (xy 88.9 39.37)
+      (xy 88.9 36.83)
     )
     (stroke
       (width 0)
@@ -6701,7 +6429,7 @@
     (uuid "eb6c8b54-cbed-5b36-b39e-76a52667a157")
   )
   (label "L_PSU"
-    (at 91.44 36.83 90)
+    (at 88.9 36.83 90)
     (fields_autoplaced)
     (effects
       (font
@@ -6713,8 +6441,8 @@
   )
   (wire
     (pts
-      (xy 91.44 46.99)
-      (xy 91.44 49.53)
+      (xy 88.9 46.99)
+      (xy 88.9 49.53)
     )
     (stroke
       (width 0)
@@ -6723,7 +6451,7 @@
     (uuid "d0786f0f-0563-58a3-8a2b-e00404b88891")
   )
   (label "N"
-    (at 91.44 49.53 270)
+    (at 88.9 49.53 270)
     (fields_autoplaced)
     (effects
       (font
@@ -6735,14 +6463,14 @@
   )
   (symbol
     (lib_id "Converter_ACDC:IRM-03-5")
-    (at 127 43.18 0)
+    (at 124.46 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "6d919dec-5397-5918-b293-1e6a599e090a")
     (property "Reference" "PS1"
-      (at 127 36.83 0)
+      (at 124.46 36.83 0)
       (id 0)
       (effects
         (font
@@ -6751,7 +6479,7 @@
       )
     )
     (property "Value" "IRM-03-5"
-      (at 127 49.53 0)
+      (at 124.46 49.53 0)
       (id 1)
       (effects
         (font
@@ -6760,7 +6488,7 @@
       )
     )
     (property "Footprint" "Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT"
-      (at 127 52.07 0)
+      (at 124.46 52.07 0)
       (id 2)
       (effects
         (font
@@ -6770,7 +6498,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 127 53.34 0)
+      (at 124.46 53.34 0)
       (id 3)
       (effects
         (font
@@ -6780,7 +6508,7 @@
       )
     )
     (property "MPN" "MEAN WELL IRM-03-5"
-      (at 127 43.18 0)
+      (at 124.46 43.18 0)
       (id 4)
       (effects
         (font
@@ -6790,7 +6518,7 @@
       )
     )
     (property "LCSC" ""
-      (at 127 43.18 0)
+      (at 124.46 43.18 0)
       (id 5)
       (effects
         (font
@@ -6800,7 +6528,7 @@
       )
     )
     (property "Section" "main"
-      (at 127 43.18 0)
+      (at 124.46 43.18 0)
       (id 6)
       (effects
         (font
@@ -6835,8 +6563,8 @@
   )
   (wire
     (pts
-      (xy 116.84 40.64)
       (xy 114.3 40.64)
+      (xy 111.76 40.64)
     )
     (stroke
       (width 0)
@@ -6845,7 +6573,7 @@
     (uuid "6fb55406-fb27-5dc2-92d7-44eee213e204")
   )
   (label "L_PSU"
-    (at 114.3 40.64 180)
+    (at 111.76 40.64 180)
     (fields_autoplaced)
     (effects
       (font
@@ -6857,8 +6585,8 @@
   )
   (wire
     (pts
+      (xy 134.62 45.72)
       (xy 137.16 45.72)
-      (xy 139.7 45.72)
     )
     (stroke
       (width 0)
@@ -6867,7 +6595,7 @@
     (uuid "ddba9a7e-f02b-56d8-9a60-a775d8b382de")
   )
   (label "GND"
-    (at 139.7 45.72 0)
+    (at 137.16 45.72 0)
     (fields_autoplaced)
     (effects
       (font
@@ -6879,8 +6607,8 @@
   )
   (wire
     (pts
+      (xy 134.62 40.64)
       (xy 137.16 40.64)
-      (xy 139.7 40.64)
     )
     (stroke
       (width 0)
@@ -6889,7 +6617,7 @@
     (uuid "af7a2081-4cfd-5c52-8311-d5cac38cff1c")
   )
   (label "+5V"
-    (at 139.7 40.64 0)
+    (at 137.16 40.64 0)
     (fields_autoplaced)
     (effects
       (font
@@ -6901,8 +6629,8 @@
   )
   (wire
     (pts
-      (xy 116.84 45.72)
       (xy 114.3 45.72)
+      (xy 111.76 45.72)
     )
     (stroke
       (width 0)
@@ -6911,7 +6639,7 @@
     (uuid "dd06a13c-8e4c-5250-9fcd-f0fc8571c08c")
   )
   (label "N"
-    (at 114.3 45.72 180)
+    (at 111.76 45.72 180)
     (fields_autoplaced)
     (effects
       (font
@@ -6922,11 +6650,11 @@
     (uuid "5822a3a9-f9bb-5d23-ae9f-9b8f774c5e98")
   )
   (no_connect
-    (at 119.38 43.18)
+    (at 116.84 43.18)
     (uuid "e61fe5af-f2c4-50f1-aa04-fc8b3479ff85")
   )
   (text "230 V : relais et sorties commutées  -  RELECTURE HUMAINE OBLIGATOIRE"
-    (at 176.436 25.48 0)
+    (at 173.556 25.48 0)
     (effects
       (font
         (size 2 2)
@@ -6938,14 +6666,14 @@
   )
   (symbol
     (lib_id "Relay:Relay_SPST-NO")
-    (at 200.66 45.72 0)
+    (at 198.12 45.72 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "d92b4f0a-5373-5d61-ac78-b8af50f0b50a")
     (property "Reference" "K1"
-      (at 212.09 41.91 0)
+      (at 209.55 41.91 0)
       (id 0)
       (effects
         (font
@@ -6955,7 +6683,7 @@
       )
     )
     (property "Value" "G5RL-U1A-E DC5"
-      (at 212.09 44.45 0)
+      (at 209.55 44.45 0)
       (id 1)
       (effects
         (font
@@ -6965,7 +6693,7 @@
       )
     )
     (property "Footprint" "dmxnow:Relay_SPST_Omron_G5RL-U1A-E"
-      (at 212.09 46.99 0)
+      (at 209.55 46.99 0)
       (id 2)
       (effects
         (font
@@ -6976,7 +6704,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 200.66 45.72 0)
+      (at 198.12 45.72 0)
       (id 3)
       (effects
         (font
@@ -6986,7 +6714,7 @@
       )
     )
     (property "MPN" "Omron G5RL-U1A-E DC5"
-      (at 200.66 45.72 0)
+      (at 198.12 45.72 0)
       (id 4)
       (effects
         (font
@@ -6996,7 +6724,7 @@
       )
     )
     (property "LCSC" ""
-      (at 200.66 45.72 0)
+      (at 198.12 45.72 0)
       (id 5)
       (effects
         (font
@@ -7006,7 +6734,7 @@
       )
     )
     (property "Section" "main"
-      (at 200.66 45.72 0)
+      (at 198.12 45.72 0)
       (id 6)
       (effects
         (font
@@ -7038,8 +6766,8 @@
   )
   (wire
     (pts
-      (xy 205.74 53.34)
-      (xy 205.74 55.88)
+      (xy 203.2 53.34)
+      (xy 203.2 55.88)
     )
     (stroke
       (width 0)
@@ -7048,7 +6776,7 @@
     (uuid "64ec073a-3be8-5109-952e-10d950af584f")
   )
   (label "L_IN"
-    (at 205.74 55.88 270)
+    (at 203.2 55.88 270)
     (fields_autoplaced)
     (effects
       (font
@@ -7060,8 +6788,8 @@
   )
   (wire
     (pts
-      (xy 208.28 38.1)
-      (xy 208.28 35.56)
+      (xy 205.74 38.1)
+      (xy 205.74 35.56)
     )
     (stroke
       (width 0)
@@ -7070,7 +6798,7 @@
     (uuid "b6b069c1-ed40-5dc9-ab3f-8c46bb4e1d6d")
   )
   (label "L_SW"
-    (at 208.28 35.56 90)
+    (at 205.74 35.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -7082,8 +6810,8 @@
   )
   (wire
     (pts
-      (xy 195.58 38.1)
-      (xy 195.58 35.56)
+      (xy 193.04 38.1)
+      (xy 193.04 35.56)
     )
     (stroke
       (width 0)
@@ -7092,7 +6820,7 @@
     (uuid "787f9b26-6bb5-5c9b-aca2-3fcbc70bf4ee")
   )
   (label "+5V"
-    (at 195.58 35.56 90)
+    (at 193.04 35.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -7104,8 +6832,8 @@
   )
   (wire
     (pts
-      (xy 195.58 53.34)
-      (xy 195.58 55.88)
+      (xy 193.04 53.34)
+      (xy 193.04 55.88)
     )
     (stroke
       (width 0)
@@ -7114,7 +6842,7 @@
     (uuid "2341333a-9933-5a26-b77f-d5761fe5a54e")
   )
   (label "RELAY_DRV"
-    (at 195.58 55.88 270)
+    (at 193.04 55.88 270)
     (fields_autoplaced)
     (effects
       (font
@@ -7125,15 +6853,15 @@
     (uuid "576f15cb-7d5b-5463-b58c-9f7eac900692")
   )
   (symbol
-    (lib_id "Connector:Screw_Terminal_01x03")
-    (at 246.38 43.18 0)
+    (lib_id "Connector:Screw_Terminal_01x02")
+    (at 241.3 40.64 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "7c56e8b0-3ded-5b30-8546-bb8ed90c7bd4")
     (property "Reference" "J4"
-      (at 246.38 38.1 0)
+      (at 241.3 38.1 0)
       (id 0)
       (effects
         (font
@@ -7141,8 +6869,8 @@
         )
       )
     )
-    (property "Value" "WAGO 2604-1103 (L_SW N PE out 1)"
-      (at 246.38 48.26 0)
+    (property "Value" "WAGO 2604-1102 (L_SW N out 1)"
+      (at 241.3 45.72 0)
       (id 1)
       (effects
         (font
@@ -7150,8 +6878,8 @@
         )
       )
     )
-    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal"
-      (at 246.38 43.18 0)
+    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal"
+      (at 241.3 40.64 0)
       (id 2)
       (effects
         (font
@@ -7161,7 +6889,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 246.38 43.18 0)
+      (at 241.3 40.64 0)
       (id 3)
       (effects
         (font
@@ -7170,8 +6898,8 @@
         hide
       )
     )
-    (property "MPN" "2604-1103"
-      (at 246.38 43.18 0)
+    (property "MPN" "2604-1102"
+      (at 241.3 40.64 0)
       (id 4)
       (effects
         (font
@@ -7181,7 +6909,7 @@
       )
     )
     (property "LCSC" ""
-      (at 246.38 43.18 0)
+      (at 241.3 40.64 0)
       (id 5)
       (effects
         (font
@@ -7191,7 +6919,7 @@
       )
     )
     (property "Section" "main"
-      (at 246.38 43.18 0)
+      (at 241.3 40.64 0)
       (id 6)
       (effects
         (font
@@ -7206,9 +6934,6 @@
     (pin "2"
       (uuid "ce06029b-4042-5ddc-ba16-b788dae1c62e")
     )
-    (pin "3"
-      (uuid "b27b2a55-cb07-5a90-a577-d0bdd8ce8ca8")
-    )
     (instances
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
@@ -7220,8 +6945,8 @@
   )
   (wire
     (pts
-      (xy 241.3 40.64)
-      (xy 238.76 40.64)
+      (xy 236.22 40.64)
+      (xy 233.68 40.64)
     )
     (stroke
       (width 0)
@@ -7230,7 +6955,7 @@
     (uuid "8ea3254c-0524-5daa-ba09-a930c18f721d")
   )
   (label "L_SW"
-    (at 238.76 40.64 180)
+    (at 233.68 40.64 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7242,8 +6967,8 @@
   )
   (wire
     (pts
-      (xy 241.3 43.18)
-      (xy 238.76 43.18)
+      (xy 236.22 43.18)
+      (xy 233.68 43.18)
     )
     (stroke
       (width 0)
@@ -7252,7 +6977,7 @@
     (uuid "a618b540-5ef3-52ed-b4ae-eeda6dbefe43")
   )
   (label "N"
-    (at 238.76 43.18 180)
+    (at 233.68 43.18 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7262,38 +6987,16 @@
     )
     (uuid "4eb43627-4077-573e-9941-a13001acfb27")
   )
-  (wire
-    (pts
-      (xy 241.3 45.72)
-      (xy 238.76 45.72)
-    )
-    (stroke
-      (width 0)
-      (type default)
-    )
-    (uuid "6d3c3a41-f554-50c8-be2c-4cc250f2529c")
-  )
-  (label "PE"
-    (at 238.76 45.72 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify right bottom)
-    )
-    (uuid "9275a7d1-523c-5b4f-9d07-cd1af5fc9e9c")
-  )
   (symbol
-    (lib_id "Connector:Screw_Terminal_01x03")
-    (at 289.56 43.18 0)
+    (lib_id "Connector:Screw_Terminal_01x02")
+    (at 281.94 40.64 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "e0692103-ce9a-551c-b89b-c9bd6fc81167")
     (property "Reference" "J7"
-      (at 289.56 38.1 0)
+      (at 281.94 38.1 0)
       (id 0)
       (effects
         (font
@@ -7301,8 +7004,8 @@
         )
       )
     )
-    (property "Value" "WAGO 2604-1103 (L_SW N PE out 2, J4b)"
-      (at 289.56 48.26 0)
+    (property "Value" "WAGO 2604-1102 (L_SW N out 2, J4b)"
+      (at 281.94 45.72 0)
       (id 1)
       (effects
         (font
@@ -7310,8 +7013,8 @@
         )
       )
     )
-    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal"
-      (at 289.56 43.18 0)
+    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal"
+      (at 281.94 40.64 0)
       (id 2)
       (effects
         (font
@@ -7321,7 +7024,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 289.56 43.18 0)
+      (at 281.94 40.64 0)
       (id 3)
       (effects
         (font
@@ -7330,8 +7033,8 @@
         hide
       )
     )
-    (property "MPN" "2604-1103"
-      (at 289.56 43.18 0)
+    (property "MPN" "2604-1102"
+      (at 281.94 40.64 0)
       (id 4)
       (effects
         (font
@@ -7341,7 +7044,7 @@
       )
     )
     (property "LCSC" ""
-      (at 289.56 43.18 0)
+      (at 281.94 40.64 0)
       (id 5)
       (effects
         (font
@@ -7351,7 +7054,7 @@
       )
     )
     (property "Section" "main"
-      (at 289.56 43.18 0)
+      (at 281.94 40.64 0)
       (id 6)
       (effects
         (font
@@ -7366,9 +7069,6 @@
     (pin "2"
       (uuid "d47a3640-3730-5870-a545-5445dbf83023")
     )
-    (pin "3"
-      (uuid "7bc66fb7-ac64-5202-96b5-4be11d8bb34a")
-    )
     (instances
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
@@ -7380,8 +7080,8 @@
   )
   (wire
     (pts
-      (xy 284.48 40.64)
-      (xy 281.94 40.64)
+      (xy 276.86 40.64)
+      (xy 274.32 40.64)
     )
     (stroke
       (width 0)
@@ -7390,7 +7090,7 @@
     (uuid "72910c44-69ff-5ed9-8902-3c9ce44deae4")
   )
   (label "L_SW"
-    (at 281.94 40.64 180)
+    (at 274.32 40.64 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7402,8 +7102,8 @@
   )
   (wire
     (pts
-      (xy 284.48 43.18)
-      (xy 281.94 43.18)
+      (xy 276.86 43.18)
+      (xy 274.32 43.18)
     )
     (stroke
       (width 0)
@@ -7412,7 +7112,7 @@
     (uuid "757955e2-b66b-50c4-9ee8-3468a45f4900")
   )
   (label "N"
-    (at 281.94 43.18 180)
+    (at 274.32 43.18 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7422,38 +7122,16 @@
     )
     (uuid "93b96a72-1efd-5fcd-946e-8276bca560bf")
   )
-  (wire
-    (pts
-      (xy 284.48 45.72)
-      (xy 281.94 45.72)
-    )
-    (stroke
-      (width 0)
-      (type default)
-    )
-    (uuid "8cdefc52-c3e8-567b-b7aa-172e9b8d4eb6")
-  )
-  (label "PE"
-    (at 281.94 45.72 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27)
-      )
-      (justify right bottom)
-    )
-    (uuid "6791faf4-894b-5ff6-b203-b89d0812550f")
-  )
   (symbol
     (lib_id "Transistor_FET:AO3400A")
-    (at 335.28 43.18 0)
+    (at 327.66 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "efecbd56-eab2-5fe3-8860-5f4b9cdf4327")
     (property "Reference" "Q1"
-      (at 340.36 41.275 0)
+      (at 332.74 41.275 0)
       (id 0)
       (effects
         (font
@@ -7463,7 +7141,7 @@
       )
     )
     (property "Value" "AO3400A"
-      (at 340.36 43.18 0)
+      (at 332.74 43.18 0)
       (id 1)
       (effects
         (font
@@ -7473,7 +7151,7 @@
       )
     )
     (property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-      (at 340.36 45.085 0)
+      (at 332.74 45.085 0)
       (id 2)
       (effects
         (font
@@ -7485,7 +7163,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 340.36 46.99 0)
+      (at 332.74 46.99 0)
       (id 3)
       (effects
         (font
@@ -7496,7 +7174,7 @@
       )
     )
     (property "MPN" ""
-      (at 335.28 43.18 0)
+      (at 327.66 43.18 0)
       (id 4)
       (effects
         (font
@@ -7506,7 +7184,7 @@
       )
     )
     (property "LCSC" "C20917"
-      (at 335.28 43.18 0)
+      (at 327.66 43.18 0)
       (id 5)
       (effects
         (font
@@ -7516,7 +7194,7 @@
       )
     )
     (property "Section" "main"
-      (at 335.28 43.18 0)
+      (at 327.66 43.18 0)
       (id 6)
       (effects
         (font
@@ -7545,8 +7223,8 @@
   )
   (wire
     (pts
-      (xy 330.2 43.18)
-      (xy 327.66 43.18)
+      (xy 322.58 43.18)
+      (xy 320.04 43.18)
     )
     (stroke
       (width 0)
@@ -7555,7 +7233,7 @@
     (uuid "be167094-1090-565d-80d3-63913bdb1822")
   )
   (label "RELAY_GATE"
-    (at 327.66 43.18 180)
+    (at 320.04 43.18 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7567,8 +7245,8 @@
   )
   (wire
     (pts
-      (xy 337.82 48.26)
-      (xy 337.82 50.8)
+      (xy 330.2 48.26)
+      (xy 330.2 50.8)
     )
     (stroke
       (width 0)
@@ -7577,7 +7255,7 @@
     (uuid "59720045-c107-528f-865f-2720d8b1c068")
   )
   (label "GND"
-    (at 337.82 50.8 270)
+    (at 330.2 50.8 270)
     (fields_autoplaced)
     (effects
       (font
@@ -7589,8 +7267,8 @@
   )
   (wire
     (pts
-      (xy 337.82 38.1)
-      (xy 337.82 35.56)
+      (xy 330.2 38.1)
+      (xy 330.2 35.56)
     )
     (stroke
       (width 0)
@@ -7599,7 +7277,7 @@
     (uuid "e5d244ff-b33d-56de-97a8-a8a56d435960")
   )
   (label "RELAY_DRV"
-    (at 337.82 35.56 90)
+    (at 330.2 35.56 90)
     (fields_autoplaced)
     (effects
       (font
@@ -7611,14 +7289,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 373.38 43.18 0)
+    (at 363.22 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "0cefae89-e586-564c-9dae-f0a3bc36b25a")
     (property "Reference" "R5"
-      (at 375.412 43.18 90)
+      (at 365.252 43.18 90)
       (id 0)
       (effects
         (font
@@ -7627,7 +7305,7 @@
       )
     )
     (property "Value" "100R"
-      (at 373.38 43.18 90)
+      (at 363.22 43.18 90)
       (id 1)
       (effects
         (font
@@ -7636,7 +7314,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 371.602 43.18 90)
+      (at 361.442 43.18 90)
       (id 2)
       (effects
         (font
@@ -7646,7 +7324,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 373.38 43.18 0)
+      (at 363.22 43.18 0)
       (id 3)
       (effects
         (font
@@ -7656,7 +7334,7 @@
       )
     )
     (property "MPN" ""
-      (at 373.38 43.18 0)
+      (at 363.22 43.18 0)
       (id 4)
       (effects
         (font
@@ -7666,7 +7344,7 @@
       )
     )
     (property "LCSC" "C22775"
-      (at 373.38 43.18 0)
+      (at 363.22 43.18 0)
       (id 5)
       (effects
         (font
@@ -7676,7 +7354,7 @@
       )
     )
     (property "Section" "main"
-      (at 373.38 43.18 0)
+      (at 363.22 43.18 0)
       (id 6)
       (effects
         (font
@@ -7702,8 +7380,8 @@
   )
   (wire
     (pts
-      (xy 373.38 39.37)
-      (xy 373.38 36.83)
+      (xy 363.22 39.37)
+      (xy 363.22 36.83)
     )
     (stroke
       (width 0)
@@ -7712,7 +7390,7 @@
     (uuid "87220b20-a737-5581-9939-52b296af7265")
   )
   (label "RELAY_CTRL"
-    (at 373.38 36.83 90)
+    (at 363.22 36.83 90)
     (fields_autoplaced)
     (effects
       (font
@@ -7724,8 +7402,8 @@
   )
   (wire
     (pts
-      (xy 373.38 46.99)
-      (xy 373.38 49.53)
+      (xy 363.22 46.99)
+      (xy 363.22 49.53)
     )
     (stroke
       (width 0)
@@ -7734,7 +7412,7 @@
     (uuid "bfb8caa5-f7c4-5731-9da9-e9ba9a0cdccc")
   )
   (label "RELAY_GATE"
-    (at 373.38 49.53 270)
+    (at 363.22 49.53 270)
     (fields_autoplaced)
     (effects
       (font
@@ -7746,14 +7424,14 @@
   )
   (symbol
     (lib_id "Device:R")
-    (at 408.94 43.18 0)
+    (at 401.32 43.18 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "7316fa3f-13f2-5370-b15d-5ecaa14cb1f6")
     (property "Reference" "R6"
-      (at 410.972 43.18 90)
+      (at 403.352 43.18 90)
       (id 0)
       (effects
         (font
@@ -7762,7 +7440,7 @@
       )
     )
     (property "Value" "100k"
-      (at 408.94 43.18 90)
+      (at 401.32 43.18 90)
       (id 1)
       (effects
         (font
@@ -7771,7 +7449,7 @@
       )
     )
     (property "Footprint" "Resistor_SMD:R_0603_1608Metric"
-      (at 407.162 43.18 90)
+      (at 399.542 43.18 90)
       (id 2)
       (effects
         (font
@@ -7781,7 +7459,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 408.94 43.18 0)
+      (at 401.32 43.18 0)
       (id 3)
       (effects
         (font
@@ -7791,7 +7469,7 @@
       )
     )
     (property "MPN" ""
-      (at 408.94 43.18 0)
+      (at 401.32 43.18 0)
       (id 4)
       (effects
         (font
@@ -7801,7 +7479,7 @@
       )
     )
     (property "LCSC" "C25803"
-      (at 408.94 43.18 0)
+      (at 401.32 43.18 0)
       (id 5)
       (effects
         (font
@@ -7811,7 +7489,7 @@
       )
     )
     (property "Section" "main"
-      (at 408.94 43.18 0)
+      (at 401.32 43.18 0)
       (id 6)
       (effects
         (font
@@ -7837,8 +7515,8 @@
   )
   (wire
     (pts
-      (xy 408.94 39.37)
-      (xy 408.94 36.83)
+      (xy 401.32 39.37)
+      (xy 401.32 36.83)
     )
     (stroke
       (width 0)
@@ -7847,7 +7525,7 @@
     (uuid "5543d206-7cd0-5221-8e37-75b4b73b4b17")
   )
   (label "RELAY_GATE"
-    (at 408.94 36.83 90)
+    (at 401.32 36.83 90)
     (fields_autoplaced)
     (effects
       (font
@@ -7859,8 +7537,8 @@
   )
   (wire
     (pts
-      (xy 408.94 46.99)
-      (xy 408.94 49.53)
+      (xy 401.32 46.99)
+      (xy 401.32 49.53)
     )
     (stroke
       (width 0)
@@ -7869,7 +7547,7 @@
     (uuid "f25a49b4-0e86-5229-bab1-5563eba24fc2")
   )
   (label "GND"
-    (at 408.94 49.53 270)
+    (at 401.32 49.53 270)
     (fields_autoplaced)
     (effects
       (font
@@ -7881,14 +7559,14 @@
   )
   (symbol
     (lib_id "Device:D")
-    (at 447.04 38.1 0)
+    (at 439.42 38.1 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "26deaff1-a045-5682-a68d-bf707e7c2b57")
     (property "Reference" "D2"
-      (at 447.04 35.56 0)
+      (at 439.42 35.56 0)
       (id 0)
       (effects
         (font
@@ -7897,7 +7575,7 @@
       )
     )
     (property "Value" "1N4148W"
-      (at 447.04 40.64 0)
+      (at 439.42 40.64 0)
       (id 1)
       (effects
         (font
@@ -7906,7 +7584,7 @@
       )
     )
     (property "Footprint" "Diode_SMD:D_SOD-123"
-      (at 447.04 38.1 0)
+      (at 439.42 38.1 0)
       (id 2)
       (effects
         (font
@@ -7916,7 +7594,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 447.04 38.1 0)
+      (at 439.42 38.1 0)
       (id 3)
       (effects
         (font
@@ -7926,7 +7604,7 @@
       )
     )
     (property "MPN" ""
-      (at 447.04 38.1 0)
+      (at 439.42 38.1 0)
       (id 4)
       (effects
         (font
@@ -7936,7 +7614,7 @@
       )
     )
     (property "LCSC" "C81598"
-      (at 447.04 38.1 0)
+      (at 439.42 38.1 0)
       (id 5)
       (effects
         (font
@@ -7946,7 +7624,7 @@
       )
     )
     (property "Section" "main"
-      (at 447.04 38.1 0)
+      (at 439.42 38.1 0)
       (id 6)
       (effects
         (font
@@ -7972,8 +7650,8 @@
   )
   (wire
     (pts
-      (xy 443.23 38.1)
-      (xy 440.69 38.1)
+      (xy 435.61 38.1)
+      (xy 433.07 38.1)
     )
     (stroke
       (width 0)
@@ -7982,7 +7660,7 @@
     (uuid "9121f770-2206-54e0-8b5d-10b7118e5a6d")
   )
   (label "+5V"
-    (at 440.69 38.1 180)
+    (at 433.07 38.1 180)
     (fields_autoplaced)
     (effects
       (font
@@ -7994,8 +7672,8 @@
   )
   (wire
     (pts
-      (xy 450.85 38.1)
-      (xy 453.39 38.1)
+      (xy 443.23 38.1)
+      (xy 445.77 38.1)
     )
     (stroke
       (width 0)
@@ -8004,7 +7682,7 @@
     (uuid "b5711415-5f8a-5b23-bf1e-51b5f9b9d98a")
   )
   (label "RELAY_DRV"
-    (at 453.39 38.1 0)
+    (at 445.77 38.1 0)
     (fields_autoplaced)
     (effects
       (font
@@ -11382,7 +11060,7 @@
         )
       )
     )
-    (property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm_Relief"
+    (property "Footprint" "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm"
       (at 144.78 187.96 0)
       (id 2)
       (effects
@@ -16124,7 +15802,7 @@
         hide
       )
     )
-    (property "Section" "main"
+    (property "Section" "strip"
       (at 492.76 332.74 0)
       (id 6)
       (effects
@@ -16138,176 +15816,6 @@
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
           (reference "H3")
-          (unit 1)
-        )
-      )
-    )
-  )
-  (symbol
-    (lib_id "Mechanical:MountingHole")
-    (at 510.54 332.74 0)
-    (unit 1)
-    (in_bom no)
-    (on_board yes)
-    (dnp no)
-    (uuid "bdb32458-419b-5bfa-bf80-1e59e25b0cef")
-    (property "Reference" "H4"
-      (at 510.54 327.66 0)
-      (id 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-      )
-    )
-    (property "Value" "M3 NPTH"
-      (at 510.54 329.565 0)
-      (id 1)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-      )
-    )
-    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
-      (at 510.54 332.74 0)
-      (id 2)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" ""
-      (at 510.54 332.74 0)
-      (id 3)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "MPN" ""
-      (at 510.54 332.74 0)
-      (id 4)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "LCSC" ""
-      (at 510.54 332.74 0)
-      (id 5)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Section" "strip"
-      (at 510.54 332.74 0)
-      (id 6)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (instances
-      (project "dmxnow"
-        (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
-          (reference "H4")
-          (unit 1)
-        )
-      )
-    )
-  )
-  (symbol
-    (lib_id "Mechanical:MountingHole")
-    (at 530.86 332.74 0)
-    (unit 1)
-    (in_bom no)
-    (on_board yes)
-    (dnp no)
-    (uuid "15e8d02d-c363-51c7-8bb0-0bd670578682")
-    (property "Reference" "H5"
-      (at 530.86 327.66 0)
-      (id 0)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-      )
-    )
-    (property "Value" "M3 NPTH"
-      (at 530.86 329.565 0)
-      (id 1)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-      )
-    )
-    (property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
-      (at 530.86 332.74 0)
-      (id 2)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Datasheet" ""
-      (at 530.86 332.74 0)
-      (id 3)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "MPN" ""
-      (at 530.86 332.74 0)
-      (id 4)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "LCSC" ""
-      (at 530.86 332.74 0)
-      (id 5)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (property "Section" "strip"
-      (at 530.86 332.74 0)
-      (id 6)
-      (effects
-        (font
-          (size 1.27 1.27)
-        )
-        hide
-      )
-    )
-    (instances
-      (project "dmxnow"
-        (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
-          (reference "H5")
           (unit 1)
         )
       )

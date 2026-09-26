@@ -68,7 +68,7 @@ sur un même réseau, codes de départ DMX non nuls.
 |--------|----------|
 | ES-01  | Isolation renforcée entre tout conducteur 230 V et la basse tension accessible (DMX, rubans, programmation) : lignes de fuite ≥ 6 mm, distances dans l'air ≥ 6 mm sur la carte (objectif de conception supérieur au minimum normatif, §4.8.2). |
 | ES-02  | Alimentation interne isolée (PS1). Aucune liaison galvanique entre secteur et masse DMX. |
-| ES-03  | Continuité du PE de J1 à J4 (et J4b), sans interruption par le relais. |
+| ES-03  | Continuité du PE entre l'entrée et les deux sorties, sans interruption par le relais. Le PE ne passe pas par le PCB : jonction par un WAGO 221-413 dans le compartiment 230 V (arbitrage A9). |
 | ES-04  | Branche d'alimentation interne protégée par F1 (T500 mA) et RV1. Chemin de puissance protégé par le disjoncteur amont : dimensionnement du cuivre en conséquence (arbitrage A2). |
 | ES-05  | Boîtier en matériau au moins UL94 V-1 (V-0 recommandé), borniers 230 V accessibles uniquement après retrait d'un couvercle vissé (outil requis), cloison entre zones, arrêts de traction sur tous les câbles secteur. |
 | ES-06  | Aucun 230 V ne traverse ni n'approche à moins de 4 mm la ligne de découpe. |
@@ -92,9 +92,10 @@ sur un même réseau, codes de départ DMX non nuls.
 ### 3.2 Nœud
 
 ```
-Secteur ─▶ J1 ─┬─ L_IN ─▶ K1 (NO) ─▶ L_SW ─▶ J4 / J4b ─▶ projecteur + alim LED externe
+Secteur ─▶ J1 ─┬─ L_IN ─▶ K1 (NO) ─▶ L_SW ─▶ J4 / J4b (réf. J7) ─▶ projecteur + alim LED externe
                ├─ F1 ─▶ RV1 ─▶ PS1 (IRM-03-5, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
-               └─ PE, N ───────────────────────────────▶ J4 / J4b
+               └─ N ──────────────────────────────────▶ J4 / J4b
+PE (cordons) ─▶ WAGO 221-413 hors carte, compartiment 230 V
 +3V3 ─▶ U1 ESP32-C3-MINI-1
 U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
 U1 IO5 ─▶ Q1 AO3400 ─▶ bobine K1 (D2 roue libre)
@@ -111,7 +112,7 @@ U1 IO6/7/10/3 ─▶ U4 74AHCT125 (5 V) ─▶ R7..R10 ─▶ grilles Q2..Q5
 | `firmware/node`    | PlatformIO, Arduino-ESP32 3.x (pioarduino) | Tâches radio, DMX, contrôle, maintenance. |
 | `firmware/dongle`  | idem | Série USB, ordonnanceur d'émission, suivi des commandes. |
 | `pi/`              | Python ≥ 3.11, asyncio, `pyserial` | Démon `dmxnowd`, CLI `dmxnow`, systemd, udev, installeur. |
-| `hardware/`        | Python (SKiDL + génération `.kicad_pcb` scriptée), `kicad-cli` | Schéma, placement, routage, ERC/DRC, sorties JLCPCB. |
+| `hardware/`        | Python (génération directe `.kicad_sch` / `.kicad_pcb`, API pcbnew), Freerouting, `kicad-cli` | Schéma, placement, routage, ERC/DRC, sorties JLCPCB. |
 | `enclosure/`       | CadQuery | Boîtier paramétrique deux longueurs. |
 
 ---
@@ -290,20 +291,25 @@ Logique (implémentée dans `common`, testée) :
 
 #### 4.8.1 Généralités
 
-2 couches, FR-4 TG ≥ 150, cuivre 2 oz (70 µm) sur les deux faces, épaisseur 1,6 mm,
-~130 × 50 mm entière, V-cut vertical à ~90 mm. Dimensions finales après placement : la
-ligne de 3 borniers 3 pôles (J1, J4, J4b) au pas de 5 mm impose ~50 mm de bord, PS1
-(~34 × 20 mm) et K1 (~33 × 13 mm) occupent l'essentiel de la zone 230 V ; la hauteur de 50 mm
-est tenable mais serrée [V-HW-10].
+2 couches, FR-4 TG ≥ 150, cuivre 2 oz (70 µm) sur les deux faces, épaisseur 1,6 mm.
+**Dimensions après placement (révisées le 2026-09-26) : 146 × 54 mm entière, V-cut à
+X = 100 mm ; partie principale 100 × 54 mm, partie rubans 46 × 54 mm** (objectif initial
+~130 × 50). Raisons : 6 mm d'isolement + fentes, pistes 16 A (A2), trois borniers 2 pôles
+(J1, J4, J4b) empilés sur le bord gauche, et borniers WAGO de ~18 mm de profondeur sur la
+partie rubans.
 
-Zonage (vue de dessus, schématique) :
+Zonage (vue de dessus) :
 
 ```
-┌──────────── partie principale ~90 mm ──────────────┬4mm┊4mm┬── partie rubans ~40 mm ──┐
-│ J1  J4  J4b  │ fente │ PS1 DC │ U3 │ U1 ESP32 [ant.]│    ┊   │ J5 F2 C7 D3  Q2..Q5 J6    │
-│ F1 RV1 K1-contacts│ 1 mm │ K1-bobine Q1 D2 │ U2 D1 J2 │   ┊   │ U4 R7..R18                │
-│   ZONE 230 V  ←≥ 6 mm→   ZONE BASSE TENSION        │ V-cut ┊                           │
-└────────────────────────────────────────────────────┴───────┴───────────────────────────┘
+X: 0            46 49 52                        96  100 104                          146
+┌───────────────┬──┬──┬─────────────────────────┬───┊───┬───────────────────────────┐
+│ J1 (L N)      │  │  │ K1 bobine  Q1 D2  U3    │   ┊   │ Q2..Q5 (DPAK)   J6 (VLED,  │
+│ J4 (L_SW N)   │ f│  │ PS1 sorties  J3 SW1     │   ┊   │ R7..R14         CH1..CH4)  │
+│ J4b(L_SW N)   │ e│6 │ U1 ESP32 [antenne ↑]    │   ┊   │ U4 C9 C7  D3 C8            │
+│ K1 contacts F1│ n│mm│ U2 D1 J2 (DMX)          │   ┊   │ F2 (ATO)        J5 (12/24V)│
+│ PS1 entrée RV1│ t│  │                         │ V-cut │                            │
+│   ZONE 230 V  │ e│  │   ZONE BASSE TENSION    │4mm┊4mm│   PARTIE SÉCABLE (TBTS)    │
+└───────────────┴──┴──┴─────────────────────────┴───┊───┴───────────────────────────┘
 ```
 
 L'antenne de U1 est placée en bord de carte, côté opposé à la zone 230 V et éloignée des
@@ -364,13 +370,18 @@ placement ne permet pas les largeurs.
 
 #### 4.8.5 Méthode de production
 
-Schéma saisi par script (SKiDL) → netlist ; génération du `.kicad_pcb` par script
-(placement coordonné, contour, fentes, V-cut sur calque `Edge.Cuts`/`User.Comments` selon
-les règles JLCPCB, zones, classes de réseaux) ; routage des pistes de puissance et de
-l'isolement **scripté** (trop critique pour un autorouteur), routage signal par Freerouting
-(DSN/SES) ; ERC et DRC par `kicad-cli` ; sorties Gerber, perçage, BOM et CPL au format
-JLCPCB, rendus 3D PNG. Document `hardware/REVIEW.md` : liste des points de contrôle
-pour la relecture humaine.
+Chaîne entièrement scriptée (`hardware/Makefile`, détails dans `hardware/README.md`) :
+`design.py` (source unique : composants, broches, nets, classes) → `sch.py` (schéma
+KiCad à étiquettes, symboles embarqués) → `pcb.py` (contour, fentes, V-cut, placement,
+routage 230 V et puissance LED **scripté**, plans) → `route.py` (signaux basse tension
+par Freerouting, zone 230 V interdite au routeur) → `check.py` (netlist schéma = design,
+pastilles PCB = design, seuls les nets autorisés traversent la découpe) → DRC avec règles
+230 V personnalisées (`dmxnow.kicad_dru`) → `fab.py` (Gerbers, perçages PTH/NPTH, V-cut,
+BOM/CPL JLCPCB par variante, BOM complète). SKiDL n'est pas utilisé : ses dépendances ne
+s'installent pas ici et la génération directe des fichiers KiCad suffit. La CI
+(`.github/workflows/hardware.yml`, image `kicad/kicad:9.0`) rejoue ERC et DRC en KiCad 9,
+génère les sorties et les rendus 3D. Document `hardware/REVIEW.md` : liste des points de
+contrôle pour la relecture humaine.
 
 ### 4.9 Maintenance et OTA
 
@@ -462,6 +473,8 @@ pour la relecture humaine.
   les leviers WAGO.
 - Cloison intérieure solidaire du fond entre zones 230 V et TBT, alignée sur la fente
   du PCB, hauteur jusqu'au couvercle (recouvrement par une lèvre).
+- Logement pour le WAGO 221-413 (jonction des trois PE, arbitrage A9) dans le compartiment
+  230 V, maintenu par un clip imprimé, accessible par le couvercle des borniers.
 - Entrées de câbles :
   - secteur entrée, sortie projecteur, sortie alimentation LED : presse-étoupes M16 ou PG9
     selon le diamètre des cordons H05VV-F 3G1,5 (≈ 8 à 9 mm) [V-ENC-01] **plus** étrier
@@ -573,7 +586,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Mean Well IRM-03-5 (A1)                 | 6 €           | 6 € |
 | Omron G5RL-U1A-E                        | 2,5 €         | 2,5 € |
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
-| WAGO 2604 : 3 × 3 pôles (+ 2 + 5 pôles) | 6 € (+ 4 €)   | 6 € |
+| WAGO 2604 : 3 × 2 pôles (+ 2 + 5 pôles), WAGO 221-413 | 5,5 € (+ 4 €) | 5,5 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
 | Partie rubans : 4 × AOD4184A, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
 | PCB 2 couches 2 oz + assemblage CMS JLCPCB (répartis) | 5 € | 5 € |
@@ -671,6 +684,7 @@ la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant
 | A6 | Maintenance sans ouvrir le boîtier | **Bouton SW1** sur IO9, toujours monté, accessible par un poussoir encastré (3 s maintenance, 10 s réinitialisation) **+ option** `powercycle_maint` (3 mises sous tension < 5 s, activée par défaut) (révisé le 2026-09-25) | BOOT seulement (ouverture du couvercle) |
 | A7 | LED d'état | **Option** : empreinte D4/R19 sur IO0 toujours présente, non montée par défaut, clé `status_led` (défaut 0), option boîtier `light_pipe` (révisé le 2026-09-25) | Pas de LED ; LED systématique |
 | A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
+| A9 | Routage 230 V 16 A en 2 couches avec trois borniers 3 pôles (constaté infaisable proprement) | **PE hors carte** : J1, J4, J4b en WAGO 2604 2 pôles (L, N) ; PE réunis par un WAGO 221-413 dans le compartiment 230 V (2026-09-26) | PCB 4 couches ; carte plus haute |
 
 Question ouverte sans proposition : **J3-3V3** — programmer en injectant 3,3 V sur la
 sortie de U3 alimente la sortie d'un régulateur non alimenté ; le comportement de
@@ -686,13 +700,13 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-01 | HLK-PM05 (empreinte de repli uniquement) : brochage (AC ×2, +Vo, −Vo), dimensions ~34 × 20 × 15 mm, pas des broches, isolation 3000 V AC, 600 mA, fusible et varistance recommandés | Fiche Hi-Link HLK-PM05 (hlktech.net) | 🔴 critique |
 | V-HW-02 | ESP32-C3-MINI-1 : brochage des pastilles, GPIO exposés (0-10, 18-21), strapping IO2/IO8/IO9, zone d'exclusion d'antenne, consommations RX/TX, découplage recommandé | *ESP32-C3-MINI-1 Datasheet* et *ESP32-C3 Hardware Design Guidelines* (espressif.com) | critique |
 | V-HW-03 | G5RL-U1A-E DC5 : courant et résistance de bobine (~80 mA / ~62 Ω supposés), disposition et diamètres des broches, distances bobine-contacts (ligne de fuite 8 mm annoncée), courant d'appel admissible, classe TV, homologations | Omron, fiche *G5RL-U/-K* K265-E1 (non accessible depuis cet environnement : proxy) | 🔴 critique |
-| V-HW-04 | WAGO 2604-1103 (entrée latérale) / 2604-3103 (entrée par le dessus) : 3 pôles, pas 5 mm, 4 mm², 32 A / 320 V IEC (selon distributeurs), **une seule âme par point de serrage** ; références 2 et 5 pôles (2604-1102, 2604-1105 supposées) ; diamètre de perçage | Fiches WAGO 2604 (wago.com, non accessible depuis cet environnement) | 🔴 critique |
+| V-HW-04 | WAGO 2604-1102 / -1105 (entrée latérale ; J1, J4, J4b, J5 en 2 pôles, J6 en 5 pôles depuis A9), autrefois 2604-1103 :  pas 5 mm, 4 mm², 32 A / 320 V IEC (selon distributeurs), **une seule âme par point de serrage** ; références 2 et 5 pôles (2604-1102, 2604-1105 supposées) ; diamètre de perçage | Fiches WAGO 2604 (wago.com, non accessible depuis cet environnement) | 🔴 critique |
 | V-HW-05 | AP2112K-3.3 : brochage SOT-23-5 (1 VIN, 2 GND, 3 EN, 4 NC, 5 VOUT), RθJA, comportement en courant inverse | Diodes Inc., fiche AP2112 | moyenne |
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
 | V-HW-07 | AOD4184A : RDS(on) à VGS 4,5 et 5 V, Qg, énergie d'avalanche ; AO3400 : VGS(th) | Alpha & Omega Semiconductor | moyenne |
-| V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (référence type Keystone 3557-2, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
+| V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (Littelfuse FLR 178.6165, empreinte KiCad, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
 | V-HW-09 | Mean Well IRM-03-5 : brochage (empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT`), dimensions (~33,7 × 22,2 × 15 mm supposées), hauteur, homologations, fusible et varistance recommandés en entrée | Fiche Mean Well IRM-05 | 🔴 critique |
-| V-HW-10 | Faisabilité du placement dans 90 × 50 mm | Livrable PCB | moyenne |
+| V-HW-10 | Placement réalisé en 146 × 54 mm (partie principale 100 × 54) ; à confirmer après vérification des cotes réelles des WAGO et du relais | Livrable PCB | moyenne |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |
 | V-HW-13 | Disponibilité JLCPCB/LCSC des références et coût de l'assemblage traversant | LCSC | faible |
@@ -716,10 +730,10 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 
 1. **WAGO 2604 et double sortie J4** : références supposées 2604-1103 / 2604-3103
    (3 pôles), 2604-1102 (2 pôles), 2604-1105 (5 pôles), pas 5 mm [V-HW-04]. Une borne
-   2604 n'accepte qu'un conducteur par point : **seconde borne J4b** 3 pôles en parallèle
-   de J4 (L_SW, N, PE), pistes dimensionnées pour le courant total. Entrée par le dessus
-   (-3103) ou latérale (-1103) à choisir au placement selon l'orientation des
-   presse-étoupes.
+   2604 n'accepte qu'un conducteur par point : **seconde borne J4b** (référence J7 dans
+   KiCad) en parallèle de J4, pistes dimensionnées pour le courant total. Depuis
+   l'arbitrage A9, J1, J4 et J4b sont des **2604-1102 (2 pôles, L et N)** à entrée
+   latérale ; le PE est raccordé hors carte (WAGO 221-413).
 2. **Brochages PS1, U1, K1** : non vérifiables depuis cet environnement (sites fabricants
    bloqués) ; hypothèses en V-HW-01 à 03, vérification obligatoire au livrable PCB, avec
    empreintes construites **depuis la fiche** et cotes citées dans `hardware/REVIEW.md`.
@@ -739,8 +753,8 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | Git 2.43 | présent | — |
 | Python 3.11 | présent | — |
 | Java (OpenJDK 21) | présent | nécessaire à Freerouting |
-| KiCad 8+ / `kicad-cli` | **absent** (dépôt Ubuntu : KiCad 7.0 seulement) | PPA KiCad 8/9 ou image Docker `kicad/kicad` en CI |
-| SKiDL | **absent**, disponible sur PyPI (2.3.0) | `pip install skidl` |
+| KiCad 8+ / `kicad-cli` | KiCad **7.0.11** installé (PPA KiCad bloqué par le proxy) : génération, API pcbnew et DRC local. ERC, DRC de référence et rendus 3D en **KiCad 9** dans la CI (image `kicad/kicad:9.0`) | — |
+| SKiDL | non utilisé (dépendances non installables ; génération directe des fichiers KiCad) | — |
 | CadQuery | **absent**, disponible sur PyPI (2.8.0) | `pip install cadquery` |
-| Freerouting | **absent** | JAR depuis les releases GitHub |
+| Freerouting | 2.1.0 installé (`/opt/freerouting/freerouting.jar`) | — |
 | PlatformIO | **absent**, disponible sur PyPI | `pip install platformio` + plateforme pioarduino |

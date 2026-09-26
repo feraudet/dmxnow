@@ -71,12 +71,15 @@ esp_pins.update({
 
 PARTS = [
     # --- 230 V section 🔴 --------------------------------------------------
-    Part("J1", "Connector:Screw_Terminal_01x03", "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal",
-         "WAGO 2604-1103 (L N PE in)", {"1": "L_IN", "2": "N", "3": "PE"}, mpn="2604-1103"),
-    Part("J4", "Connector:Screw_Terminal_01x03", "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal",
-         "WAGO 2604-1103 (L_SW N PE out 1)", {"1": "L_SW", "2": "N", "3": "PE"}, mpn="2604-1103"),
-    Part("J7", "Connector:Screw_Terminal_01x03", "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal",
-         "WAGO 2604-1103 (L_SW N PE out 2, J4b)", {"1": "L_SW", "2": "N", "3": "PE"}, mpn="2604-1103"),
+    Part("J1", "Connector:Screw_Terminal_01x02", "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal",
+         "WAGO 2604-1102 (L N in)", {"1": "L_IN", "2": "N"}, mpn="2604-1102",
+         note="PE is joined off-board by a WAGO 221-413 (arbitrage A9)"),
+    Part("J4", "Connector:Screw_Terminal_01x02", "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal",
+         "WAGO 2604-1102 (L_SW N out 1)", {"1": "L_SW", "2": "N"}, mpn="2604-1102",
+         note="PE is joined off-board by a WAGO 221-413 (arbitrage A9)"),
+    Part("J7", "Connector:Screw_Terminal_01x02", "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal",
+         "WAGO 2604-1102 (L_SW N out 2, J4b)", {"1": "L_SW", "2": "N"}, mpn="2604-1102",
+         note="PE is joined off-board by a WAGO 221-413 (arbitrage A9)"),
     Part("F1", "Device:Fuse", "Fuse:Fuse_Littelfuse_372_D8.50mm", "TR5 T500mA 250V",
          {"1": "L_IN", "2": "L_PSU"}, mpn="Littelfuse 37405000410"),
     Part("RV1", "Device:Varistor", "Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm", "10D561K",
@@ -124,7 +127,7 @@ PARTS = [
     C("C3", "100nF", "+3V3", "GND", lcsc="C14663"),
     Part("D1", "Diode:SM712_SOT23", "Package_TO_SOT_SMD:SOT-23", "SM712",
          {"1": "DMX_A", "2": "DMX_B", "3": "GND"}, mpn="SM712.TCT"),
-    Part("J2", "Connector_Generic:Conn_01x03", "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm_Relief",
+    Part("J2", "Connector_Generic:Conn_01x03", "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm",
          "DMX tail (1 GND 2 B 3 A)", {"1": "GND", "2": "DMX_B", "3": "DMX_A"}, dnp=True,
          note="Wire pads"),
     # --- Breakaway strip section ------------------------------------------
@@ -162,17 +165,18 @@ for i in range(4):
              {"1": "GATE%d" % n, "2": "CH%d" % n, "3": "GND_LED"}, mpn="AOD4184A", section="strip"),
     ]
 
-# Mounting holes (NPTH, nylon screws or printed pegs; see SPEC 4.12)
-for i in range(1, 6):
+# Mounting holes (NPTH, nylon screws or printed pegs; see SPEC 4.12).
+# None in the 230 V zone: a metal screw there would defeat the 6 mm isolation.
+for i, sec in ((1, "main"), (2, "main"), (3, "strip")):
     PARTS.append(Part("H%d" % i, "Mechanical:MountingHole", "MountingHole:MountingHole_3.2mm_M3",
-                      "M3 NPTH", {}, section="strip" if i >= 4 else "main"))
+                      "M3 NPTH", {}, section=sec))
 
 # ---------------------------------------------------------------------------
 # Net classes (widths in mm; clearances enforced by custom DRC rules)
 # ---------------------------------------------------------------------------
 
 NETCLASSES = {
-    "MAINS_PWR": {"nets": ["L_IN", "L_SW", "N", "PE"], "track": 5.0, "clearance": 3.0},
+    "MAINS_PWR": {"nets": ["L_IN", "L_SW", "N"], "track": 5.0, "clearance": 3.0},
     "MAINS": {"nets": ["L_PSU"], "track": 1.0, "clearance": 3.0},
     "LED_PWR": {"nets": ["VLED_IN", "VLED", "GND_LED", "CH1", "CH2", "CH3", "CH4"],
                 "track": 5.0, "clearance": 0.3},
