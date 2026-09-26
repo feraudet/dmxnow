@@ -9,7 +9,7 @@
     (company "dmxnow")
     (comment 1 "Généré par hardware/gen/sch.py depuis design.py - ne pas éditer à la main")
     (comment 2 "Parties 230 V : RELECTURE HUMAINE OBLIGATOIRE")
-    (comment 3 "K1, J1, J4, J7, J5, J6 : empreintes PROVISOIRES (fiches non vérifiées)")
+    (comment 3 "K1, J1, J4, J7, J5, J6, J8 : empreintes PROVISOIRES (fiches non vérifiées)")
   )
   (lib_symbols
     (symbol "Connector:Screw_Terminal_01x02"
@@ -5409,7 +5409,7 @@
         )
       )
     )
-    (symbol "Connector:Screw_Terminal_01x05"
+    (symbol "Connector:Screw_Terminal_01x03"
       (pin_names
         (offset 1.016)
         hide
@@ -5417,15 +5417,15 @@
       (in_bom yes)
       (on_board yes)
       (property "Reference" "J"
-        (at 0 7.62 0)
+        (at 0 5.08 0)
         (effects
           (font
             (size 1.27 1.27)
           )
         )
       )
-      (property "Value" "Screw_Terminal_01x05"
-        (at 0 -7.62 0)
+      (property "Value" "Screw_Terminal_01x03"
+        (at 0 -5.08 0)
         (effects
           (font
             (size 1.27 1.27)
@@ -5459,7 +5459,7 @@
           hide
         )
       )
-      (property "ki_description" "Generic screw terminal, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"
+      (property "ki_description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
         (at 0 0 0)
         (effects
           (font
@@ -5477,10 +5477,10 @@
           hide
         )
       )
-      (symbol "Screw_Terminal_01x05_1_1"
+      (symbol "Screw_Terminal_01x03_1_1"
         (rectangle
-          (start -1.27 6.35)
-          (end 1.27 -6.35)
+          (start -1.27 3.81)
+          (end 1.27 -3.81)
           (stroke
             (width 0.254)
             (type default)
@@ -5490,32 +5490,8 @@
           )
         )
         (circle
-          (center 0 -5.08)
-          (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (circle
           (center 0 -2.54)
           (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.5334 -4.7498)
-            (xy 0.3302 -5.588)
-          )
           (stroke
             (width 0.1524)
             (type default)
@@ -5565,32 +5541,6 @@
         )
         (polyline
           (pts
-            (xy -0.5334 5.4102)
-            (xy 0.3302 4.572)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
-            (xy -0.3556 -4.572)
-            (xy 0.508 -5.4102)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
-        (polyline
-          (pts
             (xy -0.3556 -2.032)
             (xy 0.508 -2.8702)
           )
@@ -5628,19 +5578,6 @@
             (type none)
           )
         )
-        (polyline
-          (pts
-            (xy -0.3556 5.588)
-            (xy 0.508 4.7498)
-          )
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
         (circle
           (center 0 0)
           (radius 0.635)
@@ -5663,19 +5600,8 @@
             (type none)
           )
         )
-        (circle
-          (center 0 5.08)
-          (radius 0.635)
-          (stroke
-            (width 0.1524)
-            (type default)
-          )
-          (fill
-            (type none)
-          )
-        )
         (pin passive line
-          (at -5.08 5.08 0)
+          (at -5.08 2.54 0)
           (length 3.81)
           (name "Pin_1"
             (effects
@@ -5693,7 +5619,7 @@
           )
         )
         (pin passive line
-          (at -5.08 2.54 0)
+          (at -5.08 0 0)
           (length 3.81)
           (name "Pin_2"
             (effects
@@ -5711,7 +5637,7 @@
           )
         )
         (pin passive line
-          (at -5.08 0 0)
+          (at -5.08 -2.54 0)
           (length 3.81)
           (name "Pin_3"
             (effects
@@ -5721,42 +5647,6 @@
             )
           )
           (number "3"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-        )
-        (pin passive line
-          (at -5.08 -2.54 0)
-          (length 3.81)
-          (name "Pin_4"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-          (number "4"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-        )
-        (pin passive line
-          (at -5.08 -5.08 0)
-          (length 3.81)
-          (name "Pin_5"
-            (effects
-              (font
-                (size 1.27 1.27)
-              )
-            )
-          )
-          (number "5"
             (effects
               (font
                 (size 1.27 1.27)
@@ -15683,15 +15573,15 @@
     (uuid "820ab602-8b78-509a-a422-18b9681bff9d")
   )
   (symbol
-    (lib_id "Connector:Screw_Terminal_01x05")
-    (at 403.86 360.68 0)
+    (lib_id "Connector:Screw_Terminal_01x02")
+    (at 401.32 355.6 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (uuid "d32e6ff1-a3df-517d-af02-2086662c0009")
     (property "Reference" "J6"
-      (at 403.86 353.06 0)
+      (at 401.32 353.06 0)
       (id 0)
       (effects
         (font
@@ -15699,8 +15589,8 @@
         )
       )
     )
-    (property "Value" "WAGO 2604-1105 (VLED CH1-CH4)"
-      (at 403.86 368.3 0)
+    (property "Value" "WAGO 2604-1102 (VLED CH1)"
+      (at 401.32 360.68 0)
       (id 1)
       (effects
         (font
@@ -15708,8 +15598,8 @@
         )
       )
     )
-    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal"
-      (at 403.86 360.68 0)
+    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal"
+      (at 401.32 355.6 0)
       (id 2)
       (effects
         (font
@@ -15719,7 +15609,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 403.86 360.68 0)
+      (at 401.32 355.6 0)
       (id 3)
       (effects
         (font
@@ -15728,8 +15618,8 @@
         hide
       )
     )
-    (property "MPN" "2604-1105"
-      (at 403.86 360.68 0)
+    (property "MPN" "2604-1102"
+      (at 401.32 355.6 0)
       (id 4)
       (effects
         (font
@@ -15738,8 +15628,8 @@
         hide
       )
     )
-    (property "LCSC" "C3818651"
-      (at 403.86 360.68 0)
+    (property "LCSC" "C3309286"
+      (at 401.32 355.6 0)
       (id 5)
       (effects
         (font
@@ -15749,7 +15639,7 @@
       )
     )
     (property "Section" "strip"
-      (at 403.86 360.68 0)
+      (at 401.32 355.6 0)
       (id 6)
       (effects
         (font
@@ -15764,15 +15654,6 @@
     (pin "2"
       (uuid "5ca6e820-eeb1-50da-b7c2-7c27aae252d4")
     )
-    (pin "3"
-      (uuid "81d8d954-1622-5955-b729-547fb91b1920")
-    )
-    (pin "4"
-      (uuid "25b79dce-fe5f-537d-b119-60ca7e72dc29")
-    )
-    (pin "5"
-      (uuid "93d10e85-2c2f-5c8e-b866-0939a29d521d")
-    )
     (instances
       (project "dmxnow"
         (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
@@ -15784,8 +15665,8 @@
   )
   (wire
     (pts
-      (xy 398.78 355.6)
       (xy 396.24 355.6)
+      (xy 393.7 355.6)
     )
     (stroke
       (width 0)
@@ -15794,7 +15675,7 @@
     (uuid "2dd64bfe-83bc-5d60-908f-c79129b2cc0b")
   )
   (label "VLED"
-    (at 396.24 355.6 180)
+    (at 393.7 355.6 180)
     (fields_autoplaced)
     (effects
       (font
@@ -15806,8 +15687,8 @@
   )
   (wire
     (pts
-      (xy 398.78 358.14)
       (xy 396.24 358.14)
+      (xy 393.7 358.14)
     )
     (stroke
       (width 0)
@@ -15816,7 +15697,7 @@
     (uuid "b731994e-22a1-50ba-b115-9f01a2b39cb1")
   )
   (label "CH1"
-    (at 396.24 358.14 180)
+    (at 393.7 358.14 180)
     (fields_autoplaced)
     (effects
       (font
@@ -15826,19 +15707,113 @@
     )
     (uuid "d3a4a1e5-722b-58ee-adbf-d5b9196bb950")
   )
+  (symbol
+    (lib_id "Connector:Screw_Terminal_01x03")
+    (at 436.88 358.14 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (uuid "f23b78f1-399e-5a43-96e2-01c617284c8b")
+    (property "Reference" "J8"
+      (at 436.88 353.06 0)
+      (id 0)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property "Value" "WAGO 2604-1103 (CH2-CH4)"
+      (at 436.88 363.22 0)
+      (id 1)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+      )
+    )
+    (property "Footprint" "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal"
+      (at 436.88 358.14 0)
+      (id 2)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Datasheet" ""
+      (at 436.88 358.14 0)
+      (id 3)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "MPN" "2604-1103"
+      (at 436.88 358.14 0)
+      (id 4)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "LCSC" "C3309758"
+      (at 436.88 358.14 0)
+      (id 5)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (property "Section" "strip"
+      (at 436.88 358.14 0)
+      (id 6)
+      (effects
+        (font
+          (size 1.27 1.27)
+        )
+        hide
+      )
+    )
+    (pin "1"
+      (uuid "5af3c90e-0367-53a2-b7a4-29f741db08d5")
+    )
+    (pin "2"
+      (uuid "30f71d38-c675-51a9-b4bf-32f967221db6")
+    )
+    (pin "3"
+      (uuid "22cfb5ec-2a40-562e-b52d-69142780ac6a")
+    )
+    (instances
+      (project "dmxnow"
+        (path "/e8dbadfa-12b4-59ca-86b1-ce9005833f30"
+          (reference "J8")
+          (unit 1)
+        )
+      )
+    )
+  )
   (wire
     (pts
-      (xy 398.78 360.68)
-      (xy 396.24 360.68)
+      (xy 431.8 355.6)
+      (xy 429.26 355.6)
     )
     (stroke
       (width 0)
       (type default)
     )
-    (uuid "4d039d1e-b695-5b2f-9ef1-316be9b6246c")
+    (uuid "b43dc6ef-00f4-5df6-98d3-f3922c1510cc")
   )
   (label "CH2"
-    (at 396.24 360.68 180)
+    (at 429.26 355.6 180)
     (fields_autoplaced)
     (effects
       (font
@@ -15846,21 +15821,21 @@
       )
       (justify right bottom)
     )
-    (uuid "5c48eacb-7afe-550d-a359-adfca0b3a4a6")
+    (uuid "a8fb99ac-ee2b-5254-8d8e-34c15bc3063f")
   )
   (wire
     (pts
-      (xy 398.78 363.22)
-      (xy 396.24 363.22)
+      (xy 431.8 358.14)
+      (xy 429.26 358.14)
     )
     (stroke
       (width 0)
       (type default)
     )
-    (uuid "b2c0caf6-aa3b-5f17-bd2c-f837a90eb61e")
+    (uuid "9417f18e-8aad-561e-92d0-faa8297f1bdd")
   )
   (label "CH3"
-    (at 396.24 363.22 180)
+    (at 429.26 358.14 180)
     (fields_autoplaced)
     (effects
       (font
@@ -15868,21 +15843,21 @@
       )
       (justify right bottom)
     )
-    (uuid "66ff416a-2d13-5904-acfc-4b64f295448f")
+    (uuid "77eec080-b70a-5ffb-b27f-cb87c70e016a")
   )
   (wire
     (pts
-      (xy 398.78 365.76)
-      (xy 396.24 365.76)
+      (xy 431.8 360.68)
+      (xy 429.26 360.68)
     )
     (stroke
       (width 0)
       (type default)
     )
-    (uuid "30eca8f1-a68e-588f-95d3-4818f049887a")
+    (uuid "143d237e-4df8-5fc0-897c-e9ecce90b85a")
   )
   (label "CH4"
-    (at 396.24 365.76 180)
+    (at 429.26 360.68 180)
     (fields_autoplaced)
     (effects
       (font
@@ -15890,10 +15865,10 @@
       )
       (justify right bottom)
     )
-    (uuid "fc8b24ba-3677-5c2a-852c-da27d6bd3d64")
+    (uuid "2108aa01-836f-5c1b-ad4d-8cef8f77dab9")
   )
   (text "Fixations"
-    (at 451.016 339.785 0)
+    (at 480.016 339.785 0)
     (effects
       (font
         (size 2 2)
@@ -15905,14 +15880,14 @@
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
-    (at 457.2 353.06 0)
+    (at 487.68 353.06 0)
     (unit 1)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (uuid "3b5e4b19-f493-5b14-b82d-be5f450cf8a6")
     (property "Reference" "H1"
-      (at 457.2 347.98 0)
+      (at 487.68 347.98 0)
       (id 0)
       (effects
         (font
@@ -15921,7 +15896,7 @@
       )
     )
     (property "Value" "M3 NPTH"
-      (at 457.2 349.885 0)
+      (at 487.68 349.885 0)
       (id 1)
       (effects
         (font
@@ -15930,7 +15905,7 @@
       )
     )
     (property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
-      (at 457.2 353.06 0)
+      (at 487.68 353.06 0)
       (id 2)
       (effects
         (font
@@ -15940,7 +15915,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 457.2 353.06 0)
+      (at 487.68 353.06 0)
       (id 3)
       (effects
         (font
@@ -15950,7 +15925,7 @@
       )
     )
     (property "MPN" ""
-      (at 457.2 353.06 0)
+      (at 487.68 353.06 0)
       (id 4)
       (effects
         (font
@@ -15960,7 +15935,7 @@
       )
     )
     (property "LCSC" ""
-      (at 457.2 353.06 0)
+      (at 487.68 353.06 0)
       (id 5)
       (effects
         (font
@@ -15970,7 +15945,7 @@
       )
     )
     (property "Section" "main"
-      (at 457.2 353.06 0)
+      (at 487.68 353.06 0)
       (id 6)
       (effects
         (font
@@ -15990,14 +15965,14 @@
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
-    (at 474.98 353.06 0)
+    (at 505.46 353.06 0)
     (unit 1)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (uuid "90575b90-c8b3-5fe7-9d3d-31b98dd22652")
     (property "Reference" "H2"
-      (at 474.98 347.98 0)
+      (at 505.46 347.98 0)
       (id 0)
       (effects
         (font
@@ -16006,7 +15981,7 @@
       )
     )
     (property "Value" "M3 NPTH"
-      (at 474.98 349.885 0)
+      (at 505.46 349.885 0)
       (id 1)
       (effects
         (font
@@ -16015,7 +15990,7 @@
       )
     )
     (property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
-      (at 474.98 353.06 0)
+      (at 505.46 353.06 0)
       (id 2)
       (effects
         (font
@@ -16025,7 +16000,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 474.98 353.06 0)
+      (at 505.46 353.06 0)
       (id 3)
       (effects
         (font
@@ -16035,7 +16010,7 @@
       )
     )
     (property "MPN" ""
-      (at 474.98 353.06 0)
+      (at 505.46 353.06 0)
       (id 4)
       (effects
         (font
@@ -16045,7 +16020,7 @@
       )
     )
     (property "LCSC" ""
-      (at 474.98 353.06 0)
+      (at 505.46 353.06 0)
       (id 5)
       (effects
         (font
@@ -16055,7 +16030,7 @@
       )
     )
     (property "Section" "main"
-      (at 474.98 353.06 0)
+      (at 505.46 353.06 0)
       (id 6)
       (effects
         (font
@@ -16075,14 +16050,14 @@
   )
   (symbol
     (lib_id "Mechanical:MountingHole")
-    (at 492.76 353.06 0)
+    (at 523.24 353.06 0)
     (unit 1)
     (in_bom no)
     (on_board yes)
     (dnp no)
     (uuid "88d5d96d-0ca3-5019-a965-d062acb5f51a")
     (property "Reference" "H3"
-      (at 492.76 347.98 0)
+      (at 523.24 347.98 0)
       (id 0)
       (effects
         (font
@@ -16091,7 +16066,7 @@
       )
     )
     (property "Value" "M3 NPTH"
-      (at 492.76 349.885 0)
+      (at 523.24 349.885 0)
       (id 1)
       (effects
         (font
@@ -16100,7 +16075,7 @@
       )
     )
     (property "Footprint" "MountingHole:MountingHole_3.2mm_M3"
-      (at 492.76 353.06 0)
+      (at 523.24 353.06 0)
       (id 2)
       (effects
         (font
@@ -16110,7 +16085,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 492.76 353.06 0)
+      (at 523.24 353.06 0)
       (id 3)
       (effects
         (font
@@ -16120,7 +16095,7 @@
       )
     )
     (property "MPN" ""
-      (at 492.76 353.06 0)
+      (at 523.24 353.06 0)
       (id 4)
       (effects
         (font
@@ -16130,7 +16105,7 @@
       )
     )
     (property "LCSC" ""
-      (at 492.76 353.06 0)
+      (at 523.24 353.06 0)
       (id 5)
       (effects
         (font
@@ -16140,7 +16115,7 @@
       )
     )
     (property "Section" "strip"
-      (at 492.76 353.06 0)
+      (at 523.24 353.06 0)
       (id 6)
       (effects
         (font
@@ -16159,7 +16134,7 @@
     )
   )
   (text "Drapeaux d'alimentation (ERC)"
-    (at 20.32 390.78 0)
+    (at 20.32 388.24 0)
     (effects
       (font
         (size 2 2)
@@ -16171,14 +16146,14 @@
   )
   (symbol
     (lib_id "power:PWR_FLAG")
-    (at 20.32 398.78 0)
+    (at 20.32 396.24 0)
     (unit 1)
     (in_bom no)
     (on_board no)
     (dnp no)
     (uuid "3f73fc11-5290-5b39-8c83-520da6f16227")
     (property "Reference" "#FLG01"
-      (at 20.32 396.875 0)
+      (at 20.32 394.335 0)
       (id 0)
       (effects
         (font
@@ -16188,7 +16163,7 @@
       )
     )
     (property "Value" "PWR_FLAG"
-      (at 20.32 394.97 0)
+      (at 20.32 392.43 0)
       (id 1)
       (effects
         (font
@@ -16197,7 +16172,7 @@
       )
     )
     (property "Footprint" ""
-      (at 20.32 398.78 0)
+      (at 20.32 396.24 0)
       (id 2)
       (effects
         (font
@@ -16207,7 +16182,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 20.32 398.78 0)
+      (at 20.32 396.24 0)
       (id 3)
       (effects
         (font
@@ -16230,8 +16205,8 @@
   )
   (wire
     (pts
+      (xy 20.32 396.24)
       (xy 20.32 398.78)
-      (xy 20.32 401.32)
     )
     (stroke
       (width 0)
@@ -16240,7 +16215,7 @@
     (uuid "a2969cff-3ede-54bf-bda1-a76f524d7549")
   )
   (label "L_PSU"
-    (at 20.32 401.32 270)
+    (at 20.32 398.78 270)
     (fields_autoplaced)
     (effects
       (font
@@ -16252,14 +16227,14 @@
   )
   (symbol
     (lib_id "power:PWR_FLAG")
-    (at 45.72 398.78 0)
+    (at 45.72 396.24 0)
     (unit 1)
     (in_bom no)
     (on_board no)
     (dnp no)
     (uuid "9337447d-c60e-54c8-8066-ea5eb7d23029")
     (property "Reference" "#FLG02"
-      (at 45.72 396.875 0)
+      (at 45.72 394.335 0)
       (id 0)
       (effects
         (font
@@ -16269,7 +16244,7 @@
       )
     )
     (property "Value" "PWR_FLAG"
-      (at 45.72 394.97 0)
+      (at 45.72 392.43 0)
       (id 1)
       (effects
         (font
@@ -16278,7 +16253,7 @@
       )
     )
     (property "Footprint" ""
-      (at 45.72 398.78 0)
+      (at 45.72 396.24 0)
       (id 2)
       (effects
         (font
@@ -16288,7 +16263,7 @@
       )
     )
     (property "Datasheet" ""
-      (at 45.72 398.78 0)
+      (at 45.72 396.24 0)
       (id 3)
       (effects
         (font
@@ -16311,8 +16286,8 @@
   )
   (wire
     (pts
+      (xy 45.72 396.24)
       (xy 45.72 398.78)
-      (xy 45.72 401.32)
     )
     (stroke
       (width 0)
@@ -16321,7 +16296,7 @@
     (uuid "50c91b69-15b3-52a9-b8f7-69bf2a5869a1")
   )
   (label "N"
-    (at 45.72 401.32 270)
+    (at 45.72 398.78 270)
     (fields_autoplaced)
     (effects
       (font

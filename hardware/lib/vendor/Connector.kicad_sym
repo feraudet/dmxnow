@@ -193,7 +193,7 @@
       )
     )
   )
-  (symbol "Screw_Terminal_01x05"
+  (symbol "Screw_Terminal_01x03"
     (pin_names
       (offset 1.016)
       hide
@@ -201,15 +201,15 @@
     (in_bom yes)
     (on_board yes)
     (property "Reference" "J"
-      (at 0 7.62 0)
+      (at 0 5.08 0)
       (effects
         (font
           (size 1.27 1.27)
         )
       )
     )
-    (property "Value" "Screw_Terminal_01x05"
-      (at 0 -7.62 0)
+    (property "Value" "Screw_Terminal_01x03"
+      (at 0 -5.08 0)
       (effects
         (font
           (size 1.27 1.27)
@@ -243,7 +243,7 @@
         hide
       )
     )
-    (property "ki_description" "Generic screw terminal, single row, 01x05, script generated (kicad-library-utils/schlib/autogen/connector/)"
+    (property "ki_description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
       (at 0 0 0)
       (effects
         (font
@@ -261,10 +261,10 @@
         hide
       )
     )
-    (symbol "Screw_Terminal_01x05_1_1"
+    (symbol "Screw_Terminal_01x03_1_1"
       (rectangle
-        (start -1.27 6.35)
-        (end 1.27 -6.35)
+        (start -1.27 3.81)
+        (end 1.27 -3.81)
         (stroke
           (width 0.254)
           (type default)
@@ -274,32 +274,8 @@
         )
       )
       (circle
-        (center 0 -5.08)
-        (radius 0.635)
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
-      (circle
         (center 0 -2.54)
         (radius 0.635)
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
-      (polyline
-        (pts
-          (xy -0.5334 -4.7498)
-          (xy 0.3302 -5.588)
-        )
         (stroke
           (width 0.1524)
           (type default)
@@ -349,32 +325,6 @@
       )
       (polyline
         (pts
-          (xy -0.5334 5.4102)
-          (xy 0.3302 4.572)
-        )
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
-      (polyline
-        (pts
-          (xy -0.3556 -4.572)
-          (xy 0.508 -5.4102)
-        )
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
-      (polyline
-        (pts
           (xy -0.3556 -2.032)
           (xy 0.508 -2.8702)
         )
@@ -412,19 +362,6 @@
           (type none)
         )
       )
-      (polyline
-        (pts
-          (xy -0.3556 5.588)
-          (xy 0.508 4.7498)
-        )
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
       (circle
         (center 0 0)
         (radius 0.635)
@@ -447,19 +384,8 @@
           (type none)
         )
       )
-      (circle
-        (center 0 5.08)
-        (radius 0.635)
-        (stroke
-          (width 0.1524)
-          (type default)
-        )
-        (fill
-          (type none)
-        )
-      )
       (pin passive line
-        (at -5.08 5.08 0)
+        (at -5.08 2.54 0)
         (length 3.81)
         (name "Pin_1"
           (effects
@@ -477,7 +403,7 @@
         )
       )
       (pin passive line
-        (at -5.08 2.54 0)
+        (at -5.08 0 0)
         (length 3.81)
         (name "Pin_2"
           (effects
@@ -495,7 +421,7 @@
         )
       )
       (pin passive line
-        (at -5.08 0 0)
+        (at -5.08 -2.54 0)
         (length 3.81)
         (name "Pin_3"
           (effects
@@ -505,42 +431,6 @@
           )
         )
         (number "3"
-          (effects
-            (font
-              (size 1.27 1.27)
-            )
-          )
-        )
-      )
-      (pin passive line
-        (at -5.08 -2.54 0)
-        (length 3.81)
-        (name "Pin_4"
-          (effects
-            (font
-              (size 1.27 1.27)
-            )
-          )
-        )
-        (number "4"
-          (effects
-            (font
-              (size 1.27 1.27)
-            )
-          )
-        )
-      )
-      (pin passive line
-        (at -5.08 -5.08 0)
-        (length 3.81)
-        (name "Pin_5"
-          (effects
-            (font
-              (size 1.27 1.27)
-            )
-          )
-        )
-        (number "5"
           (effects
             (font
               (size 1.27 1.27)

@@ -87,13 +87,13 @@ JLC_FIX = {
     "FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165": (180, None, None),
     # WAGO 2604: JLC origin = centre of the pin array (not the body with its lever)
     "TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal": (0, "pads", None),
-    "TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal": (0, "pads", None),
+    "TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal": (0, "pads", None),
 }
 THT_DEFAULT = (0, None, None)
 
 # Parts JLCPCB cannot supply today (0 stock): kept out of the JLC BOM/CPL, hand-soldered
 # or consigned (bom_full.csv says so). Re-check at order time.
-NOT_AT_JLC = {"J6": "WAGO 2604-1105 C3818651: 0 stock at JLC/LCSC (2026-09-26)"}
+NOT_AT_JLC = {}
 
 VARIANTS = {
     "smt": lambda p: not p.dnp and _smt(p),

@@ -38,7 +38,8 @@ C7,470uF 35V low ESR,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,Nichicon UHW1V471MP
 C8,1uF 50V,Capacitor_SMD:C_1206_3216Metric,,C1848,strip,yes,SMT,
 U4,74AHCT125,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,SN74AHCT125DR,C155176,strip,yes,SMT,
 C9,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,strip,yes,SMT,
-J6,WAGO 2604-1105 (VLED CH1-CH4),dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal,2604-1105,C3818651,strip,yes,"THT, hand-soldered or consigned: WAGO 2604-1105 C3818651: 0 stock at JLC/LCSC (2026-09-26)",Out of stock at LCSC (2026-09): order from a WAGO distributor
+J6,WAGO 2604-1102 (VLED CH1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,strip,yes,THT,
+J8,WAGO 2604-1103 (CH2-CH4),dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal,2604-1103,C3309758,strip,yes,THT,
 R20,0R,Resistor_SMD:R_0805_2012Metric,,C17477,strip,yes,SMT,Logic ground to LED ground star point
 R21,0R,Resistor_SMD:R_0603_1608Metric,,C21189,strip,yes,SMT,Variant detection (GPIO1 low = strip part present)
 R23,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,

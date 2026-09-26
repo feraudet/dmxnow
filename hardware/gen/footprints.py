@@ -183,6 +183,6 @@ if __name__ == "__main__":
     relay_g5rl()
     varistor_10d()
     irm03()
-    for n in (2, 5):
+    for n in (2, 3):
         wago_2604(n)
     print("footprints written to", os.path.normpath(OUT))

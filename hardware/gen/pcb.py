@@ -88,12 +88,13 @@ PLACE = {
     "R18": (93.7, 37.0, 180),
     "H2": (91.0, 50.0, 0),
     # --- breakaway strip part (X 104..146) -------------------------------
-    "J6": (141.5, 30.5, 90),     # VLED y=30.5, CH1..CH4 y=25.5,20.5,15.5,10.5 ; entry towards +X
+    "J6": (141.5, 33.5, 90),     # 2604-1102: VLED y=33.5, CH1 y=28.5 ; entry towards +X
+    "J8": (141.5, 20.5, 90),     # 2604-1103: CH2..CH4 y=20.5,15.5,10.5 (8 mm from CH1: blocks side by side)
     "J5": (141.5, 49.0, 90),     # VLED_IN y=49, GND_LED y=44
     "F2": (121.5, 51.5, 180),    # pin1 VLED_IN x 118..121.5, pin2 VLED x 108.7..112.2
     "C7": (116.5, 36.5, 0),      # + (116.5,36.5) - (121.5,36.5)
-    "D3": (133.0, 37.0, 180),
-    "C8": (140.5, 37.0, 0),
+    "D3": (127.3, 37.5, 270),    # vertical, left of J6: anode (GND_LED) at the bottom
+    "C8": (140.5, 38.75, 0),     # between J6 and J5
     "Q5": (121.0, 4.5, 0),       # CH4 ; tab (drain) towards +X, gate/source at x=116
     "Q4": (121.0, 12.0, 0),      # CH3
     "Q3": (121.0, 19.5, 0),      # CH2
@@ -313,7 +314,7 @@ def outline(board, for_routing=False):
     # J3 supply pads: program through 5V (U3 input), never back-feed 3V3 (SPEC 9, V-HW-05)
     add_text(board, "3V3", 74.0, 28.3, pcbnew.F_SilkS, 1.0)
     add_text(board, "5V", 89.24, 28.3, pcbnew.F_SilkS, 1.0)
-    for y, t in ((30.5, "V+"), (25.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
+    for y, t in ((32.6, "V+"), (28.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
         add_text(board, t, 127.2, y, pcbnew.F_SilkS, 1.0)
     add_line(board, SLOT_X, 1.0, SLOT_X, 11.0, pcbnew.F_SilkS, 0.15)
     add_text(board, "dmxnow v0.3", 88.0, 45.5, pcbnew.F_SilkS, 1.0)
@@ -463,11 +464,11 @@ LED_ROUTES = [
     ("VLED_IN", F, 4.5, [(133.3, 49.75), (121.5, 49.75)]),
     # GND_LED: J5 pin 2 front/back pins (the rest is the bottom-layer pour)
     ("GND_LED", B, 1.9, [(141.5, 44.0), (133.3, 44.0)]),
-    # Channels: drain tab -> J6 back pin (6 A per channel -> 2.5 mm)
+    # Channels: drain tab -> J6 / J8 back pin (6 A per channel -> 2.5 mm)
     ("CH4", F, 2.5, [(122.3, 4.5), (126.5, 4.5), (132.5, 10.5), (141.5, 10.5)]),
     ("CH3", F, 2.5, [(122.3, 12.0), (126.5, 12.0), (130.0, 15.5), (141.5, 15.5)]),
     ("CH2", F, 2.5, [(122.3, 19.5), (126.5, 19.5), (127.5, 20.5), (141.5, 20.5)]),
-    ("CH1", F, 2.5, [(122.3, 27.0), (126.5, 27.0), (128.0, 25.5), (141.5, 25.5)]),
+    ("CH1", F, 2.5, [(122.3, 27.0), (126.5, 27.0), (128.0, 28.5), (141.5, 28.5)]),
 ]
 
 R21_PAD1_X = 105.5 - 0.825   # R_0603: pads at +-0.825 mm
@@ -514,8 +515,8 @@ LED_ROUTES += [("GND", F, 0.4, [(92.875, 31.0), (92.875, 37.0)])]
 # U3 (AP2112K) GND pin is boxed in by pins 1 and 3: tie it to C5 pin 2 directly
 LED_ROUTES += [("GND", F, 0.3, [(74.36, 21.0), (73.2, 21.0), (72.0, 20.225)])]
 # D3 anode and C8 pin 2 to the GND_LED pour (bottom)
-LED_ROUTES += [("GND_LED", F, 1.0, [(130.85, 37.0), (130.85, 39.6)]),
-               ("GND_LED", F, 1.0, [(141.9, 37.0), (141.9, 39.6)])]
+LED_ROUTES += [("GND_LED", F, 1.0, [(127.3, 39.65), (127.3, 41.6)]),
+               ("GND_LED", F, 1.0, [(141.9, 38.75), (141.9, 40.9)])]
 # VLED: F2 pin 2 -> C7 + (keeps the VLED pour in one piece whatever the autorouter does)
 LED_ROUTES += [("VLED", F, 3.0, [(108.7, 49.0), (112.2, 49.0)]),
                ("VLED", F, 3.0, [(110.45, 49.0), (110.45, 45.5), (114.5, 41.5), (116.5, 38.5), (116.5, 36.5)])]
@@ -523,7 +524,7 @@ LED_ROUTES += [("VLED", F, 3.0, [(108.7, 49.0), (112.2, 49.0)]),
 # MOSFET sources and other GND_LED pads to the bottom pour: 3 x 0.6 mm vias per source
 Q_Y = (4.5, 12.0, 19.5, 27.0)
 GND_LED_VIAS = [(114.0, y + 2.28 + dy) for y in Q_Y for dy in (-1.4, 0.0, 1.4)] + \
-    [(130.85, 39.6), (141.9, 39.6)]
+    [(127.3, 41.6), (141.9, 40.9)]
 LED_ROUTES += [("GND_LED", F, 1.4, [(115.96, y + 2.28), (114.0, y + 2.28)]) for y in Q_Y]
 LED_ROUTES += [("GND_LED", F, 1.2, [(114.0, y + 0.88), (114.0, y + 3.68)]) for y in Q_Y]
 
@@ -614,7 +615,7 @@ def gnd_pad_vias(board):
 
 
 VLED_POLY = [(104.5, 53.5), (116.3, 53.5), (116.3, 47.1), (127.0, 47.1), (127.0, 41.9),
-             (145.5, 41.9), (145.5, 28.6), (128.0, 28.6), (125.0, 31.0), (125.0, 32.5), (114.0, 32.5),
+             (145.5, 41.9), (145.5, 30.6), (128.0, 30.6), (125.0, 32.5), (114.0, 32.5),
              (114.0, 44.8), (104.5, 44.8)]
 
 

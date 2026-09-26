@@ -31,7 +31,7 @@ GROUPS = [
      ["J5", "F2", "D3", "C7", "C8", "U4", "C9", "R20", "R21",
       "R15", "R16", "R17", "R18"]),
     ("Partie sécable rubans LED : étages de puissance",
-     ["R7", "R11", "Q2", "R8", "R12", "Q3", "R9", "R13", "Q4", "R10", "R14", "Q5", "J6"]),
+     ["R7", "R11", "Q2", "R8", "R12", "Q3", "R9", "R13", "Q4", "R10", "R14", "Q5", "J6", "J8"]),
     ("Fixations", ["H1", "H2", "H3"]),
 ]
 _missing = {p.ref for p in __import__("design").PARTS} - {r for _, refs in GROUPS for r in refs}
@@ -233,7 +233,7 @@ def write(sh):
             ["rev", QStr("0.1")], ["company", QStr("dmxnow")],
             ["comment", "1", QStr("Généré par hardware/gen/sch.py depuis design.py - ne pas éditer à la main")],
             ["comment", "2", QStr("Parties 230 V : RELECTURE HUMAINE OBLIGATOIRE")],
-            ["comment", "3", QStr("K1, J1, J4, J7, J5, J6 : empreintes PROVISOIRES (fiches non vérifiées)")]],
+            ["comment", "3", QStr("K1, J1, J4, J7, J5, J6, J8 : empreintes PROVISOIRES (fiches non vérifiées)")]],
            ["lib_symbols"] + list(sh.lib.values())]
     doc += sh.items
     doc.append(["sheet_instances", ["path", QStr("/"), ["page", QStr("1")]]])

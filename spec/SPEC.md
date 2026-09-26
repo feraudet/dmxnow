@@ -100,7 +100,7 @@ PE (cordons) ─▶ WAGO 221-413 hors carte, compartiment 230 V
 U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
 U1 IO5 ─▶ Q1 AO3400 ─▶ bobine K1 (D2 roue libre)
 ────── ligne de séparation à languettes (BOARD_SENSE, PWM1-4, +5V, GND seulement) ──────
-J5 12/24 V ─▶ F2 20 A ─▶ D3, C7, C8 ─▶ VLED ─▶ J6-VLED ─▶ rubans ─▶ J6-CH1..4 ─▶ Q2..Q5 ─▶ GND_LED
+J5 12/24 V ─▶ F2 20 A ─▶ D3, C7, C8 ─▶ VLED ─▶ J6-VLED ─▶ rubans ─▶ J6-CH1, J8-CH2..4 ─▶ Q2..Q5 ─▶ GND_LED
 U1 IO6/7/10/3 ─▶ U4 74AHCT125 (5 V) ─▶ R7..R10 ─▶ grilles Q2..Q5
 ```
 
@@ -299,7 +299,7 @@ Logique (implémentée dans `common`, testée) :
   (VBR min 31,1 V < 35 V) : accepté. Une inversion de polarité sur J5 met D3 en court-circuit
   franc : seul F2 protège, marquage « + / − » sérigraphié près de J5.
 - Chemin VLED, retour GND_LED : 17 A, largeur de piste §4.8.3 ; F2, C7 et D3 collés à J5 ;
-  retour de courant des rubans (J6 → MOSFET → GND_LED → J5) entièrement dans la partie
+  retour de courant des rubans (J6/J8 → MOSFET → GND_LED → J5) entièrement dans la partie
   sécable.
 - Borniers 17 A : WAGO 2604 32 A / 400 V (IEC, III/2), 20 A UL, 0,2-4 mm² (fiche WAGO
   2604-1102 vérifiée), largement suffisant.
@@ -336,9 +336,9 @@ Zonage (vue de dessus) :
 ```
 X: 0            46 49 52                        96  100 104                          146
 ┌───────────────┬──┬──┬─────────────────────────┬───┊───┬───────────────────────────┐
-│ J1 (L N)      │  │  │ K1 bobine  Q1 D2  U3    │   ┊   │ Q2..Q5 (DPAK)   J6 (VLED,  │
-│ J4 (L_SW N)   │ f│  │ PS1 sorties  J3 SW1     │   ┊   │ R7..R14         CH1..CH4)  │
-│ J4b(L_SW N)   │ e│6 │ U1 ESP32 [antenne ↑]    │   ┊   │ U4 C9 C7  D3 C8            │
+│ J1 (L N)      │  │  │ K1 bobine  Q1 D2  U3    │   ┊   │ Q2..Q5 (DPAK)   J8 (CH2..4)│
+│ J4 (L_SW N)   │ f│  │ PS1 sorties  J3 SW1     │   ┊   │ R7..R14         J6 (VLED,  │
+│ J4b(L_SW N)   │ e│6 │ U1 ESP32 [antenne ↑]    │   ┊   │ U4 C9 C7  D3    CH1) C8    │
 │ K1 contacts F1│ n│mm│ U2 D1 J2 (DMX)          │   ┊   │ F2 (ATO)        J5 (12/24V)│
 │ PS1 entrée RV1│ t│  │                         │ fente │                            │
 │   ZONE 230 V  │ e│  │   ZONE BASSE TENSION    │4mm┊4mm│   PARTIE SÉCABLE (TBTS)    │
@@ -662,12 +662,13 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 
 Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix d'un module Mean Well (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
 **Prix LCSC relevés le 2026-09-26** (API JLCPCB, toutes les références de `design.py`) :
-composants de la carte entière **≈ 33 $ à l'unité, ≈ 28 $ par nœud en série de 20**, dont
-≈ 12 $ pour la partie principale seule. Postes principaux : WAGO 2604-1102 (4 × 2,4 à 3,2 $),
-IRM-03-5 (3,9 $), ESP32-C3-MINI-1-N4 (3,5 à 3,8 $), WAGO 2604-1105 (3,8 $), porte-fusible
+composants de la carte entière **≈ 36 $ à l'unité, ≈ 31 $ par nœud en série de 20** (estimation révisée le 2026-09-26 pour J6 + J8), dont
+≈ 12 $ pour la partie principale seule. Postes principaux : WAGO 2604-1102 (5 × 2,4 à 3,2 $),
+IRM-03-5 (3,9 $), ESP32-C3-MINI-1-N4 (3,5 à 3,8 $), WAGO 2604-1103 (3,8 à 4,8 $), porte-fusible
 ATO (2,1 à 2,5 $), G5RL-1A-E-HR (1,4 à 1,7 $). Tous les composants traversants sont
-référencés chez LCSC (assemblage traversant JLCPCB possible) ; **WAGO 2604-1105 est en
-rupture chez LCSC** (à commander chez un distributeur WAGO). Côté assemblage CMS : 7
+référencés chez LCSC (assemblage traversant JLCPCB possible) ; le WAGO 2604-1105 (5 pôles)
+prévu à l'origine pour J6 est **arrêté chez WAGO** : remplacé par J6 (2604-1102, VLED + CH1) et
+J8 (2604-1103, CH2 à CH4), en stock chez JLCPCB. Côté assemblage CMS : 7
 références « extended » (≈ 3 $ de frais chacune par commande) ; le reste est en « basic ».
 Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port et TVA) :
 ≈ 120 à 150 $ ; série de 20 : ≈ 35 $ d'électronique par nœud [V-HW-13].
@@ -775,7 +776,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-HW-01 | HLK-PM05 (empreinte de repli uniquement) : brochage (AC ×2, +Vo, −Vo), dimensions ~34 × 20 × 15 mm, pas des broches, isolation 3000 V AC, 600 mA, fusible et varistance recommandés | Fiche Hi-Link HLK-PM05 (hlktech.net) | 🔴 critique |
 | V-HW-02 | ESP32-C3-MINI-1 : brochage des pastilles, GPIO exposés (0-10, 18-21), strapping IO2/IO8/IO9, zone d'exclusion d'antenne, consommations RX/TX, découplage recommandé | *ESP32-C3-MINI-1 Datasheet* et *ESP32-C3 Hardware Design Guidelines* (espressif.com) | critique |
 | V-HW-03 | ✅ Vérifié (catalogue Omron G5RL p. 5) pour le G5RL-1A-E-HR DC5 : bobine 80 mA / 62,5 Ω, six trous 1,3 mm (bobine 1/8, COM 3/6 à 20 mm, NO 4/5 à 25 mm), corps 29 × 12,7 × 15,7 mm, isolation renforcée 8 mm / 10 kV. Reste à contrôler par un humain : homologations de la pièce achetée | Omron, catalogue G5RL (`hardware/datasheets/omron-g5rl.pdf`) | 🔴 critique |
-| V-HW-04 | ✅ Vérifié (fiche WAGO 2604-1102, 18.02.2024) : pas 5 mm, 2 broches par pôle à 8,2 mm, perçage 1,3 mm, broche 0,8 × 1 mm, corps 16,3 mm de profondeur (+ 2,9 mm de levier), largeur (n − 1) × 5 + 7,4 mm, 32 A / 400 V IEC, 0,2-4 mm². Restent : **une seule âme par point de serrage** (câblage) et la fiche 2604-1105 (5 pôles, même série supposée identique) | Fiches WAGO 2604 (`hardware/datasheets/wago-2604-1102.pdf`) | 🔴 critique |
+| V-HW-04 | ✅ Vérifié (fiche WAGO 2604-1102, 18.02.2024) : pas 5 mm, 2 broches par pôle à 8,2 mm, perçage 1,3 mm, broche 0,8 × 1 mm, corps 16,3 mm de profondeur (+ 2,9 mm de levier), largeur (n − 1) × 5 + 7,4 mm, 32 A / 400 V IEC, 0,2-4 mm². Restent : **une seule âme par point de serrage** (câblage) et la fiche 2604-1105 (5 pôles, même série supposée identique) ; blocs juxtaposés : L = (n − 1) × 5 + 7,4 mm, soit 7,4 mm entre les broches voisines de deux blocs (fiche p. 2, relevé 2026-09-26) | Fiches WAGO 2604 (`hardware/datasheets/wago-2604-1102.pdf`) | 🔴 critique |
 | V-HW-05 | AP2112K-3.3 : brochage SOT-23-5 (1 VIN, 2 GND, 3 EN, 4 NC, 5 VOUT), RθJA, comportement en courant inverse | Diodes Inc., fiche AP2112 | moyenne |
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
 | V-HW-07 | ✅ AOD2610E (remplace AOD4184A) : 60 V, RDS(on) ≤ 13,3 mΩ à 4,5 V, VGS(th) 1,4-2,4 V, Qgd 3,5 nC ; AO3400 : VGS(th) ≤ 1,45 V | Fiches AOS (LCSC C282428, C20917) | faible |
@@ -784,7 +785,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-HW-10 | ✅ Placement 146 × 54 mm (partie principale 100 × 54) conservé après relevé des cotes réelles des WAGO 2604 et du G5RL-1A-E-HR : J1, J4, J7 décalés de 0,7 mm vers le bord, J6 et H3 de 0,5 mm ; les corps des WAGO dépassent le bord du PCB de 0,7 à 1,4 mm (à reprendre dans le boîtier, livrable 8.6) | Livrable PCB | faible |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | ✅ Capacités JLCPCB relevées : V-cut ≥ 70 × 70 mm et cuivre ≥ 0,4 mm de l'axe (d'où les languettes), languette perforée ≥ 5 mm, trous 0,5-0,8 mm, fente non métallisée ≥ 1 mm, 2 oz : piste/espace ≥ 0,16 mm, anneau ≥ 0,254 mm (vias 0,9/0,35 mm) | jlcpcb.com/capabilities | faible |
-| V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; reste la rupture de WAGO 2604-1105 chez LCSC et le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
+| V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; WAGO 2604-1105 arrêté (remplacé par 2604-1102 + 2604-1103, 2026-09-26) ; reste le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
 | V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
 | V-FW-01 | pioarduino : version exacte à épingler (Arduino ≥ 3.2 / IDF ≥ 5.4.2), support ESP32-C3 et XIAO ESP32-C3 | github.com/pioarduino/platform-espressif32 (releases) | critique |
 | V-FW-02 | `esp_now_set_peer_rate_config()` utilisable pour le pair broadcast depuis Arduino 3.x | ESP-IDF API ESP-NOW (v5.5) | moyenne |
@@ -804,7 +805,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 ## 11. Réponses aux points ouverts du cahier des charges
 
 1. **WAGO 2604 et double sortie J4** : références supposées 2604-1103 / 2604-3103
-   (3 pôles), 2604-1102 (2 pôles), 2604-1105 (5 pôles), pas 5 mm [V-HW-04]. Une borne
+   (3 pôles), 2604-1102 (2 pôles), 2604-1105 (5 pôles, arrêté : remplacé par J6 2604-1102 + J8 2604-1103, amendement de l'ADR 0008), pas 5 mm [V-HW-04]. Une borne
    2604 n'accepte qu'un conducteur par point : **seconde borne J4b** (référence J7 dans
    KiCad) en parallèle de J4, pistes dimensionnées pour le courant total. Depuis
    l'arbitrage A9, J1, J4 et J4b sont des **2604-1102 (2 pôles, L et N)** à entrée

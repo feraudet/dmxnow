@@ -155,10 +155,14 @@ PARTS = [
           "8": "DRV3", "9": "PWM3", "10": "GND", "11": "DRV4", "12": "PWM4", "13": "GND", "14": "+5V"},
          lcsc="C155176", mpn="SN74AHCT125DR", section="strip"),
     C("C9", "100nF", "+5V", "GND", lcsc="C14663", section="strip"),
-    Part("J6", "Connector:Screw_Terminal_01x05", "dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal",
-         "WAGO 2604-1105 (VLED CH1-CH4)",
-         {"1": "VLED", "2": "CH1", "3": "CH2", "4": "CH3", "5": "CH4"}, lcsc="C3818651", mpn="2604-1105", section="strip",
-         note="Out of stock at LCSC (2026-09): order from a WAGO distributor"),
+    # LED strip outputs: 2604-1105 (5 poles) is discontinued, so a 2-pole + 3-pole pair
+    # (7.4 mm between the blocks' neighbouring pins instead of 5 mm, WAGO L formula)
+    Part("J6", "Connector:Screw_Terminal_01x02", "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal",
+         "WAGO 2604-1102 (VLED CH1)",
+         {"1": "VLED", "2": "CH1"}, lcsc="C3309286", mpn="2604-1102", section="strip"),
+    Part("J8", "Connector:Screw_Terminal_01x03", "dmxnow:TerminalBlock_WAGO_2604-1103_1x03_P5.00mm_Horizontal",
+         "WAGO 2604-1103 (CH2-CH4)",
+         {"1": "CH2", "2": "CH3", "3": "CH4"}, lcsc="C3309758", mpn="2604-1103", section="strip"),
     # 0 ohm links: single deliberate connection points on the strip part (SPEC 4.8.4, 4.2)
     Part("R20", "Device:R", "Resistor_SMD:R_0805_2012Metric", "0R", {"1": "GND", "2": "GND_LED"},
          lcsc="C17477", section="strip", note="Logic ground to LED ground star point"),
