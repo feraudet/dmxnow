@@ -1,6 +1,6 @@
 # dmxnow — matériel
 
-PCB du nœud : 2 couches, cuivre 2 oz, **146 × 54 mm** plus une bande de 47,5 × 10 mm
+PCB du nœud : 2 couches, cuivre 2 oz, **146 × 54 mm** plus une bande de 47,5 × 11,5 mm
 au-dessus de la zone 230 V (porte-fusible F1), séparation à X = 100 mm par fente fraisée
 et trois languettes perforées (partie principale « projecteur » 100 × 54 mm, partie
 sécable « rubans » 46 × 54 mm). Révision 0.3 (après revue de conception, voir
@@ -72,7 +72,7 @@ Définies dans `gen/project.py` → `dmxnow.kicad_dru` :
 | Pastilles internes de K1 (COM/NO) et de PS1 (AC) | ≥ 2 mm (imposé par le composant) |
 | Cuivre 230 V ↔ bord de carte | ≥ 1 mm |
 
-Géométrie : cuivre 230 V à X ≤ 46 mm, basse tension à X ≥ 52 mm, fentes de 1 mm à
+Géométrie : cuivre 230 V à X ≤ 46 mm, basse tension à X ≥ 52 mm, fentes de 1,2 mm à
 X = 49 mm sous K1 et PS1, aucun cuivre à moins de 6 mm de la pastille NC de PS1 (rangée
 AC du module). Aucun trou de fixation dans la zone 230 V. Le PE ne passe pas
 par la carte (WAGO 221-413 dans le boîtier, arbitrage A9).

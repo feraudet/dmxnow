@@ -25,6 +25,7 @@ une pièce réelle posée sur une impression 1:1 du PCB.
 | PS1 | Mean Well IRM-03-5 (LCSC C6969425) | Empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT` conforme : AC/L (1), AC/N (3) à 5,08 mm, NC (5) à 30,48 mm, −Vo (14) et +Vo (16) à 17,78 mm, broches Ø 0,6 mm, corps 37 × 24 × 15 mm. | Fiche IRM-03 (2025-08-08) p. 4 | ☐ |
 | F1 | Support Schurter 0031.8201 (LCSC C3204125) + cartouche Littelfuse 0215.500MXP (T500 mA H, céramique, 1500 A sous 250 V AC, LCSC C142839, à insérer à la main) | Empreinte KiCad `Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open` : broches à 22,5 mm, ergot NPTH de 2,7 mm. Vérifier sur la fiche Schurter. Support ouvert : pièces nues sous 230 V dans le compartiment secteur. | Schurter | ☐ |
 | RV1 | 10D561K (LCSC C113236, HEL série 10D) | Empreinte du projet `RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1` : perçage 1,1 mm (pattes 0,8 ± 0,1 mm ; le 0,8 mm de KiCad était trop juste), corps jusqu'à 9 mm d'épaisseur (fiche, rangée 430-560 V). Vérifier l'épaisseur réelle de la pièce livrée. | Fiche HEL 10D | ☐ |
+| PS1 (trous) | IRM-03-5 | Empreinte du projet `Converter_ACDC_MeanWell_IRM-03-xx_THT_Drill1.0` : perçages 1,0 mm (broches Ø 0,6 ± 0,1 mm ; les 0,76-0,8 mm de KiCad étaient trop justes avec la tolérance JLCPCB), mêmes positions et pastilles. | Fiche IRM-03 p. 4 | ☐ |
 | U1 | ESP32-C3-MINI-1 | Empreinte officielle Espressif (kicad-libraries), zone d'exclusion d'antenne incluse. Vérifier la version de l'empreinte. | Espressif | ☐ |
 | F2 | Porte-fusible ATO | Empreinte KiCad Littelfuse FLR 178.6165 ; vérifier l'intensité admissible (≥ 20 A) et la disponibilité. | Littelfuse | ☐ |
 
@@ -35,7 +36,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | # | Point | Référence | OK |
 |---|-------|-----------|----|
 | 2.1 | Toute pièce de cuivre 230 V (nets L_IN, L_SW, N, L_PSU) est à X ≤ 46 mm ; tout cuivre basse tension à X ≥ 52 mm (6 mm). Vérifié par la règle DRC `mains_to_low_voltage` et par `check.py pcb` ; contrôler visuellement sur les Gerbers. | SPEC 4.8.2 | ☐ |
-| 2.2 | Fentes de 1 mm à X = 49 mm sous K1 (Y 12-26) et sous PS1 (Y 27,5-52), entre broches AC et DC de PS1 et entre contacts et bobine de K1. | SPEC 4.8.2 | ☐ |
+| 2.2 | Fentes de 1,2 mm à bouts arrondis à X = 49 mm sous K1 (Y 12-26) et sous PS1 (Y 27,5-52), entre broches AC et DC de PS1 et entre contacts et bobine de K1. | SPEC 4.8.2 | ☐ |
 | 2.3 | Distance bobine-contacts de K1 (interne au relais) ≥ distance requise pour l'isolation renforcée : la fiche Omron annonce une isolation renforcée, 8 mm dans l'air et en ligne de fuite, 6000 V AC, choc 10 kV (à confronter à IEC 62368-1, V-HW-11). | V-HW-03 | ☐ |
 | 2.4 | Isolation entrée-sortie de PS1 certifiée (IEC/UL 62368-1) : marquage d'homologation présent sur la pièce achetée. | V-HW-09 | ☐ |
 | 2.5 | Aucun plan de masse, via, piste ou trou métallisé basse tension dans la zone 230 V, sur les deux faces. | SPEC 4.8.2 | ☐ |
@@ -91,3 +92,14 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 4. Essai de charge : 10 A pendant 1 h, relevé thermique (pistes, relais, borniers) ;
    essai de courte durée à 16 A.
 5. Commutation d'une alimentation LED réelle (courant d'appel), 1000 cycles.
+
+## 7. Commande et montage
+
+| # | Point | OK |
+|---|-------|----|
+| 7.1 | J6 (WAGO 2604-1105) est retiré des fichiers JLCPCB (0 stock) : à souder à la main ou à fournir à JLCPCB (consignation). | ☐ |
+| 7.2 | RV1 : l'empreinte JLCPCB de C113236 écarte les pattes de 6 mm latéralement (la nôtre 1,63 mm, pas de 7,5 mm identique) : JLCPCB mettra les pattes en forme, vérifier l'aperçu. | ☐ |
+| 7.3 | Languettes de séparation : ~15 mm de FR-4 plein au total sur la ligne de rupture (les trous s'interrompent au droit des pistes) ; prévoir scie ou pince coupante plutôt qu'une rupture à la main. | ☐ |
+| 7.4 | Mise en route : démarrage à froid répété, ligne DMX terminée par 120 Ω, à la tension secteur mini et maxi (limite de courant repliée de l'AP2112K) ; F1 face à l'appel de courant de PS1. | ☐ |
+| 7.5 | Rubans : charge totale ≤ 16 A en continu avec le fusible F2 de 20 A (≤ 80 %) ; polarité de J5 (une inversion avec une alimentation limitée en courant fait chauffer D3 sans fondre F2). | ☐ |
+

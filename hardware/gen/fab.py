@@ -68,7 +68,7 @@ def gerbers():
 def _smt(p):
     return not any(k in p.footprint for k in ("THT", "TerminalBlock", "Relay", "Fuse", "Varistor",
                                                 "PinHeader", "MountingHole", "Converter_ACDC",
-                                                "SolderWire", "NetTie", "CP_Radial"))
+                                                "SolderWire", "NetTie", "CP_Radial", "RV_Disc"))
 
 
 # footprint name -> (rotation offset deg, dx, dy): JLC centroid = KiCad origin + (dx, dy)
@@ -82,13 +82,18 @@ JLC_FIX = {
     "ESP32-C3-MINI-1": (0, 0.0, 2.7),    # JLC origin at the centre of the pad array
     # THT (JLC centroid = body centre, computed from the courtyard)
     "Relay_SPST_Omron_G5RL-1A-E-HR": (-90, "pads", None),   # JLC origin = pin-pattern centre
-    "Converter_ACDC_MeanWell_IRM-03-xx_THT": (-90, None, None),
+    "Converter_ACDC_MeanWell_IRM-03-xx_THT_Drill1.0": (-90, None, None),
+    "RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1": (0, "pads", None),   # JLC leads may need forming (preview)
     "FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165": (180, None, None),
     # WAGO 2604: JLC origin = centre of the pin array (not the body with its lever)
     "TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal": (0, "pads", None),
     "TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal": (0, "pads", None),
 }
 THT_DEFAULT = (0, None, None)
+
+# Parts JLCPCB cannot supply today (0 stock): kept out of the JLC BOM/CPL, hand-soldered
+# or consigned (bom_full.csv says so). Re-check at order time.
+NOT_AT_JLC = {"J6": "WAGO 2604-1105 C3818651: 0 stock at JLC/LCSC (2026-09-26)"}
 
 VARIANTS = {
     "smt": lambda p: not p.dnp and _smt(p),
@@ -99,7 +104,8 @@ VARIANTS = {
 
 
 def _assembled(p):
-    return not p.symbol.startswith("Mechanical:") and p.footprint.split(":")[0] != "Connector_Wire"
+    return not p.symbol.startswith("Mechanical:") and p.footprint.split(":")[0] != "Connector_Wire" \
+        and p.ref not in NOT_AT_JLC
 
 
 def boms():
@@ -124,8 +130,10 @@ def boms():
             if p.symbol.startswith("Mechanical:"):
                 continue
             fitted = "DNP (option A7)" if p.variant == "led" else ("no" if p.dnp else "yes")
-            w.writerow([p.ref, p.value, p.footprint, p.mpn, p.lcsc, p.section, fitted,
-                        "SMT" if _smt(p) else "THT", p.note])
+            asm = "SMT" if _smt(p) else "THT"
+            if p.ref in NOT_AT_JLC:
+                asm = "THT, hand-soldered or consigned: " + NOT_AT_JLC[p.ref]
+            w.writerow([p.ref, p.value, p.footprint, p.mpn, p.lcsc, p.section, fitted, asm, p.note])
         for name, note, qty, mpn, var in OFF_BOARD:
             w.writerow(["-", name, "-", mpn, "", var, "x%d" % qty, "off-board", note])
 

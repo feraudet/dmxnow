@@ -6363,7 +6363,7 @@
         )
       )
     )
-    (property "Footprint" "Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT"
+    (property "Footprint" "dmxnow:Converter_ACDC_MeanWell_IRM-03-xx_THT_Drill1.0"
       (at 127 52.07 0)
       (id 2)
       (effects

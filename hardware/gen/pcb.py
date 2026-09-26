@@ -25,7 +25,7 @@ LOCAL_LIBS = {"dmxnow": os.path.join(HW, "lib", "dmxnow.pretty"),
 
 OX, OY = 50.0, 50.0          # page offset of the board origin
 W, H = 146.0, 54.0           # board size (SPEC 4.8.1 updated after placement)
-FUSE_BAND = 10.0             # extra height above the 230 V zone only (F1 5x20 holder)
+FUSE_BAND = 11.5             # extra height above the 230 V zone only (F1 5x20 holder, 10.8 mm)
 BAND_X = 47.5                # right edge of that band
 SPLIT_X = 100.0              # breakaway line: routed slot + tabs (ADR 0007, amended)
 SPLIT_KEEP = 4.0             # no component within 4 mm of the breakaway line (SPEC 4.8.4)
@@ -41,7 +41,7 @@ PWR_VIA_D, PWR_VIA_DRILL = 1.2, 0.6
 NC_KEEPOUT = (68.48, 48.0, 7.6)
 MAINS_MAX_X = 46.0           # all 230 V copper at X <= this
 LV_MIN_X = 52.0              # all low-voltage copper at X >= this (6 mm)
-SLOT_X = 49.0                # 1 mm isolation slots centred here
+SLOT_X = 49.0                # 1.2 mm isolation slots centred here
 SLOTS = [(12.0, 26.0), (27.5, 52.0)]   # (y start, y end): under K1, under PS1
 
 # ref: (x, y, rotation_deg). Footprint origin = pad 1 for THT parts.
@@ -51,7 +51,7 @@ PLACE = {
     "J4": (3.8, 20.5, -90),      # L_SW y=20.5, N y=25.5
     "J7": (3.8, 36.0, -90),      # L_SW y=36, N y=41
     "K1": (53.0, 15.0, -90),     # coil A1 (53,15) A2 (53,22.5) ; COM x=33 ; NO x=28
-    "F1": (13.0, -4.5, 0),       # holder in the top band: pin1 L_IN (13,-4.5), pin2 L_PSU (35.5,-4.5)
+    "F1": (13.0, -5.2, 0),       # holder in the top band: pin1 L_IN (13,-5.2), pin2 L_PSU (35.5,-5.2)
     "PS1": (38.0, 48.0, 90),     # AC/L (38,48) AC/N (43.08,48) ; +Vo (63.4,30.22) -Vo (68.48,30.22)
     "RV1": (28.5, 49.5, 90),     # L_PSU (28.5,49.5) ; N (30.13,42) ; 9 mm thick body clear of PS1
     # --- low voltage, main part (X 52..96) -------------------------------
@@ -294,12 +294,24 @@ def outline(board, for_routing=False):
         add_line(board, x1, y1 - r, x1, y0 + r, E)
         add_arc(board, x1, y0 + r, SPLIT_X, y0, x0, y0 + r, E)
     # 1 mm isolation slots (internal cut-outs) 🔴
-    for y1, y2 in SLOTS:
-        add_rect(board, SLOT_X - 0.5, y1, SLOT_X + 0.5, y2, E, 0.1)
+    for y1, y2 in SLOTS:        # 1.2 mm, round-ended (JLCPCB: no sharp-cornered slots)
+        sa, sb, rr = SLOT_X - 0.6, SLOT_X + 0.6, 0.6
+        add_line(board, sa, y1 + rr, sa, y2 - rr, E)
+        add_arc(board, sa, y2 - rr, SLOT_X, y2, sb, y2 - rr, E)
+        add_line(board, sb, y2 - rr, sb, y1 + rr, E)
+        add_arc(board, sb, y1 + rr, SLOT_X, y1, sa, y1 + rr, E)
     add_text(board, "CASSER ICI", SPLIT_X - 2.2, 38.5, pcbnew.F_SilkS, 1.0, 90)
     # annotations
     add_text(board, "230V", 8.0, 48.5, pcbnew.F_SilkS, 2.0)
-    add_text(board, "F1 T500mA H 250V", 24.25, -8.6, pcbnew.F_SilkS, 1.0)
+    add_text(board, "F1 T500mA H 250V", 24.25, -10.6, pcbnew.F_SilkS, 1.0)
+    # wiring marks (terminals are identical parts)
+    add_text(board, "IN L/N", 19.0, 7.3, pcbnew.F_SilkS, 1.0)
+    add_text(board, "OUT L/N", 18.0, 23.4, pcbnew.F_SilkS, 1.0)
+    add_text(board, "OUT L/N", 18.0, 38.9, pcbnew.F_SilkS, 1.0)
+    for x, t in ((77.0, "GND"), (81.2, "B-"), (85.4, "A+")):     # J2 DMX tail
+        add_text(board, t, x, 48.3, pcbnew.F_SilkS, 0.9)
+    for y, t in ((30.5, "V+"), (25.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
+        add_text(board, t, 128.6, y, pcbnew.F_SilkS, 1.0)
     add_line(board, SLOT_X, 1.0, SLOT_X, 11.0, pcbnew.F_SilkS, 0.15)
     add_text(board, "dmxnow v0.3", 88.0, 45.5, pcbnew.F_SilkS, 1.0)
     # J5 polarity (a reversed LED supply short-circuits through D3; only F2 protects)
@@ -376,6 +388,10 @@ def place(board):
         for k, v in (("MPN", p.mpn), ("LCSC", p.lcsc), ("Section", p.section)):
             if v:
                 fp.SetProperty(k, v)
+        for g in fp.GraphicalItems():     # JLCPCB legend: lines >= 0.15 mm
+            if g.GetLayer() in (pcbnew.F_SilkS, pcbnew.B_SilkS) and hasattr(g, "GetWidth") \
+                    and 0 < g.GetWidth() < mm(0.15):
+                g.SetWidth(mm(0.15))
         for pad in fp.Pads():
             net = p.pins.get(pad.GetNumber())
             if net:
@@ -403,8 +419,8 @@ MAINS_ROUTES = [
     ("L_IN", B, 2.6, [(34.6, 15.0), (37.15, 15.0)]),
     ("L_IN", F, 2.6, [(34.6, 22.5), (37.15, 22.5)]),
     ("L_IN", B, 2.6, [(34.6, 22.5), (37.15, 22.5)]),
-    ("L_IN", F, 2.5, [(13.0, -4.5), (13.0, 3.0)]),
-    ("L_IN", B, 2.5, [(13.0, -4.5), (13.0, 3.0)]),
+    ("L_IN", F, 2.5, [(13.0, -5.2), (13.0, 3.0)]),
+    ("L_IN", B, 2.5, [(13.0, -5.2), (13.0, 3.0)]),
     # L_SW: J4 pin 1 and J7 pin 1 -> relay NO bus (x=25). 7.4 mm fingers on top (they
     # cross the N bus, which is on the bottom), 3.1 mm from the N pads of the terminals.
     ("L_SW", F, 1.9, [(3.8, 20.5), (12.0, 20.5)]),
@@ -426,7 +442,7 @@ MAINS_ROUTES = [
     ("N", B, 1.0, [(18.5, 43.3), (30.13, 43.3), (43.08, 43.3), (43.08, 48.0)]),
     ("N", B, 1.0, [(30.13, 43.3), (30.13, 42.0)]),
     # L_PSU: F1 pin 2 (top band) -> PS1 AC/L, branch to RV1 pin 1
-    ("L_PSU", F, 1.0, [(35.5, -4.5), (43.5, -4.5), (43.5, 27.0), (38.0, 32.5), (38.0, 48.0)]),
+    ("L_PSU", F, 1.0, [(35.5, -5.2), (43.5, -5.2), (43.5, 27.0), (38.0, 32.5), (38.0, 48.0)]),
     ("L_PSU", F, 1.0, [(38.0, 46.0), (28.5, 49.5)]),
 ]
 

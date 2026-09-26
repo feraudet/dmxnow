@@ -179,7 +179,8 @@ le fusible TR5 (pouvoir de coupure 35 A) est remplacé par une cartouche cérami
 temporisée T500 mA « H » (Littelfuse 0215.500MXP, 1500 A sous 250 V AC) dans un support
 ouvert Schurter 0031.8201 : si RV1 finit en court-circuit (mode de défaillance usuel d'une
 varistance), le courant de défaut du réseau dépasse largement 35 A. Le support est placé
-dans une bande de 10 mm ajoutée au-dessus de la zone 230 V (seule place disponible).
+dans une bande de 11,5 mm ajoutée au-dessus de la zone 230 V (seule place disponible ;
+support de 10,8 mm d'emprise).
 La broche 5 (NC) de PS1 est sur la rangée des broches AC du module : traitée comme
 primaire : aucun cuivre à moins de 6 mm du bord de sa pastille (règle DRC `ps1_nc_pin`,
 plus une zone interdite de 7,45 mm autour de son centre pour le routeur et les plans). C10 (47 µF) en
@@ -276,7 +277,8 @@ Logique (implémentée dans `common`, testée) :
   tenus à 0 dès la mise sous tension), et elles restent inoffensives sur une carte cassée
   (0,7 mA par GPIO inutilisée à l'état haut).
 - Courant : 200 W sous 12 V = 16,7 A total, soit ~4,2 A par canal en RGBW équilibré ;
-  on dimensionne chaque canal pour **6 A** et le total pour 17 A (F2 20 A).
+  on dimensionne chaque canal pour **6 A** et le cuivre pour 17 A ; charge continue totale
+  limitée à **16 A** par le fusible F2 de 20 A (≤ 80 % de son calibre, V-HW-08).
 - Pertes par MOSFET à 4,2 A : conduction I²R ≈ 4,2² × 0,010 ≈ 0,18 W ; commutation à
   4,9 kHz ≈ 0,1 à 0,2 W (Qgd 3,5 nC sous ~20 mA de grille : ~175 ns par front) ; total
   ≈ 0,3 à 0,4 W par MOSFET à 4,2 A (≈ 0,7 W à 6 A, RDS(on) à chaud). Cuivre de drain mesuré
@@ -322,8 +324,8 @@ Logique (implémentée dans `common`, testée) :
 
 2 couches, FR-4 TG ≥ 150, cuivre 2 oz (70 µm) sur les deux faces, épaisseur 1,6 mm.
 **Dimensions après placement (révisées le 2026-09-26, rév. 0.3) : 146 × 54 mm, plus une
-bande de 47,5 × 10 mm au-dessus de la zone 230 V pour le porte-fusible F1 (encombrement
-146 × 64 mm) ; séparation à X = 100 mm par fente fraisée de 2 mm et trois languettes
+bande de 47,5 × 11,5 mm au-dessus de la zone 230 V pour le porte-fusible F1 (encombrement
+146 × 65,5 mm) ; séparation à X = 100 mm par fente fraisée de 2 mm et trois languettes
 perforées ; partie principale 100 × 54 mm, partie rubans 46 × 54 mm** (objectif initial
 ~130 × 50). Raisons : 6 mm d'isolement + fentes, pistes 16 A (A2), trois borniers 2 pôles
 (J1, J4, J4b) empilés sur le bord gauche, et borniers WAGO de ~18 mm de profondeur sur la

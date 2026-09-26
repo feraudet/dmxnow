@@ -3,8 +3,8 @@ J1,WAGO 2604-1102 (L N in),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Hori
 J4,WAGO 2604-1102 (L_SW N out 1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
 J7,"WAGO 2604-1102 (L_SW N out 2, J4b)",dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
 F1,"5x20 holder, T500mA H",Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open,Schurter 0031.8201,C3204125,main,yes,THT,"Fuse: Littelfuse 0215.500MXP (T500mA 250V ceramic, 1500 A)"
-RV1,10D561K,dmxnow:RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1,10D561K,C113236,main,yes,SMT,
-PS1,IRM-03-5,Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT,MEAN WELL IRM-03-5,C6969425,main,yes,THT,
+RV1,10D561K,dmxnow:RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1,10D561K,C113236,main,yes,THT,
+PS1,IRM-03-5,dmxnow:Converter_ACDC_MeanWell_IRM-03-xx_THT_Drill1.0,MEAN WELL IRM-03-5,C6969425,main,yes,THT,
 K1,G5RL-1A-E-HR DC5,dmxnow:Relay_SPST_Omron_G5RL-1A-E-HR,Omron G5RL-1A-E-HR DC5,C113250,main,yes,THT,"Omron pins: coil 1/8, COM 3/6, NO 4/5"
 U3,AP2112K-3.3,Package_TO_SOT_SMD:SOT-23-5,AP2112K-3.3TRG1,C51118,main,yes,SMT,
 C5,1uF,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
@@ -38,7 +38,7 @@ C7,470uF 35V low ESR,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,Nichicon UHW1V471MP
 C8,1uF 50V,Capacitor_SMD:C_1206_3216Metric,,C1848,strip,yes,SMT,
 U4,74AHCT125,Package_SO:SOIC-14_3.9x8.7mm_P1.27mm,SN74AHCT125DR,C155176,strip,yes,SMT,
 C9,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,strip,yes,SMT,
-J6,WAGO 2604-1105 (VLED CH1-CH4),dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal,2604-1105,C3818651,strip,yes,THT,Out of stock at LCSC (2026-09): order from a WAGO distributor
+J6,WAGO 2604-1105 (VLED CH1-CH4),dmxnow:TerminalBlock_WAGO_2604-1105_1x05_P5.00mm_Horizontal,2604-1105,C3818651,strip,yes,"THT, hand-soldered or consigned: WAGO 2604-1105 C3818651: 0 stock at JLC/LCSC (2026-09-26)",Out of stock at LCSC (2026-09): order from a WAGO distributor
 R20,0R,Resistor_SMD:R_0805_2012Metric,,C17477,strip,yes,SMT,Logic ground to LED ground star point
 R21,0R,Resistor_SMD:R_0603_1608Metric,,C21189,strip,yes,SMT,Variant detection (GPIO1 low = strip part present)
 R23,100k,Resistor_SMD:R_0603_1608Metric,,C25803,main,yes,SMT,

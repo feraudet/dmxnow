@@ -158,9 +158,31 @@ def varistor_10d():
     _write(name, s)
 
 
+def irm03():
+    """Mean Well IRM-03-xx (PCB mounting style), from the IRM-03 datasheet p. 4 (2025-08-08):
+    pins 0.6 +-0.1 mm, AC/L (1) - AC/N (3) 5.08 mm, NC (5) 30.48 mm from AC/L, -Vo (14) and
+    +Vo (16) on the second row 17.78 mm away, body 37 x 24 mm. Same pad layout as KiCad's
+    Converter_ACDC_MeanWell_IRM-03-xx_THT, but 1.0 mm holes (0.76-0.8 mm is too tight for a
+    0.7 mm pin with JLCPCB's -0.08 mm tolerance)."""
+    name = "Converter_ACDC_MeanWell_IRM-03-xx_THT_Drill1.0"
+    s = _header(name, "Mean Well IRM-03 AC-DC module, THT, 1.0 mm holes", "Mean Well IRM-03 AC-DC")
+    s += _text("reference", "REF**", 8.89, -4.5, "F.SilkS")
+    s += _text("value", name, 8.89, 35.0, "F.Fab", 0.8)
+    s += _rect(-3.11, -3.26, 20.89, 33.74, "F.Fab", 0.1)
+    s += _rect(-3.23, -3.38, 21.01, 33.86, "F.SilkS", 0.15)
+    s += _rect(-3.36, -3.51, 21.14, 33.99, "F.CrtYd", 0.05)
+    s += _pad_tht("1", 0.0, 0.0, "rect", 2.3, 2.0, 1.0)     # as KiCad: 2.93 mm to pin 3
+    for num, x, y in (("3", 0.0, 5.08), ("5", 0.0, 30.48), ("14", 17.78, 30.48), ("16", 17.78, 25.4)):
+        s += _pad_tht(num, x, y, "circle", 2.3, 2.3, 1.0)
+    s += ('  (model "${KICAD7_3DMODEL_DIR}/Converter_ACDC.3dshapes/Converter_ACDC_MeanWell_IRM-03-xx_THT.wrl"\n'
+          '    (offset (xyz 0 0 0)) (scale (xyz 1 1 1)) (rotate (xyz 0 0 0)))\n')
+    _write(name, s)
+
+
 if __name__ == "__main__":
     relay_g5rl()
     varistor_10d()
+    irm03()
     for n in (2, 5):
         wago_2604(n)
     print("footprints written to", os.path.normpath(OUT))
