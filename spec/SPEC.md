@@ -609,9 +609,16 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | **Total**                               | **≈ 47 €**    | **≈ 35 €** |
 
 Dans la cible de 30 à 50 €, mais la carte entière est en limite haute depuis le choix d'un module Mean Well (A1). Les postes les plus sensibles sont la connectique (WAGO, Neutrik) et PS1.
-Les composants traversants (WAGO, relais, PS1, porte-fusible) ne sont probablement pas dans
-la bibliothèque d'assemblage JLCPCB : soudure manuelle ou assemblage traversant payant
-[V-HW-13].
+**Prix LCSC relevés le 2026-09-26** (API JLCPCB, toutes les références de `design.py`) :
+composants de la carte entière **≈ 33 $ à l'unité, ≈ 28 $ par nœud en série de 20**, dont
+≈ 12 $ pour la partie principale seule. Postes principaux : WAGO 2604-1102 (4 × 2,4 à 3,2 $),
+IRM-03-5 (3,9 $), ESP32-C3-MINI-1-N4 (3,5 à 3,8 $), WAGO 2604-1105 (3,8 $), porte-fusible
+ATO (2,1 à 2,5 $), G5RL-1A-E-HR (1,4 à 1,7 $). Tous les composants traversants sont
+référencés chez LCSC (assemblage traversant JLCPCB possible) ; **WAGO 2604-1105 est en
+rupture chez LCSC** (à commander chez un distributeur WAGO). Côté assemblage CMS : 7
+références « extended » (≈ 3 $ de frais chacune par commande) ; le reste est en « basic ».
+Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port et TVA) :
+≈ 120 à 150 $ ; série de 20 : ≈ 35 $ d'électronique par nœud [V-HW-13].
 
 ---
 
@@ -722,7 +729,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-10 | ✅ Placement 146 × 54 mm (partie principale 100 × 54) conservé après relevé des cotes réelles des WAGO 2604 et du G5RL-1A-E-HR : J1, J4, J7 décalés de 0,7 mm vers le bord, J6 et H3 de 0,5 mm ; les corps des WAGO dépassent le bord du PCB de 0,7 à 1,4 mm (à reprendre dans le boîtier, livrable 8.6) | Livrable PCB | faible |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |
-| V-HW-13 | Disponibilité JLCPCB/LCSC des références et coût de l'assemblage traversant | LCSC | faible |
+| V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; reste la rupture de WAGO 2604-1105 chez LCSC et le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
 | V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
 | V-FW-01 | pioarduino : version exacte à épingler (Arduino ≥ 3.2 / IDF ≥ 5.4.2), support ESP32-C3 et XIAO ESP32-C3 | github.com/pioarduino/platform-espressif32 (releases) | critique |
 | V-FW-02 | `esp_now_set_peer_rate_config()` utilisable pour le pair broadcast depuis Arduino 3.x | ESP-IDF API ESP-NOW (v5.5) | moyenne |

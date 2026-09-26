@@ -71,7 +71,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | 5.1 | JLCPCB : 2 couches, 1,6 mm, **cuivre 2 oz**, FR-4 TG ≥ 150, finition HASL sans plomb ou ENIG. | ☐ |
 | 5.2 | V-cut : fournir `fab/dmxnow-vcut.gbr` et le préciser dans la commande ; vérifier que JLCPCB accepte le V-cut sur une carte unique de 146 × 54 mm (sinon : languettes perforées). | ☐ |
 | 5.3 | Fentes internes de 1 mm présentes sur le calque Edge.Cuts. | ☐ |
-| 5.4 | BOM et CPL : références LCSC indicatives, à revalider ; rotations des composants à contrôler dans l'aperçu JLCPCB. | ☐ |
+| 5.4 | BOM et CPL : références LCSC vérifiées le 2026-09-26 (revérifier le stock à la commande) ; rotations des composants à contrôler dans l'aperçu JLCPCB. | ☐ |
 | 5.5 | Composants traversants (WAGO, K1, PS1, F1, RV1, F2, C7) soudés à la main ou en assemblage traversant. | ☐ |
 
 ## 6. Essais du premier prototype (personne équipée et qualifiée)

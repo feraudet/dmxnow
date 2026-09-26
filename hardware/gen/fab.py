@@ -7,7 +7,7 @@
   hardware/fab/cpl_jlcpcb_base.csv, cpl_jlcpcb_led.csv   placement files
   hardware/fab/bom_full.csv       every part, including hand-soldered and off-board items
 
-LCSC part numbers are indicative and must be checked (SPEC §10 V-HW-13).
+LCSC part numbers checked against the JLCPCB parts API on 2026-09-26 (SPEC §10 V-HW-13).
 """
 import csv
 import glob

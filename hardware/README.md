@@ -77,5 +77,6 @@ par la carte (WAGO 221-413 dans le boîtier, arbitrage A9).
 - `fab/dmxnow-gerbers.zip` : 2 couches, 1,6 mm, **2 oz**, FR-4 TG ≥ 150.
 - V-cut : ligne dans `fab/dmxnow-vcut.gbr` (calque User.1) ; le préciser à la commande.
 - Assemblage CMS : `fab/bom_jlcpcb_base.csv` + `fab/cpl_jlcpcb_base.csv`, ou variante
-  `_led` avec la LED d'état (option A7). Références LCSC à revalider.
+  `_led` avec la LED d'état (option A7). Références LCSC vérifiées le 2026-09-26
+  (WAGO 2604-1105 en rupture chez LCSC).
 - Composants traversants et hors carte : `fab/bom_full.csv`.

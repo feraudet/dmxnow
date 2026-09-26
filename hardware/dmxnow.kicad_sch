@@ -6113,7 +6113,7 @@
         hide
       )
     )
-    (property "MPN" "Littelfuse 37405000410"
+    (property "MPN" "Littelfuse 37205000001"
       (at 63.5 43.18 0)
       (id 4)
       (effects
@@ -6123,7 +6123,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C142835"
       (at 63.5 43.18 0)
       (id 5)
       (effects
@@ -6248,7 +6248,7 @@
         hide
       )
     )
-    (property "MPN" ""
+    (property "MPN" "10D561K"
       (at 88.9 43.18 0)
       (id 4)
       (effects
@@ -6258,7 +6258,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C113236"
       (at 88.9 43.18 0)
       (id 5)
       (effects
@@ -8105,7 +8105,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C96123"
       (at 109.22 93.98 0)
       (id 5)
       (effects
@@ -8390,7 +8390,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C2838502"
       (at 213.36 119.38 0)
       (id 5)
       (effects
@@ -9728,7 +9728,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C116501"
       (at 398.78 91.44 0)
       (id 5)
       (effects
@@ -10233,7 +10233,7 @@
         hide
       )
     )
-    (property "MPN" ""
+    (property "MPN" "KT-0603G"
       (at 505.46 91.44 0)
       (id 4)
       (effects
@@ -10243,7 +10243,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C12624"
       (at 505.46 91.44 0)
       (id 5)
       (effects
@@ -10392,7 +10392,7 @@
         hide
       )
     )
-    (property "MPN" "SP3485EEN-L/TR"
+    (property "MPN" "SP3485EN-L/TR"
       (at 40.64 195.58 0)
       (id 4)
       (effects
@@ -10806,7 +10806,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C12067"
       (at 106.68 185.42 0)
       (id 5)
       (effects
@@ -11272,7 +11272,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C207061"
       (at 73.66 246.38 0)
       (id 5)
       (effects
@@ -11407,7 +11407,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C113997"
       (at 106.68 241.3 0)
       (id 5)
       (effects
@@ -11534,7 +11534,7 @@
         hide
       )
     )
-    (property "MPN" ""
+    (property "MPN" "Rubycon 35YXJ470M10X16"
       (at 139.7 246.38 0)
       (id 4)
       (effects
@@ -11544,7 +11544,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C88732"
       (at 139.7 246.38 0)
       (id 5)
       (effects
@@ -11681,7 +11681,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C1848"
       (at 170.18 246.38 0)
       (id 5)
       (effects
@@ -11816,7 +11816,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C155176"
       (at 203.2 248.92 0)
       (id 5)
       (effects
@@ -11976,7 +11976,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C155176"
       (at 241.3 248.92 0)
       (id 5)
       (effects
@@ -12136,7 +12136,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C155176"
       (at 279.4 248.92 0)
       (id 5)
       (effects
@@ -12296,7 +12296,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C155176"
       (at 314.96 248.92 0)
       (id 5)
       (effects
@@ -12456,7 +12456,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C155176"
       (at 350.52 254 0)
       (id 5)
       (effects
@@ -13821,7 +13821,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C99124"
       (at 93.98 309.88 0)
       (id 5)
       (effects
@@ -14253,7 +14253,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C99124"
       (at 185.42 309.88 0)
       (id 5)
       (effects
@@ -14685,7 +14685,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C99124"
       (at 276.86 309.88 0)
       (id 5)
       (effects
@@ -15117,7 +15117,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C99124"
       (at 368.3 309.88 0)
       (id 5)
       (effects
@@ -15277,7 +15277,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C3818651"
       (at 403.86 309.88 0)
       (id 5)
       (effects
