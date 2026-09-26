@@ -56,9 +56,7 @@ jobs:
         run: python3 gen/fab.py
 
       - name: Enclosure board geometry up to date (enclosure/board.json)
-        run: |
-          cd gen && python3 export_board.py && cd ..
-          git diff --stat --exit-code -- ../enclosure/board.json
+        run: cd gen && python3 export_board.py --check
 
       - name: 3D renders
         continue-on-error: true   # needs an OpenGL-capable container

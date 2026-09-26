@@ -4,11 +4,14 @@ The enclosure (CadQuery, SPEC 4.12) is derived from this file rather than from a
 export: several footprints have no 3D model (WAGO, K1, PS1 drill variants) and the
 KiCad 7 STEP exporter would silently drop them. Heights come from the datasheets.
 
-  python3 export_board.py        (run after `make pcb`/`make route`)
+  python3 export_board.py            (run after `make pcb`/`make route`)
+  python3 export_board.py --check    compare with the committed file, 0.1 mm tolerance
+                                     (KiCad versions round bounding boxes differently)
 """
 import json
 import math
 import os
+import sys
 
 import pcbnew
 
@@ -76,10 +79,41 @@ def main():
         "wago_lever_open": WAGO_LEVER_OPEN,
     }
     geo["supports"] = support_points(geo)
+    if "--check" in sys.argv:
+        return compare(json.load(open(OUT)), json.loads(json.dumps(geo)))
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w") as f:
         json.dump(geo, f, indent=1)
     print("written", OUT, "-", len(parts), "parts,", len(geo["supports"]), "support points")
+
+
+def compare(old, new, tol=0.1):
+    """Numeric comparison of two exports; prints and counts the differences."""
+    diffs = []
+
+    def walk(a, b, path):
+        if isinstance(a, dict) and isinstance(b, dict):
+            for k in sorted(set(a) | set(b)):
+                if k not in a or k not in b:
+                    diffs.append("%s/%s missing on one side" % (path, k))
+                else:
+                    walk(a[k], b[k], path + "/" + str(k))
+        elif isinstance(a, list) and isinstance(b, list):
+            if len(a) != len(b):
+                diffs.append("%s: %d vs %d items" % (path, len(a), len(b)))
+            for i, (x, y) in enumerate(zip(a, b)):
+                walk(x, y, "%s[%d]" % (path, i))
+        elif isinstance(a, (int, float)) and isinstance(b, (int, float)) and not isinstance(a, bool):
+            if abs(a - b) > tol:
+                diffs.append("%s: %s vs %s" % (path, a, b))
+        elif a != b:
+            diffs.append("%s: %r vs %r" % (path, a, b))
+
+    walk(old, new, "")
+    for d in diffs[:40]:
+        print("  ", d)
+    print("board.json: %d difference(s) beyond %.2f mm" % (len(diffs), tol))
+    return 1 if diffs else 0
 
 
 def support_points(geo):
@@ -123,4 +157,4 @@ def support_points(geo):
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
