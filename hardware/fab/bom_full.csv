@@ -3,7 +3,7 @@ J1,WAGO 2604-1102 (L N in),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Hori
 J4,WAGO 2604-1102 (L_SW N out 1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
 J7,"WAGO 2604-1102 (L_SW N out 2, J4b)",dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
 F1,"5x20 holder, T500mA H",Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open,Schurter 0031.8201,C3204125,main,yes,THT,"Fuse: Littelfuse 0215.500MXP (T500mA 250V ceramic, 1500 A)"
-RV1,10D561K,Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm,10D561K,C113236,main,yes,THT,
+RV1,10D561K,dmxnow:RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1,10D561K,C113236,main,yes,SMT,
 PS1,IRM-03-5,Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT,MEAN WELL IRM-03-5,C6969425,main,yes,THT,
 K1,G5RL-1A-E-HR DC5,dmxnow:Relay_SPST_Omron_G5RL-1A-E-HR,Omron G5RL-1A-E-HR DC5,C113250,main,yes,THT,"Omron pins: coil 1/8, COM 3/6, NO 4/5"
 U3,AP2112K-3.3,Package_TO_SOT_SMD:SOT-23-5,AP2112K-3.3TRG1,C51118,main,yes,SMT,

@@ -24,6 +24,7 @@ une pièce réelle posée sur une impression 1:1 du PCB.
 | J6 | WAGO 2604-1105 | Même série, 5 pôles, largeur 27,4 mm (formule de la fiche 2604-1102) ; fiche 5 pôles non consultée. | Fiche WAGO 2604-1105 | ☐ |
 | PS1 | Mean Well IRM-03-5 (LCSC C6969425) | Empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT` conforme : AC/L (1), AC/N (3) à 5,08 mm, NC (5) à 30,48 mm, −Vo (14) et +Vo (16) à 17,78 mm, broches Ø 0,6 mm, corps 37 × 24 × 15 mm. | Fiche IRM-03 (2025-08-08) p. 4 | ☐ |
 | F1 | Support Schurter 0031.8201 (LCSC C3204125) + cartouche Littelfuse 0215.500MXP (T500 mA H, céramique, 1500 A sous 250 V AC, LCSC C142839, à insérer à la main) | Empreinte KiCad `Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open` : broches à 22,5 mm, ergot NPTH de 2,7 mm. Vérifier sur la fiche Schurter. Support ouvert : pièces nues sous 230 V dans le compartiment secteur. | Schurter | ☐ |
+| RV1 | 10D561K (LCSC C113236, HEL série 10D) | Empreinte du projet `RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1` : perçage 1,1 mm (pattes 0,8 ± 0,1 mm ; le 0,8 mm de KiCad était trop juste), corps jusqu'à 9 mm d'épaisseur (fiche, rangée 430-560 V). Vérifier l'épaisseur réelle de la pièce livrée. | Fiche HEL 10D | ☐ |
 | U1 | ESP32-C3-MINI-1 | Empreinte officielle Espressif (kicad-libraries), zone d'exclusion d'antenne incluse. Vérifier la version de l'empreinte. | Espressif | ☐ |
 | F2 | Porte-fusible ATO | Empreinte KiCad Littelfuse FLR 178.6165 ; vérifier l'intensité admissible (≥ 20 A) et la disponibilité. | Littelfuse | ☐ |
 
@@ -63,11 +64,12 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | # | Point | OK |
 |---|-------|----|
 | 4.1 | Antenne de U1 en bord de carte, aucune piste, via ni plan dans la zone d'exclusion (règle `antenna_keepout`), rien de métallique au-dessus dans le boîtier. | ☐ |
-| 4.2 | Découplage : C1 (47 µF) et C2 (100 nF) au plus près de la broche 3V3 de U1 ; C3 contre U2 ; C9 contre U4. | ☐ |
+| 4.2 | Découplage : C2 (100 nF) contre la broche 3V3 de U1 ; C1 (47 µF) à ~17 mm de piste (0,2 mm de large, ~20 mΩ, ~20 nH : acceptable à 0,45 A crête, à confirmer par une mesure de l'ondulation pendant l'émission Wi-Fi) ; C3 contre U2 ; C9 contre U4. Les pistes +5V/+3V3 routées font 0,2 mm (Freerouting n'applique pas la classe PWR). | ☐ |
 | 4.3 | Pull-ups de démarrage R2 (IO9), R3 (IO8), R4 (IO2), RC d'EN (R1, C4). R15-R18 4,7 kΩ (GPIO6 a une résistance de tirage interne au reset), R22 10 kΩ sur DMX_TX, R23 100 kΩ sur BOARD_SENSE. | ☐ |
 | 4.4 | SW1 accessible par le poussoir du couvercle ; J3 accessible couvercle basse tension ouvert. | ☐ |
 | 4.5 | Échauffement de U3 (AP2112K) : cuivre suffisant autour de la broche GND (plan). | ☐ |
 | 4.6 | Routage automatique (Freerouting) : longueur et aspect des pistes USB (D-/D+) acceptables pour la programmation. | ☐ |
+| 4.7 | Plan de masse : la face arrière porte encore ~280 mm de pistes basse tension (PWM4 et RELAY_CTRL surtout) qui la découpent par endroits ; chaque pastille CMS de masse a son via. Juger la qualité du retour de masse sous U1 (radio) et sous le chemin DMX. | ☐ |
 
 ## 5. Fabrication
 

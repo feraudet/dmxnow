@@ -85,7 +85,7 @@ PARTS = [
     Part("F1", "Device:Fuse", "Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open",
          "5x20 holder, T500mA H", {"1": "L_IN", "2": "L_PSU"}, lcsc="C3204125",
          mpn="Schurter 0031.8201", note="Fuse: Littelfuse 0215.500MXP (T500mA 250V ceramic, 1500 A)"),
-    Part("RV1", "Device:Varistor", "Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm", "10D561K",
+    Part("RV1", "Device:Varistor", "dmxnow:RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1", "10D561K",
          {"1": "L_PSU", "2": "N"}, lcsc="C113236", mpn="10D561K"),
     Part("PS1", "Converter_ACDC:IRM-03-5", "Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT",
          "IRM-03-5", {"1": "L_PSU", "3": "N", "5": None, "14": "GND", "16": "+5V"}, lcsc="C6969425",

@@ -81,7 +81,7 @@ JLC_FIX = {
     "TO-252-2": (180, -1.8, 0.0),        # JLC (C282428): tab on the left; origin 1.8 mm towards the leads
     "ESP32-C3-MINI-1": (0, 0.0, 2.7),    # JLC origin at the centre of the pad array
     # THT (JLC centroid = body centre, computed from the courtyard)
-    "Relay_SPST_Omron_G5RL-1A-E-HR": (-90, None, None),
+    "Relay_SPST_Omron_G5RL-1A-E-HR": (-90, "pads", None),   # JLC origin = pin-pattern centre
     "Converter_ACDC_MeanWell_IRM-03-xx_THT": (-90, None, None),
     "FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165": (180, None, None),
     # WAGO 2604: JLC origin = centre of the pin array (not the body with its lever)

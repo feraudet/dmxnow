@@ -42,7 +42,12 @@ def main():
         P.add_track(board, net, layer, w, [a, b])
     board.Save(os.path.join(OUT, "dmxnow.kicad_pcb"))   # for inspection only
     rpt = os.path.join(OUT, "drc.rpt")
-    pcbnew.WriteDRCReport(board, rpt, pcbnew.EDA_UNITS_MILLIMETRES, False)
+    # the millimetre enum was renamed between KiCad versions
+    name = next(n for n in ("EDA_UNITS_MILLIMETRES", "EDA_UNITS_MM") + tuple(
+        n for n in dir(pcbnew) if n.startswith("EDA_UNITS_") and ("MILLI" in n or n.endswith("_MM")))
+        if hasattr(pcbnew, n))
+    units = getattr(pcbnew, name)
+    pcbnew.WriteDRCReport(board, rpt, units, False)
     txt = open(rpt).read()
     fired = set(re.findall(r"Rule: (\w+); Severity: error", txt))
     missing = [r for *_, r in CANARIES if r not in fired]

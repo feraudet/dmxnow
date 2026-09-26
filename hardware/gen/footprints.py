@@ -137,8 +137,30 @@ def wago_2604(poles):
     _write(name, s)
 
 
+def varistor_10d():
+    """10D561K disc varistor (LCSC C113236, HEL 10D series): leads d = 0.8 +-0.1 mm,
+    pitch 7.5 mm, disc 12 mm, thickness T up to 9.0 mm (430-560 V row of the datasheet).
+    KiCad's RV_Disc_D12mm_W4.2mm_P7.5mm drills 0.8 mm (too tight with JLC's -0.08 mm
+    tolerance) and assumes a 4.2 mm body."""
+    name = "RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1"
+    s = _header(name, "Disc varistor 10D series (12 mm), pitch 7.5 mm, lead offset 1.63 mm, "
+                      "body up to 9 mm thick, 1.1 mm holes (lead 0.8 +-0.1 mm)", "varistor MOV 10D")
+    s += _text("reference", "REF**", 3.75, -5.0, "F.SilkS")
+    s += _text("value", name, 3.75, 7.0, "F.Fab", 0.8)
+    yc = 1.633 / 2
+    s += _rect(-2.25, yc - 4.5, 9.75, yc + 4.5, "F.Fab", 0.1)
+    s += _rect(-2.37, yc - 4.62, 9.87, yc + 4.62, "F.SilkS", 0.12)
+    s += _rect(-2.5, yc - 4.75, 10.0, yc + 4.75, "F.CrtYd", 0.05)
+    s += _pad_tht("1", 0.0, 0.0, "circle", 2.2, 2.2, 1.1)
+    s += _pad_tht("2", 7.5, 1.633, "circle", 2.2, 2.2, 1.1)
+    s += ('  (model "${KICAD7_3DMODEL_DIR}/Varistor.3dshapes/RV_Disc_D12mm_W4.2mm_P7.5mm.wrl"\n'
+          '    (offset (xyz 0 0 0)) (scale (xyz 1 1 1)) (rotate (xyz 0 0 0)))\n')
+    _write(name, s)
+
+
 if __name__ == "__main__":
     relay_g5rl()
+    varistor_10d()
     for n in (2, 5):
         wago_2604(n)
     print("footprints written to", os.path.normpath(OUT))

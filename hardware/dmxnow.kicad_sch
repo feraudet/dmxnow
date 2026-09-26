@@ -6228,7 +6228,7 @@
         )
       )
     )
-    (property "Footprint" "Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm"
+    (property "Footprint" "dmxnow:RV_Disc_D12mm_T9mm_P7.5mm_Drill1.1"
       (at 92.202 43.18 90)
       (id 2)
       (effects
