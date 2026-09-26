@@ -5,15 +5,16 @@ X = 100 mm (partie principale « projecteur » 100 × 54 mm, partie sécable « 
 46 × 54 mm).
 
 > 🔴 Carte manipulant du 230 V : lire et compléter [REVIEW.md](REVIEW.md) avant toute
-> commande ou mise sous tension. Les empreintes de K1 (Omron G5RL) et des borniers WAGO
-> 2604 sont **provisoires** (cotes non vérifiées sur les fiches constructeur).
+> commande ou mise sous tension. Les cotes de K1 (Omron G5RL-1A-E-HR), des borniers WAGO
+> 2604 et de PS1 (Mean Well IRM-03-5) ont été relevées sur les fiches constructeur
+> ([datasheets/README.md](datasheets/README.md)) ; leur contrôle fait partie de la relecture.
 
 ## Contenu
 
 | Fichier | Rôle |
 |---------|------|
 | `gen/design.py` | **Source unique** : composants, empreintes, broches → nets, classes de nets |
-| `gen/footprints.py` | Empreintes du projet (`lib/dmxnow.pretty`), cotes provisoires dans `DIMS` |
+| `gen/footprints.py` | Empreintes du projet (`lib/dmxnow.pretty`), cotes et sources dans `DIMS` |
 | `gen/sch.py` | Génère `dmxnow.kicad_sch` (schéma à étiquettes, symboles embarqués) |
 | `gen/project.py` | Génère `dmxnow.kicad_pro` (classes de nets) et `dmxnow.kicad_dru` (règles 230 V) |
 | `gen/pcb.py` | Génère `dmxnow.kicad_pcb` : contour, fentes, V-cut, placement, routage 230 V et LED, plans |

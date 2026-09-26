@@ -1,11 +1,11 @@
 Ref,Value,Footprint,MPN,LCSC,Section,Fitted,Assembly,Note
-J1,WAGO 2604-1102 (L N in),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
-J4,WAGO 2604-1102 (L_SW N out 1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
-J7,"WAGO 2604-1102 (L_SW N out 2, J4b)",dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+J1,WAGO 2604-1102 (L N in),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+J4,WAGO 2604-1102 (L_SW N out 1),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
+J7,"WAGO 2604-1102 (L_SW N out 2, J4b)",dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,main,yes,hand/THT,PE is joined off-board by a WAGO 221-413 (arbitrage A9)
 F1,TR5 T500mA 250V,Fuse:Fuse_Littelfuse_372_D8.50mm,Littelfuse 37405000410,,main,yes,hand/THT,
 RV1,10D561K,Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm,,,main,yes,hand/THT,
-PS1,IRM-03-5,Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT,MEAN WELL IRM-03-5,,main,yes,hand/THT,
-K1,G5RL-U1A-E DC5,dmxnow:Relay_SPST_Omron_G5RL-U1A-E,Omron G5RL-U1A-E DC5,,main,yes,hand/THT,
+PS1,IRM-03-5,Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT,MEAN WELL IRM-03-5,C6969425,main,yes,hand/THT,
+K1,G5RL-1A-E-HR DC5,dmxnow:Relay_SPST_Omron_G5RL-1A-E-HR,Omron G5RL-1A-E-HR DC5,C113250,main,yes,hand/THT,"Omron pins: coil 1/8, COM 3/6, NO 4/5"
 U3,AP2112K-3.3,Package_TO_SOT_SMD:SOT-23-5,AP2112K-3.3TRG1,C51118,main,yes,SMT,
 C5,1uF 16V,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
 C6,1uF 16V,Capacitor_SMD:C_0603_1608Metric,,C15849,main,yes,SMT,
@@ -29,7 +29,7 @@ U2,SP3485EN,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,SP3485EEN-L/TR,C8963,main,yes,SM
 C3,100nF,Capacitor_SMD:C_0603_1608Metric,,C14663,main,yes,SMT,
 D1,SM712,Package_TO_SOT_SMD:SOT-23,SM712.TCT,,main,yes,SMT,
 J2,DMX tail (1 GND 2 B 3 A),Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm,,,main,no,hand/THT,Wire pads
-J5,WAGO 2604-1102 (VLED_IN GND_LED),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,,strip,yes,hand/THT,
+J5,WAGO 2604-1102 (VLED_IN GND_LED),dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal,2604-1102,C3309286,strip,yes,hand/THT,
 F2,ATO holder + 20A fuse,Fuse:FuseHolder_Blade_ATO_Littelfuse_FLR_178.6165,Littelfuse 178.6165.0002,,strip,yes,hand/THT,
 D3,SMBJ28A,Diode_SMD:D_SMB,SMBJ28A,,strip,yes,SMT,
 C7,470uF 35V low ESR,Capacitor_THT:CP_Radial_D10.0mm_P5.00mm,,,strip,yes,hand/THT,

@@ -8,22 +8,21 @@
 Cocher chaque ligne, noter le nom du relecteur et la date. Tout point non conforme
 bloque la commande.
 
-Relecteur : ____________________  Date : ____________  Révision PCB : 0.1
+Relecteur : ____________________  Date : ____________  Révision PCB : 0.2
 
-## 1. Empreintes provisoires (bloquant)
+## 1. Empreintes (bloquant)
 
-Les fiches constructeur n'étaient pas accessibles depuis l'environnement de conception.
-Les cotes ci-dessous sont **supposées** ; elles sont centralisées dans
-`gen/footprints.py` (dictionnaire `DIMS`) et marquées « PROVISOIRE » sur le calque
-User.Comments de chaque empreinte.
+Les cotes de K1, des WAGO 2604 et de PS1 ont été relevées sur les fiches constructeur
+(liste et liens : `datasheets/README.md`) et sont centralisées dans `gen/footprints.py`
+(dictionnaire `DIMS`, avec la page source). Les confronter aux fiches et, idéalement, à
+une pièce réelle posée sur une impression 1:1 du PCB.
 
-| Réf. | Composant | Cotes à vérifier sur la fiche | Source | OK |
-|------|-----------|-------------------------------|--------|----|
-| K1 | Omron G5RL-U1A-E DC5 | Implantation reprise de l'Omron G2RL-1A-E : bobine A1 (0 ; 0) et A2 (7,5 ; 0), COM (13) en (0 ; 20) et (7,5 ; 20), NO (14) en (0 ; 25) et (7,5 ; 25), perçage 1,3 mm, corps 12,5 × 28,8 mm. Vérifier aussi le nombre de broches par contact, la ligne de fuite bobine-contacts (8 mm annoncés) et le courant de bobine (~80 mA supposés). | Omron K265-E1 (G5RL-U/-K) | ☐ |
-| J1, J4, J7 | WAGO 2604-1102 | Pas 5,0 mm, **2 broches par pôle écartées de 6,0 mm**, perçage 1,3 mm, corps 10 × 18 mm, entrée de fil latérale. | Fiche WAGO 2604-1102 | ☐ |
-| J5 | WAGO 2604-1102 | idem | idem | ☐ |
-| J6 | WAGO 2604-1105 | idem, 5 pôles | Fiche WAGO 2604-1105 | ☐ |
-| PS1 | Mean Well IRM-03-5 | Empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT` : broches AC/L (1), AC/N (3), NC (5), −Vo (14), +Vo (16). Vérifier hauteur (~15 mm) et fusible/varistance recommandés en entrée. | Fiche Mean Well IRM-03 | ☐ |
+| Réf. | Composant | Cotes relevées | Source | OK |
+|------|-----------|----------------|--------|----|
+| K1 | Omron G5RL-1A-E-HR DC5 (LCSC C113250) | Bobine 1/8 → A1 (0 ; 0) et A2 (7,5 ; 0), COM 3/6 → 13 en (0 ; 20) et (7,5 ; 20), NO 4/5 → 14 en (0 ; 25) et (7,5 ; 25), perçage 1,3 mm, corps 29,0 × 12,7 × 15,7 mm max. Bobine 80 mA / 62,5 Ω, isolation renforcée 8 mm / 10 kV. **Ne pas accepter de G5RL-U1A-E (bistable).** | Catalogue Omron G5RL p. 5 | ☐ |
+| J1, J4, J7, J5 | WAGO 2604-1102 (LCSC C3309286) | Pas 5,0 mm, 2 broches par pôle à 8,2 mm, perçage 1,3 mm (broche 0,8 × 1 mm), pastilles 1,9 × 2,8 mm, corps 16,3 mm (broche avant à 5,2 mm de la face d'entrée, arrière à 2,9 mm du dos), levier 2,9 mm en saillie, largeur 12,4 mm. Le corps dépasse le bord du PCB de 1,4 mm (J1, J4, J7) et 0,7 mm (J5, J6). | Fiche WAGO 2604-1102 p. 2 | ☐ |
+| J6 | WAGO 2604-1105 | Même série, 5 pôles, largeur 27,4 mm (formule de la fiche 2604-1102) ; fiche 5 pôles non consultée. | Fiche WAGO 2604-1105 | ☐ |
+| PS1 | Mean Well IRM-03-5 (LCSC C6969425) | Empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT` conforme : AC/L (1), AC/N (3) à 5,08 mm, NC (5) à 30,48 mm, −Vo (14) et +Vo (16) à 17,78 mm, broches Ø 0,6 mm, corps 37 × 24 × 15 mm. | Fiche IRM-03 (2025-08-08) p. 4 | ☐ |
 | U1 | ESP32-C3-MINI-1 | Empreinte officielle Espressif (kicad-libraries), zone d'exclusion d'antenne incluse. Vérifier la version de l'empreinte. | Espressif | ☐ |
 | F2 | Porte-fusible ATO | Empreinte KiCad Littelfuse FLR 178.6165 ; vérifier l'intensité admissible (≥ 20 A) et la disponibilité. | Littelfuse | ☐ |
 
@@ -35,7 +34,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 |---|-------|-----------|----|
 | 2.1 | Toute pièce de cuivre 230 V (nets L_IN, L_SW, N, L_PSU) est à X ≤ 46 mm ; tout cuivre basse tension à X ≥ 52 mm (6 mm). Vérifié par la règle DRC `mains_to_low_voltage` et par `check.py pcb` ; contrôler visuellement sur les Gerbers. | SPEC 4.8.2 | ☐ |
 | 2.2 | Fentes de 1 mm à X = 49 mm sous K1 (Y 12-26) et sous PS1 (Y 27,5-52), entre broches AC et DC de PS1 et entre contacts et bobine de K1. | SPEC 4.8.2 | ☐ |
-| 2.3 | Distance bobine-contacts de K1 (interne au relais) ≥ distance requise pour l'isolation renforcée : vérifier sur la fiche Omron (ligne de fuite 8 mm, 10 kV annoncés). | V-HW-03 | ☐ |
+| 2.3 | Distance bobine-contacts de K1 (interne au relais) ≥ distance requise pour l'isolation renforcée : la fiche Omron annonce une isolation renforcée, 8 mm dans l'air et en ligne de fuite, 6000 V AC, choc 10 kV (à confronter à IEC 62368-1, V-HW-11). | V-HW-03 | ☐ |
 | 2.4 | Isolation entrée-sortie de PS1 certifiée (IEC/UL 62368-1) : marquage d'homologation présent sur la pièce achetée. | V-HW-09 | ☐ |
 | 2.5 | Aucun plan de masse, via, piste ou trou métallisé basse tension dans la zone 230 V, sur les deux faces. | SPEC 4.8.2 | ☐ |
 | 2.6 | Aucun trou de fixation dans la zone 230 V (une vis métallique annulerait l'isolement). | design.py | ☐ |

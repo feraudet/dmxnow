@@ -1,10 +1,10 @@
 """Generate the project footprint library hardware/lib/dmxnow.pretty.
 
-🔴 PROVISIONAL DIMENSIONS — the manufacturer datasheets (Omron G5RL-U/-K K265-E1,
-WAGO 2604) could not be read from the build environment. Every dimension used
-below lives in DIMS with its source; each footprint carries a
-"PROVISOIRE - vérifier fiche" marker on User.Comments. Blocking before any order
-(SPEC §10 V-HW-03, V-HW-04; hardware/REVIEW.md).
+Dimensions checked against the manufacturer drawings (hardware/datasheets/):
+  - Omron G5RL catalogue, page 5, G5RL-1A-E-HR (omron-g5rl.pdf);
+  - WAGO 2604-1102 data sheet, page 2, 18.02.2024 (wago-2604-1102.pdf).
+Every dimension lives in DIMS with its source. 🔴 Human review still required before
+any order (hardware/REVIEW.md).
 """
 import os
 import uuid
@@ -14,22 +14,24 @@ OUT = os.path.join(HERE, "..", "lib", "dmxnow.pretty")
 
 DIMS = {
     "G5RL": {
-        "source": "PROVISOIRE : implantation reprise de Omron G2RL-1A-E (KiCad Relay_THT, "
-                  "même boîtier 29 x 12.7 x 15.7 mm annoncé). À comparer à la fiche "
-                  "Omron K265-E1 (G5RL-U/-K).",
-        "coil": [(0.0, 0.0), (7.5, 0.0)],             # A1, A2
-        "com": [(0.0, 20.0), (7.5, 20.0)],            # 13 (two pins)
-        "no": [(0.0, 25.0), (7.5, 25.0)],             # 14 (two pins)
+        "source": "Omron G5RL-1A-E-HR, catalogue G5RL p. 5 (PCB mounting holes, bottom view): "
+                  "six holes 1.3 +-0.1 mm, coil 1/8 7.5 mm apart, COM 3/6 at 20 mm, "
+                  "NO 4/5 at 25 mm; body 29.0 x 12.7 x 15.7 mm max, (2.3) behind the coil pins.",
+        "coil": [(0.0, 0.0), (7.5, 0.0)],             # A1, A2 (Omron 1, 8; no polarity)
+        "com": [(0.0, 20.0), (7.5, 20.0)],            # 13 (Omron 3, 6)
+        "no": [(0.0, 25.0), (7.5, 25.0)],             # 14 (Omron 4, 5)
         "drill": 1.3, "pad": 2.6,
-        "body": (-2.5, -2.3, 10.0, 26.5),
+        "body": (-2.6, -2.3, 10.1, 26.7),
     },
     "WAGO2604": {
-        "source": "PROVISOIRE : pas 5.0 mm (distributeurs) ; 2 broches par pôle, "
-                  "écartement 6.0 mm, perçage 1.3 mm, corps 18 mm de profondeur "
-                  "supposés par analogie avec la série 2601 (KiCad). À relever sur la "
-                  "fiche WAGO 2604-110x.",
-        "pitch": 5.0, "row": 6.0, "drill": 1.3, "pad": (1.9, 3.2),
-        "body_front": 4.0, "body_back": 14.0,   # y extent: +front (wire entry) / -back
+        "source": "WAGO 2604-1102 data sheet p. 2: pin spacing 5 mm, 2 pins per pole 8.2 mm "
+                  "apart, hole 1.3 mm, pin 0.8 x 1 mm; body 16.3 mm deep (front pin 5.2 mm "
+                  "from the wire-entry face, rear pin 2.9 mm from the back), lever 2.9 mm "
+                  "beyond the front face (19.2 mm overall), width L = (n - 1) x 5 + 7.4 mm.",
+        "pitch": 5.0, "row": 8.2, "drill": 1.3, "pad": (1.9, 2.8),
+        "body_front": 5.2, "body_back": 11.1,   # y extent from the front row: +front (wire entry) / -back
+        "lever": 2.9,                           # overhang beyond the front face (upper part only)
+        "side": 3.7,                            # (L - (n - 1) x pitch) / 2
     },
 }
 
@@ -80,13 +82,12 @@ def _write(name, body):
 
 def relay_g5rl():
     d = DIMS["G5RL"]
-    name = "Relay_SPST_Omron_G5RL-U1A-E"
+    name = "Relay_SPST_Omron_G5RL-1A-E-HR"
     x1, y1, x2, y2 = d["body"]
-    s = _header(name, "Omron G5RL-U1A-E 16A high inrush SPST-NO. " + d["source"],
+    s = _header(name, "Omron G5RL-1A-E-HR 16A high inrush SPST-NO, reinforced coil-contact insulation. " + d["source"],
                 "relay omron G5RL 16A inrush")
     s += _text("reference", "REF**", 3.75, -3.8, "F.SilkS")
     s += _text("value", name, 3.75, 28.0, "F.Fab")
-    s += _text("user", "PROVISOIRE - vérifier fiche Omron K265-E1", 3.75, 12.0, "Cmts.User", 0.8)
     s += _rect(x1, y1, x2, y2, "F.Fab", 0.1)
     s += _rect(x1 - 0.12, y1 - 0.12, x2 + 0.12, y2 + 0.12, "F.SilkS", 0.12)
     s += _rect(x1 - 0.5, y1 - 0.5, x2 + 0.5, y2 + 0.5, "F.CrtYd", 0.05)
@@ -108,17 +109,18 @@ def wago_2604(poles):
     name = "TerminalBlock_WAGO_2604-110%d_1x%02d_P5.00mm_Horizontal" % (poles, poles)
     p = d["pitch"]
     w = (poles - 1) * p
-    x1, x2 = -p / 2, w + p / 2
+    x1, x2 = -d["side"], w + d["side"]
     y1, y2 = -d["body_back"], d["body_front"]
+    y3 = y2 + d["lever"]
     s = _header(name, "WAGO 2604-110%d lever PCB terminal block, %d poles, pitch 5.0 mm, "
                       "4 mm2, side wire entry towards +Y. %s" % (poles, poles, d["source"]),
                 "WAGO 2604 lever terminal block")
     s += _text("reference", "REF**", w / 2, y1 - 1.5, "F.SilkS")
     s += _text("value", name, w / 2, y2 + 1.5, "F.Fab", 0.8)
-    s += _text("user", "PROVISOIRE - vérifier fiche WAGO 2604", w / 2, -8.0, "Cmts.User", 0.8)
     s += _rect(x1, y1, x2, y2, "F.Fab", 0.1)
     s += _rect(x1 - 0.12, y1 - 0.12, x2 + 0.12, y2 + 0.12, "F.SilkS", 0.12)
-    s += _rect(x1 - 0.25, y1 - 0.25, x2 + 0.25, y2 + 0.25, "F.CrtYd", 0.05)
+    s += _rect(x1, y2, x2, y3, "F.Fab", 0.1)     # lever overhang (above the board)
+    s += _rect(x1 - 0.25, y1 - 0.25, x2 + 0.25, y3 + 0.25, "F.CrtYd", 0.05)
     # wire entry arrows
     for i in range(poles):
         x = i * p

@@ -5988,7 +5988,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C3309286"
       (at 33.02 40.64 0)
       (id 5)
       (effects
@@ -6393,7 +6393,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C6969425"
       (at 124.46 43.18 0)
       (id 5)
       (effects
@@ -6558,7 +6558,7 @@
         (justify left)
       )
     )
-    (property "Value" "G5RL-U1A-E DC5"
+    (property "Value" "G5RL-1A-E-HR DC5"
       (at 209.55 44.45 0)
       (id 1)
       (effects
@@ -6568,7 +6568,7 @@
         (justify left)
       )
     )
-    (property "Footprint" "dmxnow:Relay_SPST_Omron_G5RL-U1A-E"
+    (property "Footprint" "dmxnow:Relay_SPST_Omron_G5RL-1A-E-HR"
       (at 209.55 46.99 0)
       (id 2)
       (effects
@@ -6589,7 +6589,7 @@
         hide
       )
     )
-    (property "MPN" "Omron G5RL-U1A-E DC5"
+    (property "MPN" "Omron G5RL-1A-E-HR DC5"
       (at 198.12 45.72 0)
       (id 4)
       (effects
@@ -6599,7 +6599,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C113250"
       (at 198.12 45.72 0)
       (id 5)
       (effects
@@ -6784,7 +6784,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C3309286"
       (at 241.3 40.64 0)
       (id 5)
       (effects
@@ -6919,7 +6919,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C3309286"
       (at 281.94 40.64 0)
       (id 5)
       (effects
@@ -11137,7 +11137,7 @@
         hide
       )
     )
-    (property "LCSC" ""
+    (property "LCSC" "C3309286"
       (at 38.1 243.84 0)
       (id 5)
       (effects

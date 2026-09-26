@@ -10,7 +10,7 @@ Les ADR 0001 à 0010 reprennent les décisions de la section 3 du cahier des cha
 | [0002](0002-regie-pi-dongle.md) | Régie Raspberry Pi + QLC+ + dongle XIAO ESP32-C3 | Accepté (décision 2) |
 | [0003](0003-microcontroleur-esp32-c3-mini-1.md) | Microcontrôleur ESP32-C3-MINI-1 | Accepté (décision 3) |
 | [0004](0004-alimentation-isolee.md) | Alimentation interne isolée Mean Well IRM-03-5 | Accepté (décision 4 amendée par A1) |
-| [0005](0005-relais-g5rl.md) | Relais de coupure Omron G5RL-U1A-E | Accepté (décision 5) |
+| [0005](0005-relais-g5rl.md) | Relais de coupure Omron G5RL-1A-E-HR | Accepté (décision 5, amendée) |
 | [0006](0006-rubans-alim-externe-pwm.md) | Rubans LED : alimentation externe, 4 PWM côté masse | Accepté (décision 6) |
 | [0007](0007-pcb-secable.md) | PCB unique sécable par V-cut | Accepté (décision 7) |
 | [0008](0008-borniers-wago-2604.md) | Borniers WAGO série 2604 | Accepté (décision 8) |

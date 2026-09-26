@@ -219,9 +219,12 @@ cuivre 2 oz généreuse sur les broches GND/VOUT** et à vérifier par mesure (R
 
 ### 4.5 Relais 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie contacts)
 
-K1 Omron G5RL-U1A-E, bobine 5 V DC, contact NO 16 A, conçu pour courants d'appel élevés
-(« 16-A High Inrush Switching », ligne de fuite bobine-contacts 8 mm, tenue aux chocs de
-10 kV selon la fiche Omron K265-E1 [V-HW-03]). Q1 AO3400 (VGS(th) max 1,45 V, commandable
+K1 Omron G5RL-1A-E-HR (LCSC C113250), bobine 5 V DC 80 mA / 62,5 Ω (~400 mW), contact NO
+16 A 250 V AC, courant d'appel 100 A crête, isolation bobine-contacts renforcée (distances
+dans l'air et lignes de fuite 8 mm, 6000 V AC, choc 10 kV) selon le catalogue Omron G5RL
+(vérifié, `hardware/datasheets/omron-g5rl.pdf`). Le G5RL-U1A-E initialement retenu est un
+relais **bistable** (deux bobines), incompatible avec la commande par MOSFET : remplacé par
+le -1A-E-HR, même boîtier et même implantation (décision 5 amendée, ADR 0005). Q1 AO3400 (VGS(th) max 1,45 V, commandable
 en 3,3 V), R5 100 Ω limite le courant de grille et amortit, R6 100 kΩ maintient Q1 bloqué
 pendant le démarrage. D2 1N4148W en roue libre : la roue libre par simple diode ralentit
 l'ouverture du contact (quelques ms) — acceptable ici et même favorable (pas de rebond) ;
@@ -275,7 +278,8 @@ Logique (implémentée dans `common`, testée) :
 - Chemin VLED, retour GND_LED : 17 A, largeur de piste §4.8.3 ; F2, C7 et D3 collés à J5 ;
   retour de courant des rubans (J6 → MOSFET → GND_LED → J5) entièrement dans la partie
   sécable.
-- Borniers 17 A : WAGO 2604 annoncé 32 A / 320 V (IEC) [V-HW-04], largement suffisant.
+- Borniers 17 A : WAGO 2604 32 A / 400 V (IEC, III/2), 20 A UL, 0,2-4 mm² (fiche WAGO
+  2604-1102 vérifiée), largement suffisant.
 
 ### 4.7 PWM (firmware)
 
@@ -593,7 +597,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 |-----------------------------------------|---------------|--------------|
 | ESP32-C3-MINI-1                         | 2,5 €         | 2,5 € |
 | Mean Well IRM-03-5 (A1)                 | 6 €           | 6 € |
-| Omron G5RL-U1A-E                        | 2,5 €         | 2,5 € |
+| Omron G5RL-1A-E-HR                      | 2,5 €         | 2,5 € |
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
 | WAGO 2604 : 3 × 2 pôles (+ 2 + 5 pôles), WAGO 221-413 | 5,5 € (+ 4 €) | 5,5 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
@@ -708,14 +712,14 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 |----|-----------|--------------------|-----------|
 | V-HW-01 | HLK-PM05 (empreinte de repli uniquement) : brochage (AC ×2, +Vo, −Vo), dimensions ~34 × 20 × 15 mm, pas des broches, isolation 3000 V AC, 600 mA, fusible et varistance recommandés | Fiche Hi-Link HLK-PM05 (hlktech.net) | 🔴 critique |
 | V-HW-02 | ESP32-C3-MINI-1 : brochage des pastilles, GPIO exposés (0-10, 18-21), strapping IO2/IO8/IO9, zone d'exclusion d'antenne, consommations RX/TX, découplage recommandé | *ESP32-C3-MINI-1 Datasheet* et *ESP32-C3 Hardware Design Guidelines* (espressif.com) | critique |
-| V-HW-03 | G5RL-U1A-E DC5 : courant et résistance de bobine (~80 mA / ~62 Ω supposés), disposition et diamètres des broches, distances bobine-contacts (ligne de fuite 8 mm annoncée), courant d'appel admissible, classe TV, homologations | Omron, fiche *G5RL-U/-K* K265-E1 (non accessible depuis cet environnement : proxy) | 🔴 critique |
-| V-HW-04 | WAGO 2604-1102 / -1105 (entrée latérale ; J1, J4, J4b, J5 en 2 pôles, J6 en 5 pôles depuis A9), autrefois 2604-1103 :  pas 5 mm, 4 mm², 32 A / 320 V IEC (selon distributeurs), **une seule âme par point de serrage** ; références 2 et 5 pôles (2604-1102, 2604-1105 supposées) ; diamètre de perçage | Fiches WAGO 2604 (wago.com, non accessible depuis cet environnement) | 🔴 critique |
+| V-HW-03 | ✅ Vérifié (catalogue Omron G5RL p. 5) pour le G5RL-1A-E-HR DC5 : bobine 80 mA / 62,5 Ω, six trous 1,3 mm (bobine 1/8, COM 3/6 à 20 mm, NO 4/5 à 25 mm), corps 29 × 12,7 × 15,7 mm, isolation renforcée 8 mm / 10 kV. Reste à contrôler par un humain : homologations de la pièce achetée | Omron, catalogue G5RL (`hardware/datasheets/omron-g5rl.pdf`) | 🔴 critique |
+| V-HW-04 | ✅ Vérifié (fiche WAGO 2604-1102, 18.02.2024) : pas 5 mm, 2 broches par pôle à 8,2 mm, perçage 1,3 mm, broche 0,8 × 1 mm, corps 16,3 mm de profondeur (+ 2,9 mm de levier), largeur (n − 1) × 5 + 7,4 mm, 32 A / 400 V IEC, 0,2-4 mm². Restent : **une seule âme par point de serrage** (câblage) et la fiche 2604-1105 (5 pôles, même série supposée identique) | Fiches WAGO 2604 (`hardware/datasheets/wago-2604-1102.pdf`) | 🔴 critique |
 | V-HW-05 | AP2112K-3.3 : brochage SOT-23-5 (1 VIN, 2 GND, 3 EN, 4 NC, 5 VOUT), RθJA, comportement en courant inverse | Diodes Inc., fiche AP2112 | moyenne |
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
 | V-HW-07 | AOD4184A : RDS(on) à VGS 4,5 et 5 V, Qg, énergie d'avalanche ; AO3400 : VGS(th) | Alpha & Omega Semiconductor | moyenne |
 | V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (Littelfuse FLR 178.6165, empreinte KiCad, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
-| V-HW-09 | Mean Well IRM-03-5 : brochage (empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT`), dimensions (~33,7 × 22,2 × 15 mm supposées), hauteur, homologations, fusible et varistance recommandés en entrée | Fiche Mean Well IRM-05 | 🔴 critique |
-| V-HW-10 | Placement réalisé en 146 × 54 mm (partie principale 100 × 54) ; à confirmer après vérification des cotes réelles des WAGO et du relais | Livrable PCB | moyenne |
+| V-HW-09 | ✅ Brochage et dimensions vérifiés (fiche IRM-03 2025-08-08) : 37 × 24 × 15 mm, broches Ø 0,6 mm, AC/L (1) - AC/N (3) 5,08 mm, NC (5), −Vo (14), +Vo (16) conformes à l'empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT`. Restent : homologations de la pièce achetée, fusible et varistance en entrée | Fiche Mean Well IRM-03 (`hardware/datasheets/meanwell-irm-03.pdf`) | 🔴 critique |
+| V-HW-10 | ✅ Placement 146 × 54 mm (partie principale 100 × 54) conservé après relevé des cotes réelles des WAGO 2604 et du G5RL-1A-E-HR : J1, J4, J7 décalés de 0,7 mm vers le bord, J6 et H3 de 0,5 mm ; les corps des WAGO dépassent le bord du PCB de 0,7 à 1,4 mm (à reprendre dans le boîtier, livrable 8.6) | Livrable PCB | faible |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
 | V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |
 | V-HW-13 | Disponibilité JLCPCB/LCSC des références et coût de l'assemblage traversant | LCSC | faible |
