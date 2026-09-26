@@ -41,13 +41,8 @@ def seg_clear(a, b, width, net, layer, segs, circles, boxes, margin=0.25):
     for s in segs:
         if s[5] == net or s[6] != layer:
             continue
-        for t in (0.0, 0.25, 0.5, 0.75, 1.0):
-            x, y = a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t
-            if R._seg_dist(x, y, *s[:4]) <= s[4] + width / 2 + margin:
-                return False
-        for px, py in (s[0:2], s[2:4]):
-            if R._seg_dist(px, py, a[0], a[1], b[0], b[1]) <= s[4] + width / 2 + margin:
-                return False
+        if R._seg_seg(a, b, s[0:2], s[2:4]) <= s[4] + width / 2 + margin:
+            return False
     for c in circles:
         if c[3] != net and R._seg_dist(c[0], c[1], a[0], a[1], b[0], b[1]) <= c[2] + width / 2 + margin:
             return False
@@ -66,12 +61,13 @@ def pad_via(board, net, px, py, segs, circles, boxes):
     pad = next((b[5] for b in boxes if b[0] <= px <= b[2] and b[1] <= py <= b[3] and b[4] == net), None)
     boxes6 = [b[:6] for b in boxes]
     segs6 = [s[:6] for s in segs]
-    for dist in (0.0, 0.9, 1.3, 1.8):
+    for dist in (1.0, 1.4, 1.9, 2.4, 2.9, 3.5):   # never in the pad itself (solder wicking)
         dirs = [(0, 0)] if dist == 0 else [(0, 1), (0, -1), (1, 0), (-1, 0), (0.7, 0.7), (-0.7, 0.7),
                                             (0.7, -0.7), (-0.7, -0.7)]
         for dx, dy in dirs:
             x, y = px + dx * dist, py + dy * dist
-            if not R._free(x, y, 0.3, segs6, circles, boxes6, net, ignore_pad=pad):
+            if P.in_nc_keepout(x, y, P.VIA_D / 2) or \
+                    not R._free(x, y, P.VIA_D / 2, segs6, circles, boxes6, net):   # own pad included
                 continue
             if dist and not seg_clear((px, py), (x, y), 0.3, net, pcbnew.F_Cu, segs, circles,
                                       [b for b in boxes if b[5] is not pad]):
@@ -79,8 +75,8 @@ def pad_via(board, net, px, py, segs, circles, boxes):
             if dist:
                 P.add_track(board, net, pcbnew.F_Cu, 0.3, [(px, py), (x, y)])
                 segs.append((px, py, x, y, 0.15, net, pcbnew.F_Cu))
-            P.add_via(board, net, x, y, 0.6, 0.3)
-            circles.append((x, y, 0.3, net))
+            P.add_via(board, net, x, y, P.VIA_D, P.VIA_DRILL)
+            circles.append((x, y, P.VIA_D / 2, net))
             return True
     return False
 
@@ -168,13 +164,29 @@ def island_vias(board, segs, circles, boxes):
                         v = pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y))
                         if ol.PointInside(v, pcbnew.FromMM(0.35)) and \
                                 any(o.Contains(v) for o in other) and \
-                                R._free(x - P.OX, y - P.OY, 0.3, [s[:6] for s in segs], circles, boxes, "GND"):
-                            P.add_via(board, "GND", x - P.OX, y - P.OY, 0.6, 0.3)
-                            circles.append((x - P.OX, y - P.OY, 0.3, "GND"))
+                                not P.in_nc_keepout(x - P.OX, y - P.OY, P.VIA_D / 2) and \
+                                R._free(x - P.OX, y - P.OY, P.VIA_D / 2, [s[:6] for s in segs], circles,
+                                        [b[:6] for b in boxes], "GND"):
+                            P.add_via(board, "GND", x - P.OX, y - P.OY, P.VIA_D, P.VIA_DRILL)
+                            circles.append((x - P.OX, y - P.OY, P.VIA_D / 2, "GND"))
                             placed = True
                             n += 1
                         y += 0.3
                     x += 0.3
+                if not placed:
+                    # sliver too thin for a via: via next to a GND SMD pad it feeds
+                    for b in boxes:
+                        pad = b[5]
+                        if b[4] != "GND" or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD:
+                            continue
+                        # the pad is cut out of the pour and joined by spokes: test proximity
+                        if ol.SquaredDistance(pad.GetPosition()) > pcbnew.FromMM(1.5) ** 2:
+                            continue
+                        c = pad.GetPosition()
+                        if pad_via(board, "GND", pcbnew.ToMM(c.x) - P.OX, pcbnew.ToMM(c.y) - P.OY,
+                                   segs, circles, boxes):
+                            n += 1
+                            break
     return n
 
 
@@ -256,11 +268,12 @@ def main():
     for net, layer, w, pts in MANUAL:
         P.add_track(board, net, layer, w, pts)
     for net, x, y in MANUAL_HOP_VIAS + MANUAL_VIAS:
-        P.add_via(board, net, x, y, 0.6, 0.3)
-        circles.append((x, y, 0.3, net))
+        P.add_via(board, net, x, y, P.VIA_D, P.VIA_DRILL)
+        circles.append((x, y, P.VIA_D / 2, net))
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    segs, circles, boxes = obstacles(board)     # include the maze router's tracks and vias
     boxes5 = [b[:6] for b in boxes]
-    iv = island_vias(board, segs, circles, boxes5)
+    iv = island_vias(board, segs, circles, boxes)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     rm = prune_vias(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())

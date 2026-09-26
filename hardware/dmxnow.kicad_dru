@@ -12,10 +12,17 @@
   (constraint clearance (min 3.0mm)))
 
 # Pad-to-pad spacing inside a component is set by its manufacturer (K1 COM/NO
-# pins 5 mm apart, PS1 AC pins 5.08 mm apart): accepted down to 2.0 mm.
+# pins 5 mm apart, PS1 AC pins 5.08 mm apart): accepted down to 2.0 mm, for the
+# pads of K1 and of PS1 only.
 (rule "mains_pad_to_pad_inside_components"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && (A.NetClass == 'MAINS' || A.NetClass == 'MAINS_PWR') && (B.NetClass == 'MAINS' || B.NetClass == 'MAINS_PWR') && A.Net != B.Net")
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && (A.NetClass == 'MAINS' || A.NetClass == 'MAINS_PWR') && (B.NetClass == 'MAINS' || B.NetClass == 'MAINS_PWR') && A.Net != B.Net && ((A.insideCourtyard('K1') && B.insideCourtyard('K1')) || (A.insideCourtyard('PS1') && B.insideCourtyard('PS1')))")
   (constraint clearance (min 2.0mm)))
+
+# The plastic locating peg of the F1 holder (NPTH, between its two clips) is not a
+# conductor: ordinary hole clearance.
+(rule "mains_f1_holder_peg"
+  (condition "(A.NetClass == 'MAINS' || A.NetClass == 'MAINS_PWR') && B.Type == 'Pad' && !B.isPlated() && B.insideCourtyard('F1')")
+  (constraint hole_clearance (min 1mm)))
 
 (rule "mains_board_edge"
   (condition "A.NetClass == 'MAINS' || A.NetClass == 'MAINS_PWR'")

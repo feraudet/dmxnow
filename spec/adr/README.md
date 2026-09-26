@@ -12,7 +12,7 @@ Les ADR 0001 à 0010 reprennent les décisions de la section 3 du cahier des cha
 | [0004](0004-alimentation-isolee.md) | Alimentation interne isolée Mean Well IRM-03-5 | Accepté (décision 4 amendée par A1) |
 | [0005](0005-relais-g5rl.md) | Relais de coupure Omron G5RL-1A-E-HR | Accepté (décision 5, amendée) |
 | [0006](0006-rubans-alim-externe-pwm.md) | Rubans LED : alimentation externe, 4 PWM côté masse | Accepté (décision 6) |
-| [0007](0007-pcb-secable.md) | PCB unique sécable par V-cut | Accepté (décision 7) |
+| [0007](0007-pcb-secable.md) | PCB unique sécable (languettes perforées) | Accepté (décision 7, amendée) |
 | [0008](0008-borniers-wago-2604.md) | Borniers WAGO série 2604 | Accepté (décision 8) |
 | [0009](0009-relais-par-canal-dmx.md) | Commande du relais par un canal DMX | Accepté (décision 9) |
 | [0010](0010-boitier-imprime-3d.md) | Boîtier imprimé 3D paramétrique | Accepté (décision 10) |

@@ -69,7 +69,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | ES-01  | Isolation renforcée entre tout conducteur 230 V et la basse tension accessible (DMX, rubans, programmation) : lignes de fuite ≥ 6 mm, distances dans l'air ≥ 6 mm sur la carte (objectif de conception supérieur au minimum normatif, §4.8.2). |
 | ES-02  | Alimentation interne isolée (PS1). Aucune liaison galvanique entre secteur et masse DMX. |
 | ES-03  | Continuité du PE entre l'entrée et les deux sorties, sans interruption par le relais. Le PE ne passe pas par le PCB : jonction par un WAGO 221-413 dans le compartiment 230 V (arbitrage A9). |
-| ES-04  | Branche d'alimentation interne protégée par F1 (T500 mA) et RV1. Chemin de puissance protégé par le disjoncteur amont : dimensionnement du cuivre en conséquence (arbitrage A2). |
+| ES-04  | Branche d'alimentation interne protégée par F1 (T500 mA céramique 5×20, pouvoir de coupure 1500 A sous 250 V) et RV1. Chemin de puissance protégé par le disjoncteur amont : dimensionnement du cuivre en conséquence (arbitrage A2). |
 | ES-05  | Boîtier en matériau au moins UL94 V-1 (V-0 recommandé), borniers 230 V accessibles uniquement après retrait d'un couvercle vissé (outil requis), cloison entre zones, arrêts de traction sur tous les câbles secteur. |
 | ES-06  | Aucun 230 V ne traverse ni n'approche à moins de 4 mm la ligne de découpe. |
 | ES-07  | Aucune programmation ni mesure avec le secteur raccordé (procédure documentée), sauf équipement de test isolé explicitement prévu. |
@@ -99,7 +99,7 @@ PE (cordons) ─▶ WAGO 221-413 hors carte, compartiment 230 V
 +3V3 ─▶ U1 ESP32-C3-MINI-1
 U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
 U1 IO5 ─▶ Q1 AO3400 ─▶ bobine K1 (D2 roue libre)
-───────────── ligne V-cut (BOARD_SENSE, PWM1-4, +5V, GND seulement) ─────────────
+────── ligne de séparation à languettes (BOARD_SENSE, PWM1-4, +5V, GND seulement) ──────
 J5 12/24 V ─▶ F2 20 A ─▶ D3, C7, C8 ─▶ VLED ─▶ J6-VLED ─▶ rubans ─▶ J6-CH1..4 ─▶ Q2..Q5 ─▶ GND_LED
 U1 IO6/7/10/3 ─▶ U4 74AHCT125 (5 V) ─▶ R7..R10 ─▶ grilles Q2..Q5
 ```
@@ -142,8 +142,8 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
-| IO0    | STATUS_LED (option) | R19 1 kΩ en série, D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
-| IO1    | BOARD_SENSE       | Entrée, pull-up interne ; GND sur la partie rubans (R21 0 Ω) |
+| IO0    | STATUS_LED (option) | R19 100 Ω en série (LED verte VF ≈ 2,6-3,1 V), D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
+| IO1    | BOARD_SENSE       | Entrée, R23 100 kΩ vers 3V3 sur la partie principale (+ pull-up interne) ; GND sur la partie rubans (R21 0 Ω) |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
 | IO4    | DMX_TX            | UART1 TX vers SP3485 DI |
@@ -174,8 +174,16 @@ et refabriqué par d'autres, un module certifié réduit le risque d'isolement (
 L'IRM-05-5 envisagé d'abord a été écarté au placement (2026-09-25) : 45,7 × 25,4 × 21,5 mm
 d'après l'empreinte KiCad, trop gros pour la zone 230 V et trop haut pour le boîtier.
 L'IRM-03-5 a le même courant que le HLK-PM05 et un encombrement voisin. Principe inchangé
-(module isolé, broches AC et DC séparées) ; F1 et RV1 conservés sous réserve des
-recommandations de la fiche Mean Well. Le HLK-PM05 reste une empreinte de repli non
+(module isolé, broches AC et DC séparées) ; F1 et RV1 conservés. **F1 (revue 2026-09-26)** :
+le fusible TR5 (pouvoir de coupure 35 A) est remplacé par une cartouche céramique 5×20
+temporisée T500 mA « H » (Littelfuse 0215.500MXP, 1500 A sous 250 V AC) dans un support
+ouvert Schurter 0031.8201 : si RV1 finit en court-circuit (mode de défaillance usuel d'une
+varistance), le courant de défaut du réseau dépasse largement 35 A. Le support est placé
+dans une bande de 10 mm ajoutée au-dessus de la zone 230 V (seule place disponible).
+La broche 5 (NC) de PS1 est sur la rangée des broches AC du module : traitée comme
+primaire, aucun cuivre à moins de 7,2 mm (zone interdite sur le PCB). C10 (47 µF) en
+sortie de PS1 : Mean Well mesure l'ondulation avec 47 µF, et le +5 V porte la bobine du
+relais et les pointes d'émission Wi-Fi. Le HLK-PM05 reste une empreinte de repli non
 retenue [V-HW-01].
 
 Budget sur +5 V (valeurs à confirmer en datasheet) :
@@ -198,7 +206,10 @@ cuivre 2 oz généreuse sur les broches GND/VOUT** et à vérifier par mesure (R
 
 - SP3485 alimenté en 3,3 V, DE et /RE à 3V3 : émetteur actif en permanence, récepteur
   désactivé (RO non connecté). Pas de polarisation (*fail-safe*) nécessaire puisque la
-  ligne est toujours pilotée.
+  ligne est toujours pilotée. **R22 10 kΩ de DMX_TX vers 3V3** (revue 2026-09-26) : GPIO4
+  flotte pendant le reset et le démarrage alors que l'émetteur est actif ; R22 tient la
+  ligne au repos (« mark ») et évite d'envoyer du bruit aux projecteurs à la mise sous
+  tension.
 - D1 SM712 : TVS asymétrique −7 V / +12 V adaptée à la plage de mode commun RS-485.
 - **Pas de terminaison 120 Ω sur le nœud** : le nœud est l'émetteur, en tête de ligne ;
   la terminaison appartient à l'extrémité (bouchon sur la sortie THRU du projecteur si
@@ -250,31 +261,39 @@ Logique (implémentée dans `common`, testée) :
 
 ### 4.6 Sortie rubans (partie sécable)
 
-- 4 MOSFET N côté masse AOD4184A (40 V ; RDS(on) de l'ordre de 7 mΩ à VGS 10 V et 10 mΩ à
-  4,5 V [V-HW-07]). Commande en 5 V par U4 74AHCT125 (entrées compatibles TTL, VIH 2 V,
+- 4 MOSFET N côté masse **AOD2610E** (60 V ; RDS(on) ≤ 9,5 mΩ à VGS 10 V et ≤ 13,3 mΩ à
+  4,5 V, Qgd 3,5 nC, fiche AOS vérifiée). Remplace l'AOD4184A (40 V) : l'écrêtage de D3
+  (≈ 45 V) dépassait sa tenue (R-10, clos). Commande en 5 V par U4 74AHCT125 (entrées compatibles TTL, VIH 2 V,
   donc attaquables en 3,3 V ; sortie 5 V pour une meilleure saturation que 3,3 V).
-  R15-R18 100 kΩ maintiennent les entrées de U4 à 0 pendant le démarrage ; /OE à GND.
+  R15-R18 **4,7 kΩ** maintiennent les entrées de U4 à 0 pendant le démarrage ; /OE à GND.
+  4,7 kΩ et non 100 kΩ (revue 2026-09-26) : GPIO6 (PWM1, MTCK) a une résistance de tirage
+  interne de ~45 kΩ vers 3,3 V dès le reset tant que l'eFuse JTAG n'est pas brûlé (fiche
+  ESP32-C3, tableau 2-1, note 6) ; avec 100 kΩ, l'entrée de U4 restait à ~2,3 V (> VIH) et
+  le canal 1 s'allumait à chaque démarrage et en mode téléchargement.
   Au placement (2026-09-26), R15-R18 ont été mises **sur la partie principale**, juste
   avant la découpe, faute de place autour de U4 : même fonction (les nets PWM1-4 sont
   tenus à 0 dès la mise sous tension), et elles restent inoffensives sur une carte cassée
-  (tirage de 100 kΩ sur des GPIO inutilisées).
+  (0,7 mA par GPIO inutilisée à l'état haut).
 - Courant : 200 W sous 12 V = 16,7 A total, soit ~4,2 A par canal en RGBW équilibré ;
   on dimensionne chaque canal pour **6 A** et le total pour 17 A (F2 20 A).
 - Pertes par MOSFET à 4,2 A : conduction I²R ≈ 4,2² × 0,010 ≈ 0,18 W ; commutation à
-  4,9 kHz ≈ 0,05 à 0,1 W (temps de transition ~150 à 200 ns avec 100 Ω de grille et un
-  étage AHCT) ; total ≈ 0,25 W par MOSFET, ~1 W pour les quatre. En DPAK sur ~2 cm² de
-  cuivre 2 oz (RθJA ≈ 50 °C/W) : ΔT ≈ 15 °C. Aérations prévues au boîtier.
+  4,9 kHz ≈ 0,1 à 0,2 W (Qgd 3,5 nC sous ~20 mA de grille : ~175 ns par front) ; total
+  ≈ 0,3 à 0,4 W par MOSFET à 4,2 A (≈ 0,7 W à 6 A, RDS(on) à chaud). Cuivre de drain mesuré
+  ≈ 0,85 cm² par canal (RθJA ≈ 80 °C/W) : ΔT ≈ 30 °C à 4,2 A, ≈ 55 °C à 6 A. Limiter
+  `pwm_freq_hz` à ~5 kHz sous 24 V / 6 A. Sources reliées au plan GND_LED par 3 vias de
+  0,6 mm. Aérations prévues au boîtier.
 - **Ondulation dans C7** : les 4 canaux commutent jusqu'à 17 A en créneaux ; le courant
   alternatif absorbé par C7 peut dépasser plusieurs ampères efficaces, bien au-delà du
   courant d'ondulation admissible d'un 470 µF 35 V courant (~1 A). Mesures : (a) C7
-  faible ESR, 105 °C, courant d'ondulation ≥ 2 A à 100 kHz [V-HW-08] ; (b) **déphasage
+  faible ESR, 105 °C, courant d'ondulation ≥ 2 A à 100 kHz : **Nichicon UHW1V471MPD**
+  (2 A, 30 mΩ, 10 × 16 mm) [V-HW-08] ; (b) **déphasage
   des 4 PWM** (paramètre `hpoint` du LEDC décalé d'un quart de période par canal),
   sans coût matériel, qui étale les appels de courant et réduit fortement l'ondulation
   d'entrée. Justifié comme exigence firmware (EF-09).
-- D3 SMBJ28A : tension de veille 28 V (compatible 24 V + 10 %), tension d'écrêtage
-  ≈ 45 V à Ipp : **supérieure aux 40 V des MOSFET**. Une surtension sur VLED passe donc
-  en partie sur les MOSFET bloqués. Risque R-10, à arbitrer lors du livrable PCB
-  (option : MOSFET 60 V de même boîtier).
+- D3 SMBJ28A : tension de veille 28 V (compatible 24 V + 10 % ; VLED ≤ 28 V, ne pas
+  régler une alimentation 24 V au-delà), tension d'écrêtage ≈ 45 V à Ipp, sous les 60 V
+  des AOD2610E (R-10 clos). Une inversion de polarité sur J5 met D3 en court-circuit
+  franc : seul F2 protège, marquage « + / − » sérigraphié près de J5.
 - Chemin VLED, retour GND_LED : 17 A, largeur de piste §4.8.3 ; F2, C7 et D3 collés à J5 ;
   retour de courant des rubans (J6 → MOSFET → GND_LED → J5) entièrement dans la partie
   sécable.
@@ -300,8 +319,10 @@ Logique (implémentée dans `common`, testée) :
 #### 4.8.1 Généralités
 
 2 couches, FR-4 TG ≥ 150, cuivre 2 oz (70 µm) sur les deux faces, épaisseur 1,6 mm.
-**Dimensions après placement (révisées le 2026-09-26) : 146 × 54 mm entière, V-cut à
-X = 100 mm ; partie principale 100 × 54 mm, partie rubans 46 × 54 mm** (objectif initial
+**Dimensions après placement (révisées le 2026-09-26, rév. 0.3) : 146 × 54 mm, plus une
+bande de 47,5 × 10 mm au-dessus de la zone 230 V pour le porte-fusible F1 (encombrement
+146 × 64 mm) ; séparation à X = 100 mm par fente fraisée de 2 mm et trois languettes
+perforées ; partie principale 100 × 54 mm, partie rubans 46 × 54 mm** (objectif initial
 ~130 × 50). Raisons : 6 mm d'isolement + fentes, pistes 16 A (A2), trois borniers 2 pôles
 (J1, J4, J4b) empilés sur le bord gauche, et borniers WAGO de ~18 mm de profondeur sur la
 partie rubans.
@@ -315,7 +336,7 @@ X: 0            46 49 52                        96  100 104                     
 │ J4 (L_SW N)   │ f│  │ PS1 sorties  J3 SW1     │   ┊   │ R7..R14         CH1..CH4)  │
 │ J4b(L_SW N)   │ e│6 │ U1 ESP32 [antenne ↑]    │   ┊   │ U4 C9 C7  D3 C8            │
 │ K1 contacts F1│ n│mm│ U2 D1 J2 (DMX)          │   ┊   │ F2 (ATO)        J5 (12/24V)│
-│ PS1 entrée RV1│ t│  │                         │ V-cut │                            │
+│ PS1 entrée RV1│ t│  │                         │ fente │                            │
 │   ZONE 230 V  │ e│  │   ZONE BASSE TENSION    │4mm┊4mm│   PARTIE SÉCABLE (TBTS)    │
 └───────────────┴──┴──┴─────────────────────────┴───┊───┴───────────────────────────┘
 ```
@@ -369,10 +390,34 @@ elles tombent sous 0,1 W pour une charge réaliste de 1 à 2 A. Alternative ment
 cahier des charges : fils soudés sur les broches du relais, retenue seulement si le
 placement ne permet pas les largeurs.
 
+Réalisé (rév. 0.3, après revue) : L_IN 4 à 4,3 mm sur les deux faces ; L_SW en doigts de
+7,4 mm et bus de 7 mm sur la face avant ; N en bus de 7,1 mm sur la face arrière (les
+doigts L_SW le croisent sur l'autre face) ; cols de 1,9 mm sur ≤ 8 mm aux broches des
+borniers (imposés par le pas de 5 mm). Estimation IPC-2221 à 16 A : ΔT ≤ 10 °C sur les
+bus, ~25 °C sur les cols courts (la chaleur s'étale dans le cuivre voisin) ; à mesurer à
+l'essai de charge (REVIEW.md §6).
+
+Comportements à connaître (revue 2026-09-26) :
+- Relais ouvert ≠ sectionnement : un seul contact (micro-coupure), sur le conducteur
+  arrivant sur J1-1 ; avec une prise française non polarisée, ce peut être le neutre. La
+  sortie n'est pas isolée du secteur relais ouvert.
+- Tout redémarrage de l'ESP32 (chien de garde, OTA, baisse de tension) relâche le relais
+  pendant le démarrage (~0,3 s ; R6 bloque Q1) : le projecteur redémarre.
+- Courant d'appel : le G5RL-1A-E-HR admet 100 A crête (VDE, 50 000 manœuvres). Deux
+  alimentations à découpage en parallèle sur J4/J4b (projecteur + alimentation LED)
+  peuvent dépasser cette valeur à froid : à mesurer avant la mise en service [V-SYS-01] ;
+  au-delà de ~80 A, ajouter une limitation d'appel (CTN) côté charge.
+
 #### 4.8.4 Ligne de découpe
 
-- Traversent la découpe : PWM1-4, BOARD_SENSE, +5V, GND uniquement (TBT).
-- 4 mm sans composant de chaque côté ; cuivre à ≥ 0,5 mm de l'axe du V-cut [V-HW-12].
+- **Fente fraisée + languettes perforées (revue 2026-09-26, ADR 0007 amendé)** : le V-cut
+  initial entaille les deux faces de la carte et aurait coupé en fabrication les pistes qui
+  le traversent (2 couches, aucune couche interne) ; JLCPCB refuse en outre le V-cut sous
+  70 × 70 mm. Fente de 2 mm (X 99-101), trois languettes pleines de 5, 7,5 et 11 mm
+  (Y 6,5-11,5 / 22,5-30 / 33-44), rangée de trous NPTH de 0,5 mm au pas de 0,75 mm côté
+  partie principale, interrompue au passage des pistes (0,3 mm de garde).
+- Traversent la découpe, sur les languettes : PWM1-4, BOARD_SENSE, +5V, GND uniquement (TBT).
+- 4 mm sans composant de chaque côté ; plans de cuivre à ≥ 0,7 mm des bords de la fente.
 - La GND qui traverse n'est qu'une référence (pistes fines, ~0,5 mm) : le courant des
   rubans ne doit pas pouvoir y circuler en fonctionnement normal. Cf. R-09.
 - Sur la partie sécable, GND logique (U4, pull-downs) et GND_LED (retour des rubans) sont
@@ -385,11 +430,11 @@ placement ne permet pas les largeurs.
 
 Chaîne entièrement scriptée (`hardware/Makefile`, détails dans `hardware/README.md`) :
 `design.py` (source unique : composants, broches, nets, classes) → `sch.py` (schéma
-KiCad à étiquettes, symboles embarqués) → `pcb.py` (contour, fentes, V-cut, placement,
+KiCad à étiquettes, symboles embarqués) → `pcb.py` (contour, fentes, languettes, placement,
 routage 230 V et puissance LED **scripté**, plans) → `route.py` (signaux basse tension
 par Freerouting, zone 230 V interdite au routeur) → `check.py` (netlist schéma = design,
 pastilles PCB = design, seuls les nets autorisés traversent la découpe) → DRC avec règles
-230 V personnalisées (`dmxnow.kicad_dru`) → `fab.py` (Gerbers, perçages PTH/NPTH, V-cut,
+230 V personnalisées (`dmxnow.kicad_dru`) → `fab.py` (Gerbers, perçages PTH/NPTH,
 BOM/CPL JLCPCB par variante, BOM complète). SKiDL n'est pas utilisé : ses dépendances ne
 s'installent pas ici et la génération directe des fichiers KiCad suffit. La CI
 (`.github/workflows/hardware.yml`, image `kicad/kicad:9.0`) rejoue ERC et DRC en KiCad 9,
@@ -424,7 +469,7 @@ contrôle pour la relecture humaine.
   manœuvre coupe et rétablit aussi le projecteur, à documenter. Permet de récupérer un
   nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier. Désactivée, le
   compteur n'est ni lu ni écrit.
-- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (1 kΩ,
+- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (100 Ω,
   ~1 mA sous 3,3 V, suffisant pour un guide de lumière) est **toujours présente** sur le
   PCB, câblée sur IO0 (broche libre, sans rôle de strapping sur l'ESP32-C3). Les deux
   composants sont **non montés par défaut** (DNP) ; la génération des sorties produit deux
@@ -601,7 +646,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
 | WAGO 2604 : 3 × 2 pôles (+ 2 + 5 pôles), WAGO 221-413 | 5,5 € (+ 4 €) | 5,5 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
-| Partie rubans : 4 × AOD4184A, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
+| Partie rubans : 4 × AOD2610E, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
 | PCB 2 couches 2 oz + assemblage CMS JLCPCB (répartis) | 5 € | 5 € |
 | Boîtier ABS-FR (~60 g) + inserts + vis  | 3 €           | 2,5 € |
 | Presse-étoupes (4 à 6)                  | 2,5 €         | 1,5 € |
@@ -635,11 +680,11 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 | R-07 | Échauffement de U3 (LDO) | Dérive, arrêt thermique | Moyenne | Cuivre, mesure ; repli : convertisseur abaisseur (nouvel arbitrage) |
 | R-08 | Échauffement dans un boîtier fermé (relais 0,4 W, PS1 ~0,6 W, contacts à fort courant, MOSFET ~1 W) | Vieillissement, déformation du boîtier | Moyenne | Aérations, matériau Tg ≥ 100 °C, mesure à charge nominale |
 | R-09 | Boucle de masse : GND_LED (alimentation LED) reliée à la GND DMX, elle-même souvent au PE via le projecteur ; si le −V de l'alimentation LED est aussi relié au PE, une partie du courant des rubans peut circuler par la masse DMX et la piste GND de la découpe | Perturbations DMX, échauffement d'une piste fine | Faible (Mean Well LRS/HLG : sortie flottante) | Documenter : sortie de l'alimentation LED non reliée à la terre ; option résistance/ferrite série dans la GND de découpe à évaluer au PCB |
-| R-10 | Écrêtage de D3 (≈ 45 V) au-delà de VDS max des MOSFET (40 V) ; surtensions inductives des câbles de rubans | Destruction MOSFET | Faible | Arbitrage au livrable PCB (MOSFET 60 V) |
+| R-10 | Écrêtage de D3 (≈ 45 V) au-delà de VDS max des MOSFET (40 V) ; surtensions inductives des câbles de rubans | Destruction MOSFET | Faible | **Clos** : AOD2610E 60 V (revue 2026-09-26) |
 | R-11 | Trafic ESP-NOW hostile ou accidentel (même `net_id`) | Spectacle perturbé | Faible | `net_id` aléatoire recommandé, A4 pour les commandes |
 | R-12 | Wi-Fi voisin intense sur le même canal (salle, festival) | Pertes, latence | Moyenne | Choix du canal (scan documenté), débit, CLI affichant les pertes |
 | R-13 | Ondulation excessive dans C7 | Vieillissement de C7 | Moyenne | Condensateur faible ESR + déphasage PWM (§4.6) |
-| R-14 | V-cut sur une carte de 50 mm de haut refusé ou non standard chez JLCPCB | Surcoût, découpe différente | Moyenne | [V-HW-12] ; repli : languettes à perforations |
+| R-14 | V-cut sur une carte de 50 mm de haut refusé ou non standard chez JLCPCB | Surcoût, découpe différente | Moyenne | **Réalisé** : V-cut abandonné (il coupait aussi les pistes), fente + languettes perforées |
 | R-15 | Boîtier ignifugé difficile à imprimer (gauchissement) | Retard | Moyenne | Géométrie sans grands aplats, congés, bordure ; test d'impression tôt |
 
 ---
@@ -654,7 +699,7 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 - Règles de classes de réseaux : MAINS ↔ LV ≥ 6 mm ; MAINS ↔ MAINS ≥ 3 mm ; pistes de
   puissance ≥ largeurs §4.8.3 ; aucun cuivre MAINS à < 4 mm de l'axe de découpe (vérifié
   par script).
-- Fichiers JLCPCB : Gerber, perçage, V-cut, BOM (`bom_base` et `bom_led`, A7) et CPL au format JLCPCB, rendus PNG
+- Fichiers JLCPCB : Gerber, perçage (fente et perforations incluses), BOM (`bom_base` et `bom_led`, A7) et CPL au format JLCPCB, rendus PNG
   dessus/dessous ; génération reproductible par une commande (`make -C hardware`).
 - `hardware/REVIEW.md` : liste de contrôle de relecture humaine complétée.
 - Recommandation (hors CI) : test diélectrique secteur/TBT au premier prototype
@@ -723,12 +768,12 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-HW-04 | ✅ Vérifié (fiche WAGO 2604-1102, 18.02.2024) : pas 5 mm, 2 broches par pôle à 8,2 mm, perçage 1,3 mm, broche 0,8 × 1 mm, corps 16,3 mm de profondeur (+ 2,9 mm de levier), largeur (n − 1) × 5 + 7,4 mm, 32 A / 400 V IEC, 0,2-4 mm². Restent : **une seule âme par point de serrage** (câblage) et la fiche 2604-1105 (5 pôles, même série supposée identique) | Fiches WAGO 2604 (`hardware/datasheets/wago-2604-1102.pdf`) | 🔴 critique |
 | V-HW-05 | AP2112K-3.3 : brochage SOT-23-5 (1 VIN, 2 GND, 3 EN, 4 NC, 5 VOUT), RθJA, comportement en courant inverse | Diodes Inc., fiche AP2112 | moyenne |
 | V-HW-06 | SP3485 : brochage SOIC-8 (1 RO, 2 /RE, 3 DE, 4 DI, 5 GND, 6 A, 7 B, 8 VCC), courant de sortie ; SM712 brochage SOT-23 | MaxLinear SP3485 ; Semtech ou Bourns SM712 | moyenne |
-| V-HW-07 | AOD4184A : RDS(on) à VGS 4,5 et 5 V, Qg, énergie d'avalanche ; AO3400 : VGS(th) | Alpha & Omega Semiconductor | moyenne |
-| V-HW-08 | C7 470 µF 35 V : courant d'ondulation admissible, ESR, diamètre ; porte-fusible ATO pour PCB (Littelfuse FLR 178.6165, empreinte KiCad, intensité admissible 20 A ?) | Fabricants, catalogue LCSC | moyenne |
+| V-HW-07 | ✅ AOD2610E (remplace AOD4184A) : 60 V, RDS(on) ≤ 13,3 mΩ à 4,5 V, VGS(th) 1,4-2,4 V, Qgd 3,5 nC ; AO3400 : VGS(th) ≤ 1,45 V | Fiches AOS (LCSC C282428, C20917) | faible |
+| V-HW-08 | ✅ C7 Nichicon UHW1V471MPD : 2 A d'ondulation à 100 kHz, 30 mΩ, 10 × 16 mm. Porte-fusible ATO Littelfuse 178.6165.0002 : 30 A max / 80 V (22,5 A en continu) ; fusible 20 A chargé à 17 A = 85 % de son calibre : prévoir 25 A ou limiter la charge à 16 A | Nichicon, Littelfuse | faible |
 | V-HW-09 | ✅ Brochage et dimensions vérifiés (fiche IRM-03 2025-08-08) : 37 × 24 × 15 mm, broches Ø 0,6 mm, AC/L (1) - AC/N (3) 5,08 mm, NC (5), −Vo (14), +Vo (16) conformes à l'empreinte KiCad `Converter_ACDC_MeanWell_IRM-03-xx_THT`. Restent : homologations de la pièce achetée, fusible et varistance en entrée | Fiche Mean Well IRM-03 (`hardware/datasheets/meanwell-irm-03.pdf`) | 🔴 critique |
 | V-HW-10 | ✅ Placement 146 × 54 mm (partie principale 100 × 54) conservé après relevé des cotes réelles des WAGO 2604 et du G5RL-1A-E-HR : J1, J4, J7 décalés de 0,7 mm vers le bord, J6 et H3 de 0,5 mm ; les corps des WAGO dépassent le bord du PCB de 0,7 à 1,4 mm (à reprendre dans le boîtier, livrable 8.6) | Livrable PCB | faible |
 | V-HW-11 | Valeurs normatives exactes (IEC 62368-1 tableaux de distances dans l'air et lignes de fuite pour isolation renforcée, 250 V, PD2, OVC II, groupe IIIb) | Norme IEC 62368-1:2018 (ou EN 62368-1:2020+A11) | 🔴 critique |
-| V-HW-12 | Règles JLCPCB : V-cut sur carte unique (dimensions minimales), distance cuivre/V-cut, fentes ≥ 1 mm, cuivre 2 oz en 2 couches | jlcpcb.com, capacités de fabrication | moyenne |
+| V-HW-12 | ✅ Capacités JLCPCB relevées : V-cut ≥ 70 × 70 mm et cuivre ≥ 0,4 mm de l'axe (d'où les languettes), languette perforée ≥ 5 mm, trous 0,5-0,8 mm, fente non métallisée ≥ 1 mm, 2 oz : piste/espace ≥ 0,16 mm, anneau ≥ 0,254 mm (vias 0,9/0,35 mm) | jlcpcb.com/capabilities | faible |
 | V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; reste la rupture de WAGO 2604-1105 chez LCSC et le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
 | V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
 | V-FW-01 | pioarduino : version exacte à épingler (Arduino ≥ 3.2 / IDF ≥ 5.4.2), support ESP32-C3 et XIAO ESP32-C3 | github.com/pioarduino/platform-espressif32 (releases) | critique |
@@ -741,7 +786,7 @@ remplacer la pastille J3-3V3 par J3-5V (alimentation par l'entrée du régulateu
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
-| V-SYS-01 | Puissance maximale des projecteurs visés et courant d'appel mesuré | Toi (inventaire du parc) | moyenne |
+| V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
 | V-SYS-02 | XLR 3 ou 5 broches sur le parc | Toi | faible |
 
 ---

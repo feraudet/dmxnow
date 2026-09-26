@@ -17,7 +17,7 @@ MAINS_TO_MAINS = 3.0   # functional insulation target
 RELAY_CONTACT_GAP = 2.0  # COM/NO pads of K1 are 5 mm apart by relay design
 
 
-def netclass(name, clearance, track, via_d=0.6, via_drill=0.3):
+def netclass(name, clearance, track, via_d=0.9, via_drill=0.35):
     return {
         "name": name, "clearance": clearance, "track_width": track,
         "via_diameter": via_d, "via_drill": via_drill,
@@ -32,7 +32,7 @@ def write_project():
     classes = [netclass("Default", 0.2, 0.25)]
     patterns = []
     for name, nc in design.NETCLASSES.items():
-        via = (1.2, 0.6) if name in ("MAINS_PWR", "LED_PWR") else (0.8, 0.4)
+        via = (1.2, 0.6) if name in ("MAINS_PWR", "LED_PWR") else (0.9, 0.35)
         classes.append(netclass(name, nc["clearance"], nc["track"], *via))
         for n in nc["nets"]:
             patterns.append({"netclass": name, "pattern": n})
@@ -50,7 +50,7 @@ def write_project():
                     "min_hole_clearance": 0.25, "min_hole_to_hole": 0.25, "min_microvia_diameter": 0.2,
                     "min_microvia_drill": 0.1, "min_resolved_spokes": 1, "min_silk_clearance": 0.0,
                     "min_text_height": 0.8, "min_text_thickness": 0.08, "min_through_hole_diameter": 0.3,
-                    "min_track_width": 0.2, "min_via_annular_width": 0.13, "min_via_diameter": 0.5,
+                    "min_track_width": 0.2, "min_via_annular_width": 0.25, "min_via_diameter": 0.8,
                     "solder_mask_to_copper_clearance": 0.0, "use_height_for_length_calcs": True,
                 },
                 "rule_severities": {
@@ -60,7 +60,7 @@ def write_project():
                     "courtyards_overlap": "error", "missing_courtyard": "ignore",
                 },
                 "track_widths": [0.0, 0.25, 0.4, 0.6, 1.0, 2.0, 5.0],
-                "via_dimensions": [{"diameter": 0.0, "drill": 0.0}, {"diameter": 0.6, "drill": 0.3},
+                "via_dimensions": [{"diameter": 0.0, "drill": 0.0}, {"diameter": 0.9, "drill": 0.35},
                                    {"diameter": 1.2, "drill": 0.6}],
             },
         },
@@ -92,10 +92,17 @@ def write_rules():
   (constraint clearance (min {mm}mm)))
 
 # Pad-to-pad spacing inside a component is set by its manufacturer (K1 COM/NO
-# pins 5 mm apart, PS1 AC pins 5.08 mm apart): accepted down to {rc} mm.
+# pins 5 mm apart, PS1 AC pins 5.08 mm apart): accepted down to {rc} mm, for the
+# pads of K1 and of PS1 only.
 (rule "mains_pad_to_pad_inside_components"
-  (condition "A.Type == 'Pad' && B.Type == 'Pad' && ({a}) && ({b}) && A.Net != B.Net")
+  (condition "A.Type == 'Pad' && B.Type == 'Pad' && ({a}) && ({b}) && A.Net != B.Net && ((A.insideCourtyard('K1') && B.insideCourtyard('K1')) || (A.insideCourtyard('PS1') && B.insideCourtyard('PS1')))")
   (constraint clearance (min {rc}mm)))
+
+# The plastic locating peg of the F1 holder (NPTH, between its two clips) is not a
+# conductor: ordinary hole clearance.
+(rule "mains_f1_holder_peg"
+  (condition "({a}) && B.Type == 'Pad' && !B.isPlated() && B.insideCourtyard('F1')")
+  (constraint hole_clearance (min 1mm)))
 
 (rule "mains_board_edge"
   (condition "{a}")

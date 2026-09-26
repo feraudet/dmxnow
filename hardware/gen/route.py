@@ -1,7 +1,7 @@
 """Route the low-voltage signal nets with Freerouting and import the result.
 
 1. copy the board, lock every existing track (230 V and LED power are scripted
-   in pcb.py and must not be touched), replace the V-cut keep-out (footprints
+   in pcb.py and must not be touched), replace the breakaway keep-out (footprints
    only, but Specctra would treat it as a routing barrier) by a routing keep-out
    covering the 230 V zone + 6 mm;
 2. export Specctra DSN, run Freerouting headless;
@@ -32,13 +32,18 @@ def prepare_dsn(dsn_path):
     # of the same file in one interpreter (the second board comes back empty)
     subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "pcb.py"),
                     "--dsn", dsn_path], check=True)
+    # no via inside an SMD pad (solder wicking through an open via, see REVIEW.md)
+    txt = open(dsn_path).read()
+    if "via_at_smd" not in txt:
+        txt = txt.replace("(structure", "(structure\n    (control (via_at_smd off))", 1)
+        open(dsn_path, "w").write(txt)
 
 
 def run_freerouting(dsn, ses, passes):
     cmd = ["java", "-jar", FREEROUTING, "-de", dsn, "-do", ses, "-mp", str(passes),
            "--gui.enabled=false", "-dct", "0"]
     print(" ".join(cmd))
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
+    r = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
     tail = "\n".join((r.stdout + r.stderr).splitlines()[-15:])
     print(tail)
     if not os.path.exists(ses):
@@ -83,7 +88,7 @@ def import_ses(board, ses_path):
         for v in find_all(net, "via"):
             if find(v, "type") is not None and str(find(v, "type")[1]) in ("fix", "protect"):
                 continue
-            dia, drill = vias.get(str(v[1]), (0.6, 0.3))
+            dia, drill = vias.get(str(v[1]), (P.VIA_D, P.VIA_DRILL))
             x, y = float(v[2]) * scale, float(v[3]) * scale
             via = pcbnew.PCB_VIA(board)
             via.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(-y)))
@@ -100,6 +105,20 @@ def _seg_dist(px, py, x1, y1, x2, y2):
     L = dx * dx + dy * dy
     t = 0.0 if L == 0 else max(0.0, min(1.0, ((px - x1) * dx + (py - y1) * dy) / L))
     return ((px - x1 - t * dx) ** 2 + (py - y1 - t * dy) ** 2) ** 0.5
+
+
+def _cross(o, a, b):
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+
+def _seg_seg(p1, p2, q1, q2):
+    """Exact distance between segments p1-p2 and q1-q2 (0 if they cross)."""
+    d1, d2 = _cross(q1, q2, p1), _cross(q1, q2, p2)
+    d3, d4 = _cross(p1, p2, q1), _cross(p1, p2, q2)
+    if ((d1 > 0) != (d2 > 0)) and ((d3 > 0) != (d4 > 0)):
+        return 0.0
+    return min(_seg_dist(p1[0], p1[1], *q1, *q2), _seg_dist(p2[0], p2[1], *q1, *q2),
+               _seg_dist(q1[0], q1[1], *p1, *p2), _seg_dist(q2[0], q2[1], *p1, *p2))
 
 
 def _obstacles(board):
@@ -146,24 +165,26 @@ def escape_vias(board, net="GND"):
         if b[4] != net or pad.GetAttribute() != pcbnew.PAD_ATTRIB_SMD:
             continue
         cx, cy = (b[0] + b[2]) / 2, (b[1] + b[3]) / 2
-        if not (P.LV_MIN_X < cx < P.VCUT - P.VCUT_KEEP or P.VCUT + P.VCUT_KEEP < cx < 112.8):
+        if not (P.LV_MIN_X < cx < P.SPLIT_X - P.SPLIT_KEEP or P.SPLIT_X + P.SPLIT_KEEP < cx < 112.8):
             continue
         if cx > 79.0 and cy < 7.5:
             continue
         half = max(b[2] - b[0], b[3] - b[1]) / 2
         done = False
-        for dist in (half + 0.7, half + 1.1, half + 1.6):
+        for dist in (half + 0.7, half + 1.1, half + 1.6, half + 2.2, half + 2.8, half + 3.4):
             for dx, dy in ((0, 1), (0, -1), (1, 0), (-1, 0), (0.7, 0.7), (-0.7, 0.7), (0.7, -0.7), (-0.7, -0.7)):
                 x, y = cx + dx * dist, cy + dy * dist
-                if _free(x, y, 0.3, segs, circles, boxes, net, ignore_pad=pad) and \
+                if P.in_nc_keepout(x, y, P.VIA_D / 2):
+                    continue
+                if _free(x, y, P.VIA_D / 2, segs, circles, boxes, net, ignore_pad=pad) and \
                         all(_seg_dist(px, py, cx, cy, x, y) > 0.2 + 0.35 + (bb[2] - bb[0]) / 2
                             for bb in boxes if bb[4] != net
                             for px, py in [((bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2)]) and \
-                        all(s[5] == net or _seg_dist((cx + x) / 2, (cy + y) / 2, *s[:4]) > s[4] + 0.2 + 0.35
+                        all(s[5] == net or _seg_seg((cx, cy), (x, y), s[0:2], s[2:4]) > s[4] + 0.15 + 0.3
                             for s in segs):
                     P.add_track(board, net, pcbnew.F_Cu, 0.3, [(cx, cy), (x, y)])
-                    P.add_via(board, net, x, y, 0.6, 0.3)
-                    circles.append((x, y, 0.3, net))
+                    P.add_via(board, net, x, y, P.VIA_D, P.VIA_DRILL)
+                    circles.append((x, y, P.VIA_D / 2, net))
                     segs.append((cx, cy, x, y, 0.15, net))
                     n += 1
                     done = True
@@ -173,7 +194,7 @@ def escape_vias(board, net="GND"):
     return n
 
 
-def stitch_gnd(board, pitch=1.8, dia=0.6, drill=0.3, margin=0.35):
+def stitch_gnd(board, pitch=1.8, dia=P.VIA_D, drill=P.VIA_DRILL, margin=0.35):
     """Add GND vias on a grid in the low-voltage area wherever they clear everything,
     so that the top and bottom GND pours form one piece."""
     mm = pcbnew.ToMM
@@ -199,11 +220,12 @@ def stitch_gnd(board, pitch=1.8, dia=0.6, drill=0.3, margin=0.35):
     while y < P.H - 1.0:
         x = P.LV_MIN_X + 1.5
         while x < 112.6:
-            if P.VCUT - P.VCUT_KEEP - 0.5 <= x <= P.VCUT + P.VCUT_KEEP + 0.5:
-                x += pitch        # no stitching in the V-cut band
+            if P.SPLIT_X - P.SPLIT_KEEP - 0.5 <= x <= P.SPLIT_X + P.SPLIT_KEEP + 0.5:
+                x += pitch        # no stitching in the breakaway band
                 continue
             ok = not (x > 79.0 and y < 7.5)            # antenna keep-out
-            ok = ok and not (x > P.VCUT and y > 43.8)  # strip: logic GND pour ends at y=44.3
+            ok = ok and not P.in_nc_keepout(x, y, r)   # PS1 NC pin keep-out
+            ok = ok and not (x > P.SPLIT_X and y > 43.8)  # strip: logic GND pour ends at y=44.3
             for b in boxes:
                 if not ok:
                     break

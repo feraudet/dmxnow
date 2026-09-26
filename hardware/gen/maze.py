@@ -10,7 +10,7 @@ import pcb as P
 
 STEP = 0.1          # grid pitch, mm
 TRACK_W = 0.25
-VIA_D, VIA_DRILL = 0.6, 0.3
+VIA_D, VIA_DRILL = P.VIA_D, P.VIA_DRILL
 CLEAR = 0.25        # clearance used by the maze router (board rule is 0.2)
 
 
@@ -52,9 +52,13 @@ class Grid:
                 if inside(*a) or inside(*b) or inside((a[0] + b[0]) / 2, (a[1] + b[1]) / 2):
                     if t.GetLayer() in self.items:
                         self.items[t.GetLayer()].append(("s", a[0], a[1], b[0], b[1], _mm(t.GetWidth()) / 2))
+        self.smd = []   # every SMD pad, own net included: no via may land on one
         for fp in board.GetFootprints():
             for pad in fp.Pads():
                 bb = pad.GetBoundingBox()
+                if pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD:
+                    self.smd.append((_mm(bb.GetLeft()) - P.OX, _mm(bb.GetTop()) - P.OY,
+                                     _mm(bb.GetRight()) - P.OX, _mm(bb.GetBottom()) - P.OY))
                 r = (_mm(bb.GetLeft()) - P.OX, _mm(bb.GetTop()) - P.OY, _mm(bb.GetRight()) - P.OX,
                      _mm(bb.GetBottom()) - P.OY)
                 if not (inside(r[0], r[1]) or inside(r[2], r[3])):
@@ -103,6 +107,17 @@ class Grid:
                     break
         self.cache[key] = ok
         return ok
+
+    def via_ok(self, ix, iy):
+        x, y = self.x0 + ix * STEP, self.y0 + iy * STEP
+        if P.in_nc_keepout(x, y, VIA_D / 2):
+            return False
+        for r in self.smd:
+            dx = max(r[0] - x, 0, x - r[2])
+            dy = max(r[1] - y, 0, y - r[3])
+            if math.hypot(dx, dy) < VIA_D / 2 + 0.15:
+                return False
+        return True
 
     def cell(self, x, y):
         return int(round((x - self.x0) / STEP)), int(round((y - self.y0) / STEP))
@@ -158,7 +173,7 @@ def route(board, net, a, b, a_layers=(0, 1), b_layers=(0, 1), margin=6.0):
                 heapq.heappush(openq, (nc + h(nxt), nc, nxt, cur))
         # via
         other = 1 - li
-        if g.free(ix, iy, 0, rv) and g.free(ix, iy, 1, rv):
+        if g.free(ix, iy, 0, rv) and g.free(ix, iy, 1, rv) and g.via_ok(ix, iy):
             nxt = ((ix, iy), other)
             nc = cost + 25.0
             if nc < best.get(nxt, 1e18):

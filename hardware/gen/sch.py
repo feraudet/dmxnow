@@ -23,10 +23,10 @@ GROUPS = [
      ["J1", "F1", "RV1", "PS1"]),
     ("230 V : relais et sorties commutées  -  RELECTURE HUMAINE OBLIGATOIRE",
      ["K1", "J4", "J7", "Q1", "R5", "R6", "D2"]),
-    ("Alimentation 3,3 V", ["U3", "C5", "C6", "C1", "C2"]),
+    ("Alimentation 3,3 V", ["U3", "C5", "C10", "C6", "C1", "C2"]),
     ("ESP32-C3, démarrage, programmation, bouton, LED option (A7)",
-     ["U1", "R1", "C4", "R2", "R3", "R4", "SW1", "J3", "R19", "D4"]),
-    ("Sortie DMX", ["U2", "C3", "D1", "J2"]),
+     ["U1", "R1", "C4", "R2", "R3", "R4", "R23", "SW1", "J3", "R19", "D4"]),
+    ("Sortie DMX", ["U2", "C3", "R22", "D1", "J2"]),
     ("Partie sécable rubans LED : entrée 12/24 V et commande",
      ["J5", "F2", "D3", "C7", "C8", "U4", "C9", "R20", "R21",
       "R15", "R16", "R17", "R18"]),
@@ -34,6 +34,9 @@ GROUPS = [
      ["R7", "R11", "Q2", "R8", "R12", "Q3", "R9", "R13", "Q4", "R10", "R14", "Q5", "J6"]),
     ("Fixations", ["H1", "H2", "H3"]),
 ]
+_missing = {p.ref for p in __import__("design").PARTS} - {r for _, refs in GROUPS for r in refs}
+if _missing:
+    raise SystemExit("sch.py: parts missing from GROUPS: %s" % sorted(_missing))
 POWER_FLAG_NETS = ["L_PSU", "N"]
 
 _uuid_ns = uuid.UUID("5f0c7a52-9d1b-4c7e-8a51-6a0d3c1e2b7f")

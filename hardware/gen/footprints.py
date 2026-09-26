@@ -28,7 +28,7 @@ DIMS = {
                   "apart, hole 1.3 mm, pin 0.8 x 1 mm; body 16.3 mm deep (front pin 5.2 mm "
                   "from the wire-entry face, rear pin 2.9 mm from the back), lever 2.9 mm "
                   "beyond the front face (19.2 mm overall), width L = (n - 1) x 5 + 7.4 mm.",
-        "pitch": 5.0, "row": 8.2, "drill": 1.3, "pad": (1.9, 2.8),
+        "pitch": 5.0, "row": 8.2, "drill": 1.4, "pad": (2.0, 2.8),   # WAGO: hole 1.3 +0.1; JLC PTH tolerance -0.08
         "body_front": 5.2, "body_back": 11.1,   # y extent from the front row: +front (wire entry) / -back
         "lever": 2.9,                           # overhang beyond the front face (upper part only)
         "side": 3.7,                            # (L - (n - 1) x pitch) / 2

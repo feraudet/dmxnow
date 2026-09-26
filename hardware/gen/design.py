@@ -80,8 +80,11 @@ PARTS = [
     Part("J7", "Connector:Screw_Terminal_01x02", "dmxnow:TerminalBlock_WAGO_2604-1102_1x02_P5.00mm_Horizontal",
          "WAGO 2604-1102 (L_SW N out 2, J4b)", {"1": "L_SW", "2": "N"}, mpn="2604-1102", lcsc="C3309286",
          note="PE is joined off-board by a WAGO 221-413 (arbitrage A9)"),
-    Part("F1", "Device:Fuse", "Fuse:Fuse_Littelfuse_372_D8.50mm", "TR5 T500mA 250V",
-         {"1": "L_IN", "2": "L_PSU"}, lcsc="C142835", mpn="Littelfuse 37205000001"),
+    # F1: 5x20 mm ceramic time-lag fuse (1500 A breaking capacity at 250 VAC) in an open
+    # PCB holder; the cartridge itself is inserted by hand (bom_full, off-board list).
+    Part("F1", "Device:Fuse", "Fuse:Fuseholder_Cylinder-5x20mm_Schurter_0031_8201_Horizontal_Open",
+         "5x20 holder, T500mA H", {"1": "L_IN", "2": "L_PSU"}, lcsc="C3204125",
+         mpn="Schurter 0031.8201", note="Fuse: Littelfuse 0215.500MXP (T500mA 250V ceramic, 1500 A)"),
     Part("RV1", "Device:Varistor", "Varistor:RV_Disc_D12mm_W4.2mm_P7.5mm", "10D561K",
          {"1": "L_PSU", "2": "N"}, lcsc="C113236", mpn="10D561K"),
     Part("PS1", "Converter_ACDC:IRM-03-5", "Converter_ACDC:Converter_ACDC_MeanWell_IRM-03-xx_THT",
@@ -94,14 +97,16 @@ PARTS = [
     # --- Power, MCU --------------------------------------------------------
     Part("U3", "Regulator_Linear:AP2112K-3.3", "Package_TO_SOT_SMD:SOT-23-5", "AP2112K-3.3",
          {"1": "+5V", "2": "GND", "3": "+5V", "4": None, "5": "+3V3"}, lcsc="C51118", mpn="AP2112K-3.3TRG1"),
-    C("C5", "1uF 16V", "+5V", "GND", lcsc="C15849"),
-    C("C6", "1uF 16V", "+3V3", "GND", lcsc="C15849"),
+    C("C5", "1uF", "+5V", "GND", lcsc="C15849"),
+    # +5V bulk at the PS1 output (Mean Well measures ripple with 47 uF; relay coil and TX bursts)
+    C("C10", "47uF 10V", "+5V", "GND", lcsc="C96123", fp="Capacitor_SMD:C_1206_3216Metric"),
+    C("C6", "1uF", "+3V3", "GND", lcsc="C15849"),
     C("C1", "47uF 10V", "+3V3", "GND", lcsc="C96123", fp="Capacitor_SMD:C_1206_3216Metric"),
     C("C2", "100nF", "+3V3", "GND", lcsc="C14663"),
     Part("U1", "Espressif:ESP32-C3-MINI-1", "Espressif:ESP32-C3-MINI-1", "ESP32-C3-MINI-1-N4",
          esp_pins, lcsc="C2838502", mpn="ESP32-C3-MINI-1-N4"),
     R("R1", "10k", "+3V3", "EN", lcsc="C25804"),
-    C("C4", "1uF 16V", "EN", "GND", lcsc="C15849"),
+    C("C4", "1uF", "EN", "GND", lcsc="C15849"),
     R("R2", "10k", "+3V3", "BOOT", lcsc="C25804"),
     R("R3", "10k", "+3V3", "IO8_PU", lcsc="C25804"),
     R("R4", "10k", "+3V3", "IO2_PU", lcsc="C25804"),
@@ -112,7 +117,7 @@ PARTS = [
          {"1": "+3V3", "2": "GND", "3": "USB_DM", "4": "USB_DP", "5": "EN", "6": "BOOT"},
          dnp=True, note="Pads only, header not fitted"),
     # --- Status LED option (A7) -------------------------------------------
-    R("R19", "1k", "STATUS_LED", "LED_A", lcsc="C21190", dnp=True, variant="led"),
+    R("R19", "100R", "STATUS_LED", "LED_A", lcsc="C22775", dnp=True, variant="led"),
     Part("D4", "Device:LED", "LED_SMD:LED_0603_1608Metric", "LED green 0603",
          {"1": "GND", "2": "LED_A"}, lcsc="C12624", mpn="KT-0603G", dnp=True, variant="led"),
     # --- Relay driver ------------------------------------------------------
@@ -127,6 +132,8 @@ PARTS = [
          {"1": None, "2": "+3V3", "3": "+3V3", "4": "DMX_TX", "5": "GND", "6": "DMX_A",
           "7": "DMX_B", "8": "+3V3"}, lcsc="C8963", mpn="SP3485EN-L/TR"),
     C("C3", "100nF", "+3V3", "GND", lcsc="C14663"),
+    # DMX_TX idles at mark while GPIO4 floats (reset, boot): the driver is always enabled
+    R("R22", "10k", "+3V3", "DMX_TX", lcsc="C25804"),
     Part("D1", "Diode:SM712_SOT23", "Package_TO_SOT_SMD:SOT-23", "SM712",
          {"1": "DMX_A", "2": "DMX_B", "3": "GND"}, lcsc="C12067", mpn="SM712.TCT"),
     Part("J2", "Connector_Generic:Conn_01x03", "Connector_Wire:SolderWire-0.25sqmm_1x03_P4.2mm_D0.65mm_OD1.7mm",
@@ -140,7 +147,8 @@ PARTS = [
     Part("D3", "Device:D_Zener", "Diode_SMD:D_SMB", "SMBJ28A",
          {"1": "VLED", "2": "GND_LED"}, lcsc="C113997", mpn="SMBJ28A", section="strip"),
     Part("C7", "Device:C_Polarized", "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm", "470uF 35V low ESR",
-         {"1": "VLED", "2": "GND_LED"}, lcsc="C88732", mpn="Rubycon 35YXJ470M10X16", section="strip"),
+         {"1": "VLED", "2": "GND_LED"}, lcsc="C136284", mpn="Nichicon UHW1V471MPD", section="strip",
+         note="2 A ripple at 100 kHz (V-HW-08)"),
     C("C8", "1uF 50V", "VLED", "GND_LED", lcsc="C1848", fp="Capacitor_SMD:C_1206_3216Metric", section="strip"),
     Part("U4", "74xx:74LVC125", "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm", "74AHCT125",
          {"1": "GND", "2": "PWM1", "3": "DRV1", "4": "GND", "5": "PWM2", "6": "DRV2", "7": "GND",
@@ -156,17 +164,23 @@ PARTS = [
          lcsc="C17477", section="strip", note="Logic ground to LED ground star point"),
     Part("R21", "Device:R", FP_R, "0R", {"1": "BOARD_SENSE", "2": "GND"},
          lcsc="C21189", section="strip", note="Variant detection (GPIO1 low = strip part present)"),
+    # BOARD_SENSE pull-up on the main side: reads high once the strip part is snapped off,
+    # whatever the firmware does with the internal pull-up
+    R("R23", "100k", "+3V3", "BOARD_SENSE", lcsc="C25803"),
 ]
 
 for i in range(4):
     n = i + 1
     PARTS += [
-        R("R%d" % (15 + i), "100k", "PWM%d" % n, "GND", lcsc="C25803", section="main",
-          note="PWM pull-down, main side of the V-cut (layout), SPEC 4.6"),
+        # 4.7k: GPIO6 (PWM1) has a ~45k internal pull-up from reset until the firmware
+        # takes the pin (ESP32-C3 datasheet table 2-1 note 6); keeps U4 inputs < 0.8 V
+        R("R%d" % (15 + i), "4.7k", "PWM%d" % n, "GND", lcsc="C23162", section="main",
+          note="PWM pull-down, main side of the breakaway line, SPEC 4.6"),
         R("R%d" % (7 + i), "100R", "DRV%d" % n, "GATE%d" % n, lcsc="C22775", section="strip"),
         R("R%d" % (11 + i), "100k", "GATE%d" % n, "GND_LED", lcsc="C25803", section="strip"),
-        Part("Q%d" % (2 + i), "Device:Q_NMOS_GDS", "Package_TO_SOT_SMD:TO-252-2", "AOD4184A",
-             {"1": "GATE%d" % n, "2": "CH%d" % n, "3": "GND_LED"}, lcsc="C99124", mpn="AOD4184A", section="strip"),
+        Part("Q%d" % (2 + i), "Device:Q_NMOS_GDS", "Package_TO_SOT_SMD:TO-252-2", "AOD2610E",
+             {"1": "GATE%d" % n, "2": "CH%d" % n, "3": "GND_LED"}, lcsc="C282428", mpn="AOD2610E",
+             section="strip", note="60 V: above the SMBJ28A clamp voltage (R-10)"),
     ]
 
 # Mounting holes (NPTH, nylon screws or printed pegs; see SPEC 4.12).
@@ -188,7 +202,7 @@ NETCLASSES = {
 }
 MAINS_NETS = NETCLASSES["MAINS_PWR"]["nets"] + NETCLASSES["MAINS"]["nets"]
 
-# Nets allowed to cross the V-cut (SPEC 4.8.4)
+# Nets allowed to cross the breakaway line (SPEC 4.8.4)
 CROSSING_NETS = {"PWM1", "PWM2", "PWM3", "PWM4", "BOARD_SENSE", "+5V", "GND"}
 
 

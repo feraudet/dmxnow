@@ -36,7 +36,7 @@ def check_netlist(path):
 
 
 def check_pcb(path):
-    """Pad nets match design.py; only CROSSING_NETS cross the V-cut; no 230 V copper
+    """Pad nets match design.py; only CROSSING_NETS cross the breakaway line; no 230 V copper
     beyond MAINS_MAX_X."""
     import pcbnew
     import pcb as P
@@ -51,12 +51,12 @@ def check_pcb(path):
             got = pad.GetNetname() or None
             if want.get(key) != got:
                 errors.append("pad %s.%s: design=%s pcb=%s" % (key[0], key[1], want.get(key), got))
-    vx = pcbnew.FromMM(P.OX + P.VCUT)
+    vx = pcbnew.FromMM(P.OX + P.SPLIT_X)
     lim = pcbnew.FromMM(P.OX + P.MAINS_MAX_X)
     for t in board.GetTracks():
         xs = (t.GetStart().x, t.GetEnd().x)
         if min(xs) < vx < max(xs) and t.GetNetname() not in design.CROSSING_NETS:
-            errors.append("net %s crosses the V-cut" % t.GetNetname())
+            errors.append("net %s crosses the breakaway line" % t.GetNetname())
         if t.GetNetname() in design.MAINS_NETS and max(xs) + t.GetWidth() // 2 > lim:
             errors.append("230 V track %s beyond X=%.1f mm" % (t.GetNetname(), P.MAINS_MAX_X))
     # every crossing stub must still carry its own net (a stub touching a foreign pad
@@ -68,12 +68,25 @@ def check_pcb(path):
                  for t in board.GetTracks())
         if not ok:
             errors.append("crossing stub %s at y=%.2f missing or renamed" % (net, y))
+        elif not any(t0 + w / 2 + 0.5 <= y <= t1 - w / 2 - 0.5 for t0, t1 in P.TABS):
+            errors.append("crossing stub %s at y=%.2f is not on a solid tab" % (net, y))
+    # no via inside an SMD pad (open via in a pad wicks the solder away)
+    smd = [pad for fp in board.GetFootprints() for pad in fp.Pads()
+           if pad.GetAttribute() == pcbnew.PAD_ATTRIB_SMD]
+    for v in board.GetTracks():
+        if isinstance(v, pcbnew.PCB_VIA):
+            for pad in smd:
+                if pad.HitTest(v.GetPosition(), v.GetWidth() // 2):
+                    errors.append("via %s at (%.2f, %.2f) inside SMD pad %s.%s" % (
+                        v.GetNetname(), pcbnew.ToMM(v.GetPosition().x) - P.OX,
+                        pcbnew.ToMM(v.GetPosition().y) - P.OY,
+                        pad.GetParent().GetReference(), pad.GetNumber()))
     for z in board.Zones():
         if z.GetIsRuleArea():
             continue
         bb = z.GetBoundingBox()
         if bb.GetLeft() < vx < bb.GetRight():
-            errors.append("zone %s crosses the V-cut" % z.GetNetname())
+            errors.append("zone %s crosses the breakaway line" % z.GetNetname())
     for e in errors:
         print("ERROR", e)
     print("pcb check: %d errors" % len(errors))
