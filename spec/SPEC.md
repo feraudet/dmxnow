@@ -490,8 +490,10 @@ contrôle pour la relecture humaine.
   peut conserver la réception ESP-NOW en mode AP+STA sur le canal commun ; le DMX continue
   donc d'être rafraîchi en maintenance, au mieux [V-FW-05].
 - Mot de passe : `maint_password` ; à défaut, mot de passe aléatoire de 12 caractères généré
-  au premier démarrage, stocké en NVS, lisible uniquement par `GET_CONFIG` authentifiée
-  (A4) ou par la console USB. (Un mot de passe dérivé de la MAC serait devinable.)
+  au premier démarrage, stocké en NVS, lisible uniquement sur la console USB (J3, hors
+  secteur : affiché au démarrage et à l'entrée en maintenance) ; en écriture seule par
+  `SET_CONFIG` authentifiée (A4, PROTOCOL §6.4), qui permet de le redéfinir à
+  l'enrôlement. (Un mot de passe dérivé de la MAC serait devinable.)
 - Page web minimale (configuration, état, téléversement du firmware), OTA par partitions
   `ota_0`/`ota_1` (2 × 1,9 Mo sur 4 Mo) ; validation de l'image (retour arrière si le
   nouveau firmware ne reçoit pas de paquet valide dans les 60 s) si le chargeur d'amorçage

@@ -382,6 +382,9 @@ void enter_maintenance(uint16_t timeout_s) {
     hk.relay = set_relay_mode;
     maint::start(cfg, timeout_s, hk);
     schedule_heartbeat();
+    // the USB console (J3, off mains) is the physical way to read the password (SPEC 4.9)
+    Serial.printf("dmxnow: maintenance, AP dmxnow-%s, password %s, http://192.168.4.1/\n", cfg.name,
+                  cfg.maint_password);
 }
 
 void poll_button(uint32_t now) {
@@ -481,6 +484,7 @@ void setup() {
     schedule_heartbeat();
     Serial.printf("dmxnow node %u.%u.%u, %s, universe %u, channel %u\n", kFw[0], kFw[1], kFw[2],
                   variant == Variant::WithStrips ? "strips" : "fixture only", cfg.universe, cfg.radio_channel);
+    Serial.printf("dmxnow: name %s, maintenance password %s\n", cfg.name, cfg.maint_password);
 }
 
 void loop() {

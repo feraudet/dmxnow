@@ -16,7 +16,7 @@ projecteur par relais et, dans sa version complète, pilote 4 canaux PWM de ruba
 | `firmware/`  | `common/` (protocole, testé nativement), `node/` ; `dongle/` à venir |
 | `pi/`        | Démon `dmxnowd`, CLI `dmxnow`, systemd, udev, `install.sh`      |
 | `enclosure/` | Boîtier CadQuery paramétrique, deux variantes, STL/STEP         |
-| `docs/`      | Assemblage, câblage, flash, mise en service, sécurité (à venir) |
+| `docs/`      | Assemblage, câblage, flash, mise en service, sécurité 🔴 ([docs/README.md](docs/README.md)) |
 
 ⚠️ Ce projet manipule du 230 V. Toute la partie secteur est soumise à relecture
 humaine obligatoire par une personne qualifiée avant fabrication et mise sous tension.

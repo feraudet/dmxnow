@@ -42,8 +42,9 @@ désactiver la vérification.
    `net_key` (A4) : dès lors, toute commande sauf `IDENTIFY` doit être authentifiée.
 3. Sans console : page de maintenance (SW1 ≥ 3 s, ou 3 mises sous tension en moins de 5 s
    chacune), point d'accès `dmxnow-<nom>`, mot de passe `maint_password` (aléatoire au
-   premier démarrage, lisible par `GET_CONFIG` authentifiée ou la console USB), puis
-   http://192.168.4.1/.
+   premier démarrage, affiché sur la console USB J3 au démarrage et à l'entrée en
+   maintenance ; à redéfinir de préférence à l'enrôlement :
+   `dmxnow set <nœud> maint_password=…`, 8 à 32 caractères), puis http://192.168.4.1/.
 
 ## Comportements (où les trouver)
 
