@@ -79,6 +79,8 @@ par la carte (WAGO 221-413 dans le boîtier, arbitrage A9).
 
 ## Commande JLCPCB
 
+Dossier pas à pas (réglages, remarque, aperçu, achats hors JLCPCB) : [`ORDER.md`](ORDER.md).
+
 - `fab/dmxnow-gerbers.zip` : 2 couches, 1,6 mm, **2 oz**, FR-4 TG ≥ 150.
 - Séparation : fente et perforations sont dans les Gerbers (Edge.Cuts, NPTH). JLCPCB
   compte la carte comme **2 designs** : « Different Design = 2 », « Panel by Customer »
