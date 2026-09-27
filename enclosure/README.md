@@ -126,3 +126,28 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 - contre-écrous des presse-étoupes : hors du PCB, des composants, dans la hauteur ;
   ouverture en goutte d'eau couverte par l'écrou ;
 - aucun métal (inserts, vis) à moins de 15 mm de la zone d'antenne.
+
+## Boîtier du dongle (`dongle_case.py`)
+
+Boîtier de la **Seeed XIAO ESP32-C3** (référence 113991054) et de son antenne FPC
+2,4 GHz fournie (40 × 20 mm, câble de 80 mm), retenu à la place d'une clé USB-A toute
+faite pour garder l'antenne externe (SPEC 4.10). Encombrement : **80 × 25 × 9 mm**,
+languette d'accroche comprise.
+
+| Pièce | Orientation | Rôle |
+|-------|-------------|------|
+| `out/dongle/tray` | fond sur le plateau | Ouverture USB-C avec lamage pour la fiche, nervures et butée du XIAO, rebord de l'antenne, languette pour collier ou sangle |
+| `out/dongle/lid` | face gravée sur le plateau | Lèvre à clipser, deux appuis sur les bords du PCB |
+
+- **Matériau** : PETG ou PLA (5 V USB seulement, pas de secteur : pas d'exigence V-0).
+- **Montage** : XIAO poussé contre la paroi USB-C ; câble de l'antenne clipsé sur le
+  connecteur U.FL ; antenne collée par son adhésif dans son rebord, à 7 mm de la carte
+  (loin du plan de masse) ; câble coaxial lové dans l'espace libre ; couvercle clipsé.
+- **Utilisation** : câble USB-C vers USB-A sur le Pi, avec une rallonge pour pendre le
+  dongle en hauteur par sa languette, antenne verticale de préférence.
+- **Flash** : par l'USB-C, sans ouvrir le boîtier (l'USB Serial/JTAG de l'ESP32-C3 passe
+  en mode téléchargement tout seul) ; les boutons BOOT et RESET ne sont pas accessibles.
+
+Cotes à confirmer sur une carte reçue [V-ENC-04] : épaisseur du PCB (1,2 mm prévu),
+dépassement de l'USB-C au-delà du bord (1,0 mm prévu), hauteur des composants
+(3,4 mm prévu). Elles sont des paramètres en tête de `dongle_case.py`.

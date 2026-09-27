@@ -504,6 +504,11 @@ contrôle pour la relecture humaine.
 - XIAO ESP32-C3 alimenté par l'USB du Pi. Antenne externe du XIAO (connecteur U.FL) :
   l'antenne fournie doit être montée ; placer le dongle en hauteur (rallonge USB) plutôt
   que derrière le Pi.
+- **Boîtier imprimé** (décidé le 2026-09-27, plutôt qu'une clé USB-A du commerce : les
+  modèles en boîtier sont à ESP32-S3 et à antenne intégrée, de portée moindre) :
+  `enclosure/dongle_case.py`, 80 × 25 × 9 mm, XIAO + antenne FPC fournie (40 × 20 mm),
+  PETG ou PLA, languette d'accroche ; câble USB-C vers USB-A. Achat : XIAO ESP32-C3
+  Seeed 113991054 (~5 €, distributeurs UE), 0 en stock chez JLCPCB au 2026-09-27.
 - Ordonnanceur : file prioritaire (COMMAND > DMX_DATA > BEACON), émission ESP-NOW
   séquentielle (attente du callback d'émission avant l'envoi suivant, pour ne pas saturer
   la file interne).
@@ -816,6 +821,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
+| V-ENC-04 | Boîtier du dongle : épaisseur du PCB du XIAO (1,2 mm prévu), dépassement de l'USB-C (1,0 mm), hauteur des composants (3,4 mm) ; cotes de l'antenne FPC relevées sur le plan Seeed M01-0601770R0A (40 × 20 mm, câble 80 mm) | Mesure sur un XIAO reçu | faible |
 | V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
 | V-SYS-02 | ✅ XLR **3 broches** sur tout le parc (confirmé par l'utilisateur le 2026-09-27) : queue en NC3FXX femelle (1 masse, 2 Data −, 3 Data +) ; XLR 5 broches seulement par adaptateur si un appareil l'impose | Toi | — |
 
