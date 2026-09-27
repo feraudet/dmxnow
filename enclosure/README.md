@@ -129,25 +129,35 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 
 ## Boîtier du dongle (`dongle_case.py`)
 
-Boîtier de la **Seeed XIAO ESP32-C3** (référence 113991054) et de son antenne FPC
-2,4 GHz fournie (40 × 20 mm, câble de 80 mm), retenu à la place d'une clé USB-A toute
-faite pour garder l'antenne externe (SPEC 4.10). Encombrement : **80 × 25 × 9 mm**,
-languette d'accroche comprise.
+Boîtier de la **Seeed XIAO ESP32-C3** (référence 113991054) avec une **antenne dipôle
+vissée** sur une embase RP-SMA, retenu à la place d'une clé USB-A toute faite pour garder
+une antenne externe (SPEC 4.10). Encombrement : **59 × 39 × 13 mm**, oreilles comprises
+(corps 48 × 25 × 13 mm).
+
+Achats (Kiwi Electronics, 2026-09-27) :
+
+| Article | Code | Note |
+|---------|------|------|
+| Seeed XIAO ESP32C3 | SS-113991054 | |
+| Câble **RP-SMA** vers u.FL, 14 cm, embase à visser | KW-1518 | pas le « SMA to u.FL » : SMA et RP-SMA ne se connectent pas |
+| Antenne dipôle 2,4 GHz **RP-SMA** 5 dBi | ANT-24GHZ-5DBI | rayonne surtout à l'horizontale : la tenir verticale |
 
 | Pièce | Orientation | Rôle |
 |-------|-------------|------|
-| `out/dongle/tray` | fond sur le plateau | Ouverture USB-C avec lamage pour la fiche, nervures et butée du XIAO, rebord de l'antenne, languette pour collier ou sangle |
-| `out/dongle/lid` | face gravée sur le plateau | Lèvre à clipser, deux appuis sur les bords du PCB |
+| `out/dongle/tray` | fond sur le plateau | Ouverture USB-C avec lamage pour la fiche, nervures et butée du XIAO, trou Ø 6,6 mm de l'embase RP-SMA dans une paroi de 2,5 mm, place pour lover le câble, oreilles pour un collier |
+| `out/dongle/lid` | face gravée sur le plateau | Lèvre à clipser (échancrée au-dessus de l'embase), deux appuis sur les bords du PCB |
 
 - **Matériau** : PETG ou PLA (5 V USB seulement, pas de secteur : pas d'exigence V-0).
-- **Montage** : XIAO poussé contre la paroi USB-C ; câble de l'antenne clipsé sur le
-  connecteur U.FL ; antenne collée par son adhésif dans son rebord, à 7 mm de la carte
-  (loin du plan de masse) ; câble coaxial lové dans l'espace libre ; couvercle clipsé.
-- **Utilisation** : câble USB-C vers USB-A sur le Pi, avec une rallonge pour pendre le
-  dongle en hauteur par sa languette, antenne verticale de préférence.
+- **Montage** : XIAO poussé contre la paroi USB-C ; embase RP-SMA passée de l'intérieur
+  dans la paroi opposée, rondelle et écrou à l'extérieur ; câble clipsé sur le
+  connecteur U.FL du XIAO, lové en une boucle d'au moins 18 mm de diamètre ; couvercle
+  clipsé ; antenne vissée à la main.
+- **Utilisation** : câble USB-C vers USB-A sur le Pi, avec une rallonge ; dongle suspendu
+  par son câble USB (ou par un collier dans une oreille), antenne vers le bas, verticale.
 - **Flash** : par l'USB-C, sans ouvrir le boîtier (l'USB Serial/JTAG de l'ESP32-C3 passe
   en mode téléchargement tout seul) ; les boutons BOOT et RESET ne sont pas accessibles.
 
-Cotes à confirmer sur une carte reçue [V-ENC-04] : épaisseur du PCB (1,2 mm prévu),
+Cotes à confirmer sur les pièces reçues [V-ENC-04] : épaisseur du PCB (1,2 mm prévu),
 dépassement de l'USB-C au-delà du bord (1,0 mm prévu), hauteur des composants
-(3,4 mm prévu). Elles sont des paramètres en tête de `dongle_case.py`.
+(3,4 mm prévu), corps de l'embase RP-SMA côté intérieur (Ø 9,4 × 9 mm prévu), filetage
+1/4"-36 (trou Ø 6,6 mm). Ce sont des paramètres en tête de `dongle_case.py`.

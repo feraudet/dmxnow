@@ -1,14 +1,15 @@
-"""Printed case of the USB dongle: Seeed XIAO ESP32-C3 + its 2.4 GHz FPC antenna
-(SPEC 4.10, ADR 0002). Low voltage only (5 V USB): PETG or PLA are fine, no V-0 needed.
+"""Printed case of the USB dongle: Seeed XIAO ESP32-C3 + a screwed 2.4 GHz dipole on an
+RP-SMA bulkhead (u.FL pigtail, Kiwi KW-1518) (SPEC 4.10, ADR 0002). Low voltage only
+(5 V USB): PETG or PLA are fine, no V-0 needed.
 
   python3 dongle_case.py              build, check, export out/dongle/
   python3 dongle_case.py --check-only
 
-Layout along X: USB-C in the end wall at X = 0, the XIAO lying on the floor, then the
-FPC antenna stuck (its own adhesive) on the floor, away from the board ground plane.
-Two parts: tray (floor down on the bed) and lid (top face down), held by a snap lip.
-A slotted tab at the far end takes a cable tie or a strap to hang the dongle high
-(SPEC 4.10: dongle up on a USB extension, not behind the Pi).
+Layout along X: USB-C in the end wall at X = 0, the XIAO lying on the floor, the pigtail
+coiled behind it, the RP-SMA jack through the far end wall. Hung from its USB cable, the
+dongle has its antenna pointing down, vertical (SPEC 4.10: dongle up on a USB extension,
+not behind the Pi). Two parts: tray (floor down on the bed) and lid (top face down),
+held by a snap lip. Side ears take a cable tie.
 """
 import argparse
 import os
@@ -25,17 +26,21 @@ XIAO_PCB = 1.2                     # PCB thickness, to measure (V-ENC-04): 1.0 e
 XIAO_TOP = 3.4                     # tallest part above the PCB: USB-C receptacle (3.2)
 USBC_W, USBC_H = 8.94, 3.26        # USB-C receptacle shell (USB-IF)
 USBC_OVERHANG = 1.0                # receptacle beyond the PCB edge, to measure (V-ENC-04)
-ANT_L, ANT_W, ANT_T = 40.0, 20.0, 0.3   # FPC antenna A-01 (Seeed drawing M01-0601770R0A)
-ANT_GAP = 7.0                      # board end to antenna: coax bend, keep the antenna off the ground plane
+# RP-SMA bulkhead jack of the u.FL pigtail (Kiwi KW-1518, RG178, 14 cm): 1/4"-36 thread
+# through the end wall, nut and washer outside; to measure on the part (V-ENC-04)
+SMA_HOLE = 6.6                     # thread 6.35 mm + clearance
+SMA_BODY_D, SMA_BODY_L = 9.4, 9.0  # inside: rear hex (8 mm across flats) + crimp sleeve
+SMA_WALL = 2.5                     # end wall under the nut (panel max ~5 mm)
+COIL_L = 24.0                      # RG178 coil: bend radius >= 9 mm (5 x 1.8 mm)
 
 # --- Case -------------------------------------------------------------------------
 WALL, FLOOR, LID = 1.6, 1.4, 1.4
 CLR = 0.3                          # parts to walls
-IN_L = XIAO_L + ANT_GAP + ANT_L + 1.0
-IN_W = max(XIAO_W, ANT_W) + 2 * CLR + 1.0
-IN_H = XIAO_PCB + XIAO_TOP + 1.8   # room for the U.FL plug and the coax above the board
+IN_L = XIAO_L + 1.0 + COIL_L + SMA_BODY_L
+IN_W = 22.0                        # the coil (diameter 18-20 mm) sets the width
+IN_H = 10.4                        # the bulkhead body (9.4 mm) + 0.5 mm under the lid
 LIP = 1.8                          # lid lip depth into the tray
-TAB_L, SLOT_W, SLOT_L = 8.0, 3.2, 10.0
+EAR_L, SLOT_W, SLOT_L = 9.0, 3.2, 6.0   # side ears for a cable tie (hang it from a truss)
 
 
 def box(x1, y1, z1, x2, y2, z2):
@@ -46,9 +51,13 @@ def usbc_z():
     return FLOOR + XIAO_PCB + USBC_H / 2   # receptacle centre, board resting on the floor
 
 
+def sma_z():
+    return FLOOR + IN_H / 2               # bulkhead axis, mid-height of the cavity
+
+
 def tray():
     ox1, oy1 = -WALL, -IN_W / 2 - WALL
-    ox2, oy2 = IN_L + WALL, IN_W / 2 + WALL
+    ox2, oy2 = IN_L + SMA_WALL, IN_W / 2 + WALL
     t = box(ox1, oy1, 0, ox2, oy2, FLOOR + IN_H).cut(box(0, -IN_W / 2, FLOOR, IN_L, IN_W / 2, FLOOR + IN_H + 1))
     # USB-C opening in the end wall, receptacle shell + 0.35 mm, taller for the PCB tolerance
     zc = usbc_z()
@@ -60,25 +69,28 @@ def tray():
         y = s * (XIAO_W / 2 + CLR)
         t = t.union(box(1.0, min(y, y + s * 0.9), FLOOR - 0.1, XIAO_L - 1.0, max(y, y + s * 0.9), FLOOR + XIAO_PCB + 0.8))
     t = t.union(box(XIAO_L + CLR, -5.0, FLOOR - 0.1, XIAO_L + CLR + 1.2, 5.0, FLOOR + XIAO_PCB))
-    # antenna outline: a low border so the FPC is stuck in place
-    ax1 = XIAO_L + ANT_GAP
-    for s in (-1, 1):
-        y = s * (ANT_W / 2 + 0.3)
-        t = t.union(box(ax1 + 2, min(y, y + s * 0.8), FLOOR - 0.1, ax1 + ANT_L - 2, max(y, y + s * 0.8), FLOOR + 0.8))
+    # RP-SMA bulkhead hole in the far end wall (horizontal: round, 6.6 mm prints fine)
+    t = t.cut(cq.Workplane("YZ").workplane(offset=IN_L - 1).center(0, sma_z()).circle(SMA_HOLE / 2)
+              .extrude(SMA_WALL + 2))
     # snap bead inside the walls, under the lid lip
     zb = FLOOR + IN_H - LIP + 0.5
     for s in (-1, 1):
         y = s * IN_W / 2
-        t = t.union(box(8, min(y, y - s * 0.35), zb, IN_L - 8, max(y, y - s * 0.35), zb + 0.6))
-    # hanging tab with a cable-tie / strap slot
-    t = t.union(box(ox2 - 0.1, -IN_W / 2, 0, ox2 + TAB_L, IN_W / 2, FLOOR + 0.6))
-    t = t.cut(box(ox2 + (TAB_L - SLOT_W) / 2, -SLOT_L / 2, -1, ox2 + (TAB_L + SLOT_W) / 2, SLOT_L / 2, 5))
+        t = t.union(box(6, min(y, y - s * 0.35), zb, IN_L - 6, max(y, y - s * 0.35), zb + 0.6))
+    # side ears with a cable-tie slot, to hang the dongle from a truss or a pole
+    xm = IN_L / 2
+    for s in (-1, 1):
+        y0 = s * (IN_W / 2 + WALL)
+        t = t.union(box(xm - EAR_L / 2, min(y0 - s * 0.1, y0 + s * 7.0), 0, xm + EAR_L / 2,
+                        max(y0 - s * 0.1, y0 + s * 7.0), FLOOR + 0.8))
+        yc = y0 + s * 3.8
+        t = t.cut(box(xm - SLOT_L / 2, yc - SLOT_W / 2, -1, xm + SLOT_L / 2, yc + SLOT_W / 2, 5))
     return t
 
 
 def lid():
     ox1, oy1 = -WALL, -IN_W / 2 - WALL
-    ox2, oy2 = IN_L + WALL, IN_W / 2 + WALL
+    ox2, oy2 = IN_L + SMA_WALL, IN_W / 2 + WALL
     z0 = FLOOR + IN_H
     l = box(ox1, oy1, z0, ox2, oy2, z0 + LID)
     # lip inside the walls (0.2 mm clearance), with a groove for the tray bead
@@ -87,7 +99,10 @@ def lid():
     zb = FLOOR + IN_H - LIP + 0.5
     for s in (-1, 1):
         y = s * (IN_W / 2 - 0.2)
-        lip = lip.cut(box(7.5, min(y, y - s * 0.5), zb - 0.1, IN_L - 7.5, max(y, y - s * 0.5), zb + 0.7))
+        lip = lip.cut(box(5.5, min(y, y - s * 0.5), zb - 0.1, IN_L - 5.5, max(y, y - s * 0.5), zb + 0.7))
+    # notch over the RP-SMA bulkhead body
+    lip = lip.cut(box(IN_L - SMA_BODY_L - 0.5, -SMA_BODY_D / 2 - 0.5, z0 - LIP - 1, IN_L + 1,
+                      SMA_BODY_D / 2 + 0.5, z0))
     l = l.union(lip)
     # two pressers on the PCB long edges (castellated border, no parts there)
     for s in (-1, 1):
@@ -95,19 +110,20 @@ def lid():
         l = l.union(box(4.0, y - 0.4, FLOOR + XIAO_PCB + 0.15, XIAO_L - 4.0, y + 0.4, z0))
     # engraving on the outer face
     txt = (cq.Workplane("XY").workplane(offset=z0 + LID - 0.5)
-           .text("dmxnow", 6.0, 1.0, halign="center", valign="center").translate((IN_L / 2 + 6, 0, 0)))
+           .text("dmxnow", 6.0, 1.0, halign="center", valign="center").translate((IN_L / 2, 0, 0)))
     return l.cut(txt)
 
 
 def parts_envelope():
-    """XIAO (PCB + tallest part over the whole board) and antenna, for the checks."""
+    """XIAO (PCB + tallest part over the whole board) and RP-SMA bulkhead body, for the checks."""
     x = box(0, -XIAO_W / 2, FLOOR, XIAO_L, XIAO_W / 2, FLOOR + XIAO_PCB)
     x = x.union(box(3.0, -XIAO_W / 2 + 1.0, FLOOR + XIAO_PCB, XIAO_L - 1.0, XIAO_W / 2 - 1.0,
                     FLOOR + XIAO_PCB + XIAO_TOP))
     zc = usbc_z()
     x = x.union(box(-USBC_OVERHANG, -USBC_W / 2, zc - USBC_H / 2, 3.0, USBC_W / 2, zc + USBC_H / 2))
-    a = box(XIAO_L + ANT_GAP, -ANT_W / 2, FLOOR, XIAO_L + ANT_GAP + ANT_L, ANT_W / 2, FLOOR + ANT_T)
-    return x.union(a)
+    body = (cq.Workplane("YZ").workplane(offset=IN_L - SMA_BODY_L).center(0, sma_z())
+            .circle(SMA_BODY_D / 2).extrude(SMA_BODY_L))
+    return x.union(body)
 
 
 def _vol(a, b):
