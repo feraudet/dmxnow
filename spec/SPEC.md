@@ -817,7 +817,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
 | V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
-| V-SYS-02 | XLR 3 ou 5 broches sur le parc | Toi | faible |
+| V-SYS-02 | ✅ XLR **3 broches** sur tout le parc (confirmé par l'utilisateur le 2026-09-27) : queue en NC3FXX femelle (1 masse, 2 Data −, 3 Data +) ; XLR 5 broches seulement par adaptateur si un appareil l'impose | Toi | — |
 
 ---
 
@@ -835,8 +835,9 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 3. **ESP-NOW v2** : disponible depuis ESP-IDF 5.4 (1470 octets à partir de 5.4.2),
    accessible en Arduino 3.2+ via pioarduino. Retenu, repli v1 fragmenté (ADR 0011).
 4. **Puissance des projecteurs et XLR** : G5RL dimensionné pour ~500 W de LED
-   (appels de courant) ; à confirmer par ton inventaire [V-SYS-01/02]. Boîtier et queue
-   prévus en NC3FXX par défaut, NC5FXX en option (broches 4 et 5 non connectées).
+   (appels de courant) ; à confirmer par ton inventaire [V-SYS-01/02]. Queue DMX en
+   **NC3FXX** (XLR 3 broches femelle), parc confirmé en 3 broches le 2026-09-27 [V-SYS-02] ;
+   adaptateur XLR3F → XLR5M si un appareil en 5 broches s'ajoute.
 5. **Matériau** : ABS-FR V-0 recommandé (§4.12).
 
 ---
