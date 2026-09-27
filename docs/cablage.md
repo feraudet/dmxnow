@@ -17,6 +17,8 @@ fait **fiche secteur débranchée**. À la fin, dérouler la liste de contrôle 
             └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+![Emplacement des borniers](figures/carte.svg)
+
 Borniers : **WAGO 2604** à levier, conducteurs jusqu'à **4 mm²** (souple ou rigide),
 dénudés sur **11 à 13 mm** [À valider : plage de section et longueur de dénudage à
 relire sur la fiche WAGO 2604 de la pièce reçue]. Lever le levier, insérer à fond, rabattre. Sur fil souple, un embout

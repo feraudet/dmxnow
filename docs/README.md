@@ -16,10 +16,13 @@ QLC+ ─Art-Net─▶ dmxnowd (Pi) ─USB─▶ dongle ─ESP-NOW─▶ nœud �
 manipulation ; ce document et la liste de contrôle qu'il contient demandent une
 **relecture humaine obligatoire** par une personne qualifiée.
 
+![Carte du nœud](figures/carte.svg)
+
 ## Ordre de lecture
 
 | # | Document | Pour qui, pour quoi |
 |---|----------|---------------------|
+| 0 | [fonctionnement.md](fonctionnement.md) | **Comprendre** : principes, radio, nœud, relais, rubans, commandes, maintenance, options — illustré |
 | 1 | [securite.md](securite.md) 🔴 | Tout le monde : règles, essais du prototype, **liste de contrôle avant mise sous tension** |
 | 2 | [assemblage.md](assemblage.md) | Réception des cartes, fusibles, découpe de la partie rubans, impression et montage du boîtier, dongle |
 | 3 | [flash.md](flash.md) | Premier chargement du firmware (nœud par J3, dongle par USB-C), mises à jour OTA |

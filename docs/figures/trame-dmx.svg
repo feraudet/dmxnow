@@ -1,0 +1,49 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 400' width='1000' height='400'>
+<title>Trame DMX émise par le nœud</title>
+<rect width='1000' height='400' fill='#ffffff'/>
+<text x='500.0' y='28.0' font-size='20' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >Trame DMX émise par le nœud</text>
+<path d='M60.0,90.0 L100.0,90.0 L100.0,150.0 L381.6,150.0 L381.6,90.0 L400.8,90.0 L400.8,90.0 L400.8,150.0 L407.2,150.0 L407.2,150.0 L407.2,150.0 L413.6,150.0 L413.6,150.0 L413.6,150.0 L420.0,150.0 L420.0,150.0 L420.0,150.0 L426.4,150.0 L426.4,150.0 L426.4,150.0 L432.8,150.0 L432.8,150.0 L432.8,150.0 L439.2,150.0 L439.2,150.0 L439.2,150.0 L445.6,150.0 L445.6,150.0 L445.6,150.0 L452.0,150.0 L452.0,150.0 L452.0,150.0 L458.4,150.0 L458.4,150.0 L458.4,90.0 L464.8,90.0 L464.8,90.0 L464.8,90.0 L471.2,90.0 L471.2,90.0 L471.2,150.0 L477.6,150.0 L477.6,150.0 L477.6,90.0 L484.0,90.0 L484.0,90.0 L484.0,150.0 L490.4,150.0 L490.4,150.0 L490.4,90.0 L496.8,90.0 L496.8,90.0 L496.8,90.0 L503.2,90.0 L503.2,90.0 L503.2,150.0 L509.6,150.0 L509.6,150.0 L509.6,150.0 L516.0,150.0 L516.0,150.0 L516.0,90.0 L522.4,90.0 L522.4,90.0 L522.4,150.0 L528.8,150.0 L528.8,150.0 L528.8,90.0 L535.2,90.0 L535.2,90.0 L535.2,90.0 L541.6,90.0 L541.6,90.0 L541.6,150.0 L548.0,150.0 L548.0,150.0 L548.0,150.0 L554.4,150.0 L554.4,150.0 L554.4,90.0 L560.8,90.0 L560.8,90.0 L560.8,90.0 L567.2,90.0 L567.2,90.0 L567.2,90.0 L573.6,90.0 L573.6,90.0 L573.6,90.0 L580.0,90.0 L580.0,90.0 L580.0,90.0 L586.4,90.0 L586.4,90.0 L586.4,90.0 L592.8,90.0 L592.8,90.0 L592.8,90.0 L599.2,90.0 L599.2,90.0 L599.2,90.0 L605.6,90.0 L605.6,90.0 L605.6,90.0 L612.0,90.0 L642.0,90.0' stroke='#1d70b8' stroke-width='2' fill='none' />
+<text x='652.0' y='95.0' font-size='13' fill='#59636e' text-anchor='start' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >… jusqu'au canal dmx_out_slots</text>
+<line x1='100.0' y1='170.0' x2='381.6' y2='170.0' stroke='#1f2328' stroke-width='1' />
+<line x1='100.0' y1='165.0' x2='100.0' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<line x1='381.6' y1='165.0' x2='381.6' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<text x='240.8' y='188.0' font-size='12' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >BREAK 176 µs</text>
+<text x='240.8' y='203.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >(≥ 88 µs)</text>
+<line x1='381.6' y1='80.0' x2='381.6' y2='68.0' stroke='#1f2328' stroke-width='1' />
+<line x1='400.8' y1='80.0' x2='400.8' y2='68.0' stroke='#1f2328' stroke-width='1' />
+<text x='391.2' y='62.0' font-size='12' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >MAB 12 µs</text>
+<line x1='400.8' y1='170.0' x2='471.2' y2='170.0' stroke='#1f2328' stroke-width='1' />
+<line x1='400.8' y1='165.0' x2='400.8' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<line x1='471.2' y1='165.0' x2='471.2' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<text x='436.0' y='188.0' font-size='12' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >44 µs</text>
+<text x='436.0' y='203.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >code de départ (0)</text>
+<line x1='471.2' y1='170.0' x2='541.6' y2='170.0' stroke='#1f2328' stroke-width='1' />
+<line x1='471.2' y1='165.0' x2='471.2' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<line x1='541.6' y1='165.0' x2='541.6' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<text x='506.4' y='188.0' font-size='12' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >44 µs</text>
+<text x='506.4' y='203.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >canal 1</text>
+<line x1='541.6' y1='170.0' x2='612.0' y2='170.0' stroke='#1f2328' stroke-width='1' />
+<line x1='541.6' y1='165.0' x2='541.6' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<line x1='612.0' y1='165.0' x2='612.0' y2='175.0' stroke='#1f2328' stroke-width='1' />
+<text x='576.8' y='188.0' font-size='12' fill='#1f2328' text-anchor='middle' font-weight='bold' font-family='Helvetica, Arial, sans-serif' >44 µs</text>
+<text x='576.8' y='203.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >canal 2</text>
+<text x='60.0' y='95.0' font-size='11' fill='#59636e' text-anchor='end' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >repos</text>
+<text x='60.0' y='250.0' font-size='13' fill='#1f2328' text-anchor='start' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >250 kbit/s, 8 bits + 2 bits de stop : 44 µs par canal. Durée d'une trame de N canaux : 176 + 12 + (N + 1) × 44 µs.</text>
+<rect x='60.0' y='290.0' width='728.3' height='24.0' fill='#9fb3c8' stroke='none' stroke-width='1' rx='3'/>
+<text x='796.3' y='307.0' font-size='13' fill='#1f2328' text-anchor='start' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >22,76 ms — 512 canaux (défaut)</text>
+<rect x='60.0' y='334.0' width='63.7' height='24.0' fill='#1d70b8' stroke='none' stroke-width='1' rx='3'/>
+<text x='131.7' y='351.0' font-size='13' fill='#1f2328' text-anchor='start' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >1,99 ms — 40 canaux (dmx_out_slots = dernier canal du projecteur)</text>
+<line x1='60.0' y1='374.0' x2='60.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='60.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >0 ms</text>
+<line x1='220.0' y1='374.0' x2='220.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='220.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >5 ms</text>
+<line x1='380.0' y1='374.0' x2='380.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='380.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >10 ms</text>
+<line x1='540.0' y1='374.0' x2='540.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='540.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >15 ms</text>
+<line x1='700.0' y1='374.0' x2='700.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='700.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >20 ms</text>
+<line x1='860.0' y1='374.0' x2='860.0' y2='380.0' stroke='#59636e' stroke-width='1' />
+<text x='860.0' y='394.0' font-size='11' fill='#59636e' text-anchor='middle' font-weight='normal' font-family='Helvetica, Arial, sans-serif' >25 ms</text>
+<line x1='60.0' y1='374.0' x2='860.0' y2='374.0' stroke='#59636e' stroke-width='1' />
+</svg>

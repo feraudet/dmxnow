@@ -1,0 +1,33 @@
+name: docs
+
+on:
+  push:
+    paths: ["docs/**", "enclosure/board.json", "enclosure/out/**", ".github/workflows/docs.yml"]
+  pull_request:
+    paths: ["docs/**", "enclosure/board.json", "enclosure/out/**", ".github/workflows/docs.yml"]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Figures up to date (generated from enclosure/board.json and SPEC values)
+        run: |
+          python3 docs/figures/make_figures.py
+          git diff --exit-code -- docs/figures
+      - name: Relative links and images
+        run: python3 docs/tools/check_links.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Mermaid diagrams parse
+        run: |
+          npm install --no-save @mermaid-js/mermaid-cli@11
+          echo '{"args":["--no-sandbox"]}' > /tmp/pp.json
+          for f in docs/*.md; do
+            grep -q '```mermaid' "$f" || continue
+            npx mmdc -p /tmp/pp.json -i "$f" -o "/tmp/$(basename "$f" .md)-out.md" -e svg
+          done
