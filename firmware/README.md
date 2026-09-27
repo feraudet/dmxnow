@@ -5,14 +5,15 @@
 | `common/` | Bibliothèque C++17 sans Arduino : protocole v1 (en-tête, validation, CRC16, COBS), configuration TLV, réassemblage, compteur de pertes, logique du relais, gamma, cadence d'émission, HMAC-SHA256 et anti-rejeu, historique des commandes. Tests natifs. |
 | `common/test_vectors.json` | Vecteurs communs (PROTOCOL §9), produits par `common/tools/gen_vectors.py` avec une implémentation Python indépendante ; consommés par les tests C++ et, plus tard, par ceux du démon Pi. |
 | `node/` | Firmware du nœud, ESP32-C3-MINI-1, Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5 (pioarduino 55.03.312, épinglé). |
-| `dongle/` | Firmware du dongle (livrable 8.4, à venir). |
+| `dongle/` | Firmware du dongle, Seeed XIAO ESP32-C3 sur l'USB du Pi (même plateforme épinglée). |
 
 ## Compiler et tester
 
 ```
 pip install platformio
-cd firmware/common && pio test -e native        # 25 tests, -Wall -Wextra -Werror
+cd firmware/common && pio test -e native        # 36 tests (nœud + dongle), -Wall -Wextra -Werror
 cd firmware/node && pio run -e node             # firmware.bin (OTA) et firmware.factory.bin
+cd firmware/dongle && pio run -e dongle         # XIAO ESP32-C3
 python3 firmware/common/tools/gen_vectors.py    # après toute évolution du protocole
 ```
 
@@ -79,3 +80,28 @@ désactiver la vérification.
 | B8 | OTA : mise à jour par la page ; retour arrière si aucun paquet valide en 60 s | Deux images | l'ancienne image redémarre |
 | B9 | Changement de canal par commande (appliqué 500 ms après l'ACK) ; balayage après 60 s sans réseau | Dongle sur un autre canal | le nœud retrouve le réseau et persiste le canal |
 | B10 | Authentification : commande non signée refusée (`AUTH_FAILED`) une fois la clé posée, rejeu refusé, `IDENTIFY` toujours accepté | Démon Pi | PROTOCOL §7 |
+
+## Dongle
+
+- Liaison USB CDC avec le démon (PROTOCOL §8) : trames COBS, CRC16, `seq` par émetteur ;
+  `UNIVERSE`, `COMMAND` (remorque d'authentification calculée par le Pi), `DONGLE_CONFIG`
+  (persisté en NVS), `PING` → `PONG`, `GET_STATUS` → `STATUS` (aussi toutes les 5 s).
+- Émission ESP-NOW **une à la fois** (attente du callback d'émission, garde de 50 ms),
+  priorité COMMAND > DMX_DATA > BEACON (1 Hz, même sans univers) ; univers émis sur
+  événement (≥ 10 ms d'écart) et rafraîchis à `refresh_hz` (44), arrêtés après
+  `hold_timeout` (10 s) sans données du Pi ; mode v1 fragmenté sélectionnable.
+- Commandes : ciblées, 5 tentatives (attentes 30, 60, 120, 240 ms puis 50 ms) jusqu'à
+  l'ACK de la bonne MAC ; broadcast, 3 émissions à 20 ms puis 1 s de collecte ;
+  `CMD_RESULT` au Pi. HEARTBEAT et ACK remontés en `RADIO_RX` (paquet brut) ; les
+  heartbeats des nœuds non configurés (`net_id` 0) sont acceptés pour l'enrôlement.
+- Sonde de latence : **D10 (GPIO10)** bascule à chaque émission radio (ENF-01).
+- Logique testée nativement : `common/src/dongle.cpp`, `common/src/serial.cpp`.
+
+### Recette dongle (SPEC 8.4)
+
+| # | Essai | Critère |
+|---|-------|---------|
+| D1 | Latence Art-Net → ligne DMX : QLC+ → démon → dongle (sonde D10) → nœud (analyseur sur IO4) | ≤ budget SPEC §5.1 (≈ 3,3 ms typique en trame courte) |
+| D2 | Débit USB : 4 univers à 50 Hz sans perte (`serial_errors`, `coalesced`) [V-FW-04] | aucune erreur série |
+| D3 | Pi débranché : univers maintenus 10 s puis BEACON seul | `hold_timeout` |
+| D4 | Commande ciblée vers un nœud éteint : 5 tentatives, `CMD_RESULT` = expiré | < 0,5 s |

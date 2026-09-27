@@ -53,3 +53,30 @@ jobs:
           path: |
             firmware/node/.pio/build/node/firmware.bin
             firmware/node/.pio/build/node/firmware.factory.bin
+
+  dongle:
+    name: dongle (XIAO ESP32-C3 build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: firmware/dongle
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-${{ hashFiles('firmware/dongle/platformio.ini') }}
+      - name: Install PlatformIO
+        run: pip install platformio==6.2.0
+      - name: Build (pioarduino 55.03.312)
+        run: pio run -e dongle
+      - name: Upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmxnow-dongle-firmware
+          path: |
+            firmware/dongle/.pio/build/dongle/firmware.bin
+            firmware/dongle/.pio/build/dongle/firmware.factory.bin
