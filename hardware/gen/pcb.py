@@ -315,7 +315,7 @@ def outline(board, for_routing=False):
     add_text(board, "3V3", 74.0, 28.3, pcbnew.F_SilkS, 1.0)
     add_text(board, "5V", 89.24, 28.3, pcbnew.F_SilkS, 1.0)
     for y, t in ((32.6, "V+"), (28.5, "1"), (20.5, "2"), (15.5, "3"), (10.5, "4")):   # J6
-        add_text(board, t, 127.2, y, pcbnew.F_SilkS, 1.0)
+        add_text(board, t, 129.5, y, pcbnew.F_SilkS, 1.0)
     add_line(board, SLOT_X, 1.0, SLOT_X, 11.0, pcbnew.F_SilkS, 0.15)
     add_text(board, "dmxnow v0.3", 88.0, 45.5, pcbnew.F_SilkS, 1.0)
     # J5 polarity (a reversed LED supply short-circuits through D3; only F2 protects)
@@ -371,7 +371,7 @@ def add_npth(board, x, y, d):
 
 
 # reference texts that the library footprint puts outside the board outline
-REF_AT = {"F1": (41.5, -8.6), "F2": (107.0, 45.8)}
+REF_AT = {"F1": (41.5, -8.6), "F2": (107.0, 45.8), "C7": (119.0, 42.8)}
 
 
 def place(board):
@@ -638,6 +638,160 @@ def zones(board):
     add_zone(board, "GND", [F, B], logic, clearance=0.3, name="GND_STRIP", priority=2)
 
 
+# --- Silkscreen tidy-up (JLCPCB clips legend on pads, edges and slots) ----------------
+SILK_EDGE = 0.3          # legend kept this far from the board edge and the slots
+
+
+def _silk_forbidden():
+    """Rectangles (x1, y1, x2, y2) where no legend may be: slots and the breakaway line."""
+    m = SILK_EDGE
+    f = [(SLOT_X - 0.6 - m, y1 - m, SLOT_X + 0.6 + m, y2 + m) for y1, y2 in SLOTS]
+    f.append((SPLIT_X - SLOT_W / 2 - m - 0.4, -1.0, SPLIT_X + SLOT_W / 2 + m, H + 1.0))
+    return f
+
+
+def _silk_board():
+    m = SILK_EDGE
+    return [(m, m, W - m, H - m), (m, -FUSE_BAND + m, BAND_X - m, 0.0 + m)]
+
+
+def _in_silk_area(x1, y1, x2, y2):
+    inside = any(bx1 <= x1 and x2 <= bx2 and by1 <= y1 and y2 <= by2 for bx1, by1, bx2, by2 in _silk_board()) \
+        or (x1 >= SILK_EDGE and x2 <= BAND_X - SILK_EDGE and y1 >= -FUSE_BAND + SILK_EDGE and y2 <= H - SILK_EDGE)
+    return inside and not any(x1 < fx2 and x2 > fx1 and y1 < fy2 and y2 > fy1 for fx1, fy1, fx2, fy2 in _silk_forbidden())
+
+
+def _clip_segment(a, b):
+    """Parts of an axis-aligned segment inside the legend area (list of (a, b))."""
+    (x1, y1), (x2, y2) = a, b
+    horiz = abs(y1 - y2) < 1e-6
+    if not horiz and abs(x1 - x2) > 1e-6:
+        return [(a, b)]
+    lo, hi = sorted((x1, x2)) if horiz else sorted((y1, y2))
+    c = y1 if horiz else x1
+    spans = []
+    for bx1, by1, bx2, by2 in _silk_board():
+        if horiz and by1 <= c <= by2:
+            spans.append((max(lo, bx1), min(hi, bx2)))
+        elif not horiz and bx1 <= c <= bx2:
+            spans.append((max(lo, by1), min(hi, by2)))
+    spans = sorted(s for s in spans if s[1] > s[0])
+    merged = []
+    for s in spans:
+        if merged and s[0] <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], s[1]))
+        else:
+            merged.append(s)
+    for fx1, fy1, fx2, fy2 in _silk_forbidden():
+        cut_lo, cut_hi, inside = (fx1, fx2, fy1 <= c <= fy2) if horiz else (fy1, fy2, fx1 <= c <= fx2)
+        if not inside:
+            continue
+        out = []
+        for s0, s1 in merged:
+            if cut_hi <= s0 or cut_lo >= s1:
+                out.append((s0, s1))
+                continue
+            if cut_lo > s0:
+                out.append((s0, cut_lo))
+            if cut_hi < s1:
+                out.append((cut_hi, s1))
+        merged = out
+    return [(((s0, c), (s1, c)) if horiz else ((c, s0), (c, s1))) for s0, s1 in merged if s1 - s0 > 0.2]
+
+
+def clip_footprint_silk(board):
+    """Footprint legend lines/rectangles crossing the edge or a slot are cut back."""
+    n = 0
+    for fp in board.GetFootprints():
+        for g in list(fp.GraphicalItems()):
+            if g.GetLayer() not in (pcbnew.F_SilkS, pcbnew.B_SilkS) or not isinstance(g, pcbnew.FP_SHAPE):
+                continue
+            if g.GetShape() == pcbnew.SHAPE_T_RECT:
+                c = [(pcbnew.ToMM(v.x) - OX, pcbnew.ToMM(v.y) - OY) for v in g.GetRectCorners()]
+                segs = [(c[i], c[(i + 1) % 4]) for i in range(4)]
+            elif g.GetShape() == pcbnew.SHAPE_T_SEGMENT:
+                segs = [((pcbnew.ToMM(g.GetStart().x) - OX, pcbnew.ToMM(g.GetStart().y) - OY),
+                         (pcbnew.ToMM(g.GetEnd().x) - OX, pcbnew.ToMM(g.GetEnd().y) - OY))]
+            else:
+                continue
+            clipped = [s for a, b in segs for s in _clip_segment(a, b)]
+            key = lambda ss: sorted(tuple(sorted((tuple(round(v, 3) for v in a), tuple(round(v, 3) for v in b))))
+                                    for a, b in ss)
+            if key(clipped) == key(segs):
+                continue
+            w, layer = g.GetWidth(), g.GetLayer()
+            fp.Remove(g)
+            for a, b in clipped:
+                s = pcbnew.FP_SHAPE(fp, pcbnew.SHAPE_T_SEGMENT)
+                s.SetLayer(layer)
+                s.SetWidth(w)
+                s.SetStart(pt(*a))
+                s.SetEnd(pt(*b))
+                s.SetLocalCoord()
+                fp.Add(s)
+            n += 1
+    return n
+
+
+def _box(item, grow=0.0):
+    b = item.GetBoundingBox()
+    return (pcbnew.ToMM(b.GetLeft()) - OX - grow, pcbnew.ToMM(b.GetTop()) - OY - grow,
+            pcbnew.ToMM(b.GetRight()) - OX + grow, pcbnew.ToMM(b.GetBottom()) - OY + grow)
+
+
+def _overlap(a, b):
+    return a[0] < b[2] and a[2] > b[0] and a[1] < b[3] and a[3] > b[1]
+
+
+def place_references(board):
+    """Every visible reference on a spot free of pads, other legend, edges and slots:
+    the nearest of a ring of candidates around (and on) the footprint."""
+    pads = [_box(pd, 0.25) for fp in board.GetFootprints() for pd in fp.Pads()]
+    taken = [_box(t, 0.2) for t in board.GetDrawings()
+             if isinstance(t, pcbnew.PCB_TEXT) and t.GetLayer() == pcbnew.F_SilkS]
+    taken += [_box(g, 0.2) for fp in board.GetFootprints() for g in fp.GraphicalItems()   # filled legend
+              if g.GetLayer() == pcbnew.F_SilkS and isinstance(g, pcbnew.FP_SHAPE) and g.IsFilled()]
+    moved, hidden = 0, []
+    def area(f):   # small parts first: they have the fewest free spots nearby
+        bb = f.GetBoundingBox(False, False)
+        return pcbnew.ToMM(bb.GetWidth()) * pcbnew.ToMM(bb.GetHeight())
+    fps = sorted(board.GetFootprints(), key=lambda f: (area(f), f.GetReference()))
+    for fp in fps:
+        ref = fp.Reference()
+        if not ref.IsVisible() or fp.GetReference() == "MB":
+            continue
+        ref.SetTextAngleDegrees(0)
+        cy = fp.GetCourtyard(pcbnew.F_CrtYd)
+        bb = cy.BBox() if cy.OutlineCount() else fp.GetBoundingBox(False, False)
+        cx1, cy1 = pcbnew.ToMM(bb.GetLeft()) - OX, pcbnew.ToMM(bb.GetTop()) - OY
+        cx2, cy2 = pcbnew.ToMM(bb.GetRight()) - OX, pcbnew.ToMM(bb.GetBottom()) - OY
+        ox, oy = pcbnew.ToMM(ref.GetPosition().x) - OX, pcbnew.ToMM(ref.GetPosition().y) - OY
+        mx, my = (cx1 + cx2) / 2, (cy1 + cy2) / 2
+        cands = [(ox, oy), (mx, my), (mx, cy1 - 0.8), (mx, cy2 + 0.8), (cx1 - 1.6, my), (cx2 + 1.6, my)]
+        for d in (1.5, 3.0, 4.5):
+            cands += [(mx, cy1 - 0.8 - d), (mx, cy2 + 0.8 + d), (cx1 - 1.6 - d, my), (cx2 + 1.6 + d, my),
+                      (cx1 - 1.0, cy1 - 0.8), (cx2 + 1.0, cy1 - 0.8), (cx1 - 1.0, cy2 + 0.8), (cx2 + 1.0, cy2 + 0.8)]
+        cands.sort(key=lambda c: (c != (ox, oy), (c[0] - ox) ** 2 + (c[1] - oy) ** 2))
+        for x, y in cands:
+            ref.SetPosition(pt(x, y))
+            box = _box(ref, 0.1)
+            if _in_silk_area(*box) and not any(_overlap(box, q) for q in pads + taken):
+                taken.append(box)
+                moved += (x, y) != (ox, oy)
+                break
+        else:
+            ref.SetPosition(pt(ox, oy))
+            ref.SetVisible(False)
+            hidden.append(fp.GetReference())
+    return moved, hidden
+
+
+def tidy_silk(board):
+    n = clip_footprint_silk(board)
+    moved, hidden = place_references(board)
+    print("silk: %d outlines clipped, %d references moved, hidden: %s" % (n, moved, ", ".join(hidden) or "none"))
+
+
 def build(for_routing=False):
     # NewBoard() writes an empty board at the given path: never point it at the real
     # board file when building the routing variant.
@@ -661,6 +815,8 @@ def build(for_routing=False):
         for x, y in mouse_bites():
             add_npth(board, x, y, BITE_D)
     zones(board)
+    if not for_routing:
+        tidy_silk(board)
     tb = board.GetTitleBlock()
     tb.SetTitle("dmxnow - noeud DMX / relais / rubans LED")
     tb.SetRevision("0.3")

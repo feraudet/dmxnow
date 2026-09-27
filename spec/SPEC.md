@@ -58,7 +58,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | ENF-02 | Rafraîchissement DMX ≥ 44 Hz, pas de trou > 100 ms en conditions nominales. | Mesure, compteur `lost_frames`. |
 | ENF-03 | Taux de perte radio < 1 % à 20 m en vue directe, 4 univers actifs. | Mesure heartbeat. |
 | ENF-04 | Coût matière ≤ 50 € par nœud en série de 20 (hors alimentation LED, hors XLR si fournie). | BOM chiffrée §6. |
-| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. **Non tenu (2026-09-26)** : 208 × 72 × 34 mm (entière), 145 × 72 × 34 mm (cassée), hors oreilles et bossages ; longueur : chambres de presse-étoupes et étriers imposés par ES-05, largeur : bande de F1 (§4.12, « Réalisation »). | STEP. |
+| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. **Non tenu, accepté par l'utilisateur le 2026-09-27** : 208 × 72 × 34 mm (entière), 145 × 72 × 34 mm (cassée), hors oreilles et bossages ; longueur : chambres de presse-étoupes et étriers imposés par ES-05, largeur : bande de F1 (§4.12, « Réalisation »). | STEP. |
 | ENF-06 | Nœud configurable, identifiable et mis à jour sans ouverture du boîtier. | Recette. |
 | ENF-07 | Reproductibilité : tout est généré par scripts versionnés ; CI verte. | CI. |
 

@@ -315,6 +315,45 @@ def join_gnd_groups(board, rounds=6):
     return joined
 
 
+def trim_stubs(board):
+    """Shorten the fixed crossing stubs (pcb.CROSSING_STUBS) to the span actually used:
+    the autorouter may join a stub short of its end, leaving a dangling tip."""
+    tol = pcbnew.FromMM(0.05)
+    nets = {n for n, _, _ in P.CROSSING_STUBS}
+    tracks = [t for t in board.GetTracks() if not isinstance(t, pcbnew.PCB_VIA)]
+    n = 0
+    for s in tracks:
+        a, b = s.GetStart(), s.GetEnd()
+        if s.GetNetname() not in nets or a.y != b.y or abs(abs(a.x - b.x) - pcbnew.FromMM(P.STUB_X1 - P.STUB_X0)) > tol:
+            continue
+        lo, hi = sorted((a.x, b.x))
+        y = a.y
+        xs = []
+        for t in tracks:      # other copper of the net touching the stub line
+            if t is s or t.GetNetname() != s.GetNetname() or t.GetLayer() != s.GetLayer():
+                continue
+            for q in (t.GetStart(), t.GetEnd()):
+                if abs(q.y - y) <= tol and lo - tol <= q.x <= hi + tol:
+                    xs.append(q.x)
+            for q in (a, b):  # stub end lying on another segment (T joint)
+                qq = (pcbnew.ToMM(q.x), pcbnew.ToMM(q.y))
+                if R._seg_seg(qq, qq, (pcbnew.ToMM(t.GetStart().x), pcbnew.ToMM(t.GetStart().y)),
+                              (pcbnew.ToMM(t.GetEnd().x), pcbnew.ToMM(t.GetEnd().y))) < 0.05:
+                    xs.append(q.x)
+        for it in list(board.GetPads()) + [v for v in board.GetTracks() if isinstance(v, pcbnew.PCB_VIA)]:
+            if it.GetNetname() == s.GetNetname() and it.HitTest(pcbnew.VECTOR2I(it.GetPosition().x, y)) \
+                    and lo - tol <= it.GetPosition().x <= hi + tol:
+                xs.append(it.GetPosition().x)
+        if not xs:
+            continue
+        nlo, nhi = max(lo, min(xs)), min(hi, max(xs))
+        if nhi - nlo > pcbnew.FromMM(1.0) and (nlo > lo + tol or nhi < hi - tol):
+            s.SetStart(pcbnew.VECTOR2I(nlo, y))
+            s.SetEnd(pcbnew.VECTOR2I(nhi, y))
+            n += 1
+    return n
+
+
 def main():
     txt, _, _ = drc.run(REPORT, fill=True)
     board = pcbnew.LoadBoard(P.PCB)
@@ -371,6 +410,7 @@ def main():
     for t in [t for t in board.GetTracks() if not isinstance(t, pcbnew.PCB_VIA)]:
         if (t.GetStart() - t.GetEnd()).EuclideanNorm() < pcbnew.FromMM(0.02):
             board.Remove(t)
+    print("trimmed %d crossing stubs" % trim_stubs(board))
     board.Save(P.PCB)
     print("fixup: %d fixes, %d manual, %d island vias" % (fixed, len(MANUAL) + len(MANUAL_VIAS), iv))
 

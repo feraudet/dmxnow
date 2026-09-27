@@ -16,7 +16,7 @@ Modèle CadQuery unique générant les deux variantes, en matériau ignifugé (A
 - Chambres de câblage aux extrémités pour les presse-étoupes et les étriers : 208 × 72 × 34 mm
   (carte entière), 145 × 72 × 34 mm (cassée), au-delà de l'objectif ENF-05, qui n'était
   qu'indicatif. Réduire la longueur supposerait de renoncer à l'étrier indépendant (ES-05)
-  ou aux presse-étoupes : non retenu, sauf arbitrage contraire.
+  ou aux presse-étoupes : non retenu ; taille acceptée par l'utilisateur le 2026-09-27.
 - Cloison en trois parties (fond, languettes dans les fentes, jupe du couvercle 230 V).
 
 ## Conséquences
