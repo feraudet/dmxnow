@@ -1,0 +1,12 @@
+{
+  "name": "dmxnow-common",
+  "version": "1.0.0",
+  "description": "dmxnow protocol v1: header, CRC16, COBS, TLV configuration, reassembly, relay logic, gamma, authentication",
+  "frameworks": "*",
+  "platforms": "*",
+  "build": {
+    "srcDir": "src",
+    "includeDir": "include",
+    "flags": ["-std=gnu++17"]
+  }
+}
