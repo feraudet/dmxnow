@@ -1,0 +1,4 @@
+# dmxnow dongle (Seeed XIAO ESP32-C3, native USB Serial/JTAG): stable name /dev/dmx-dongle.
+# 303a:1001 is shared by every ESP32-C3/S3 in native USB mode, hence the serial number
+# (the dongle's MAC), filled in by install.sh (SPEC 4.11).
+SUBSYSTEM=="tty", ATTRS{idVendor}=="303a", ATTRS{idProduct}=="1001", ATTRS{serial}=="@SERIAL@", SYMLINK+="dmx-dongle", GROUP="dialout", MODE="0660"

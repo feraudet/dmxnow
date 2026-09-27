@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dmxnow"
+version = "1.0.0"
+description = "Art-Net (QLC+) to ESP-NOW gateway daemon and CLI for dmxnow nodes"
+requires-python = ">=3.11"
+dependencies = ["pyserial>=3.5"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+dmxnowd = "dmxnow.daemon:main"
+dmxnow = "dmxnow.cli:main"
+
+[tool.setuptools]
+packages = ["dmxnow"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

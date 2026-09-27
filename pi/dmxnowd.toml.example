@@ -1,0 +1,23 @@
+# /etc/dmxnow/dmxnowd.toml - dmxnow daemon (SPEC 4.11)
+
+[artnet]
+bind = "0.0.0.0"          # QLC+ sends to 127.0.0.1:6454 ; 0.0.0.0 also accepts the LAN
+universes = [0]           # Port-Addresses forwarded to the nodes (<= 4 recommended per dongle)
+announce_ip = "127.0.0.1" # address given in ArtPollReply
+
+[dongle]
+port = "/dev/dmx-dongle"
+channel = 6               # 1, 6 or 11 recommended; must match the nodes (they scan after 60 s)
+net_id = 4660             # 1..65535, one per installation
+phy_rate = "6M"           # 6M (default), 12M, 24M, 1M, 2M, 5.5M, 11M
+power_dbm = 15            # 15 dBm + 5 dBi dipole = ~20 dBm EIRP, the EU limit: do not raise
+hold_timeout_ms = 10000   # the dongle keeps sending the last frame this long if the Pi stops
+refresh_hz = 44
+mode = "v2"               # v2 = one packet per universe ; v1 = fragmented fallback
+
+[security]
+net_key_file = "/etc/dmxnow/net_key"   # 32 bytes in hex; absent = commands not signed (A4)
+state_dir = "/var/lib/dmxnow"
+
+[control]
+socket = "/run/dmxnow/control.sock"

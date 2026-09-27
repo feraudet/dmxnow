@@ -1,0 +1,31 @@
+name: pi
+
+on:
+  push:
+    paths: ["pi/**", "firmware/common/test_vectors.json", ".github/workflows/pi.yml"]
+  pull_request:
+    paths: ["pi/**", "firmware/common/test_vectors.json", ".github/workflows/pi.yml"]
+
+jobs:
+  pytest:
+    name: pytest (Python 3.11)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pi
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e '.[test]'
+      - name: Tests (protocol vectors, Art-Net, daemon against a simulated dongle)
+        run: pytest -v
+
+  install:
+    name: install.sh on Debian Bookworm + systemd
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install, CLI, automatic restart (SPEC 8.5)
+        run: pi/ci/test_install.sh
