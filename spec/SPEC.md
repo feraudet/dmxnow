@@ -805,12 +805,12 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-HW-12 | ✅ Capacités JLCPCB relevées : V-cut ≥ 70 × 70 mm et cuivre ≥ 0,4 mm de l'axe (d'où les languettes), languette perforée ≥ 5 mm, trous 0,5-0,8 mm, fente non métallisée ≥ 1 mm, 2 oz : piste/espace ≥ 0,16 mm, anneau ≥ 0,254 mm (vias 0,9/0,35 mm) | jlcpcb.com/capabilities | faible |
 | V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; WAGO 2604-1105 arrêté (remplacé par 2604-1102 + 2604-1103, 2026-09-26) ; reste le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
 | V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
-| V-FW-01 | pioarduino : version exacte à épingler (Arduino ≥ 3.2 / IDF ≥ 5.4.2), support ESP32-C3 et XIAO ESP32-C3 | github.com/pioarduino/platform-espressif32 (releases) | critique |
-| V-FW-02 | `esp_now_set_peer_rate_config()` utilisable pour le pair broadcast depuis Arduino 3.x | ESP-IDF API ESP-NOW (v5.5) | moyenne |
-| V-FW-03 | `esp_dmx` compatible Arduino 3.x / IDF 5.5 sur ESP32-C3 ; `dmx_send_num()` | github.com/someweisguy/esp_dmx | moyenne (repli prévu) |
+| V-FW-01 | ✅ Épinglé (2026-09-27) : pioarduino **55.03.312** = Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5, `ESP_NOW_MAX_DATA_LEN_V2` = 1470 présent, compilation ESP32-C3 vérifiée (`firmware/node`). Reste le XIAO ESP32-C3 (dongle, 8.4) | github.com/pioarduino/platform-espressif32 (releases) | — |
+| V-FW-02 | ✅ `esp_now_set_peer_rate_config()` présent dans IDF 5.5.5 (en-têtes Arduino 3.3.12), utilisé pour le pair broadcast et le dongle ; effet réel à mesurer au banc | ESP-IDF API ESP-NOW (v5.5) | faible |
+| V-FW-03 | ✅ Sans objet : le repli prévu est retenu d'emblée (pilote UART maison, break par inversion de ligne, `firmware/node/src/dmx_out.cpp`) — aucune dépendance à `esp_dmx`. Timings à mesurer à l'analyseur logique (recette 8.3) | — | — |
 | V-FW-04 | Débit et latence réels de l'USB Serial/JTAG de l'ESP32-C3 côté Linux | Mesure sur banc | moyenne |
 | V-FW-05 | Réception ESP-NOW maintenue en mode AP+STA | Mesure ; ESP-IDF doc ESP-NOW (coexistence) | faible |
-| V-FW-06 | Retour arrière OTA disponible avec le chargeur d'amorçage précompilé d'Arduino 3.x | Documentation Arduino-ESP32 | faible |
+| V-FW-06 | ✅ `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` dans les bibliothèques précompilées Arduino 3.3.12 ; `verifyRollbackLater()` surchargé, image validée au premier paquet radio valide, retour arrière après 60 s | sdkconfig d'Arduino-ESP32 3.3.12 | — |
 | V-FW-07 | Format exact de la trame ESP-NOW v2 (surcoût en octets) | ESP-IDF doc ESP-NOW, *Frame Format* | faible (affecte le calcul d'occupation de ±10 %) |
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
@@ -853,4 +853,4 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | SKiDL | non utilisé (dépendances non installables ; génération directe des fichiers KiCad) | — |
 | CadQuery | 2.8.0 installé (`pip install -r enclosure/requirements.txt`) ; rendus via OSMesa (`libosmesa6`) | — |
 | Freerouting | 2.1.0 installé (`/opt/freerouting/freerouting.jar`) | — |
-| PlatformIO | **absent**, disponible sur PyPI | `pip install platformio` + plateforme pioarduino |
+| PlatformIO | 6.2 installé ; plateforme pioarduino 55.03.312 épinglée dans `firmware/node/platformio.ini` | — |
