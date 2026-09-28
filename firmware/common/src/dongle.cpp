@@ -16,7 +16,9 @@ bool apply_dongle_config(const uint8_t* tlv, size_t len, DongleSettings* s) {
         switch (k) {
             case 0x01: ok = l == 1 && v[0] >= 1 && v[0] <= 13; if (ok) n.channel = v[0]; break;
             case 0x02: ok = l == 2 && get16(v) >= 1; if (ok) n.net_id = get16(v); break;
-            case 0x03: ok = l == 1 && v[0] <= 0x0F; if (ok) n.phy_rate = v[0]; break;
+            // wifi_phy_rate_t legacy rates: 0x00-0x03 (DSSS long preamble), 0x05-0x07
+            // (short preamble), 0x08-0x0F (OFDM); 0x04 does not exist
+            case 0x03: ok = l == 1 && v[0] <= 0x0F && v[0] != 0x04; if (ok) n.phy_rate = v[0]; break;
             case 0x04: ok = l == 1 && v[0] >= 2 && v[0] <= 20; if (ok) n.power_dbm = v[0]; break;
             case 0x05: ok = l == 4 && get32(v) >= 1000; if (ok) n.hold_timeout_ms = get32(v); break;
             case 0x06: ok = l == 1 && v[0] >= 1 && v[0] <= 60; if (ok) n.refresh_hz = v[0]; break;

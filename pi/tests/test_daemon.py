@@ -193,3 +193,48 @@ def test_status_json(tmp_path, fast_link):
 
     asyncio.run(scenario())
     dongle.close()
+
+
+def test_config_limits_match_the_dongle():
+    # the dongle applies DONGLE_CONFIG all or nothing (firmware/common/src/dongle.cpp):
+    # a value it refuses must be refused here first
+    for bad in ({"refresh_hz": 100}, {"refresh_hz": 0}, {"hold_timeout_ms": 500}, {"universes": list(range(9))}):
+        with pytest.raises(ValueError):
+            config.check(config.Config(net_id=1, **bad))
+    config.check(config.Config(net_id=1, refresh_hz=60, hold_timeout_ms=1000, universes=list(range(8))))
+
+
+def test_dongle_status_checked_and_config_sent_again(tmp_path, fast_link):
+    dongle, cfg = make(tmp_path)
+
+    async def scenario():
+        d, task = await started(cfg)
+        assert await asyncio.to_thread(dongle.wait, lambda: dongle.configs)
+        code, out = await cli_run(cfg, "--json", "status")
+        st = json.loads(out)
+        assert code == 0 and st["dongle_config_ok"] and st["dongle"]["net_id"] == NET
+        # the dongle lost its settings (e.g. configuration sent while its USB port was
+        # coming up): the next STATUS shows it, the daemon sends the configuration again
+        dongle.settings["channel"], dongle.net_id = 3, 0
+        dongle.status()
+        assert await asyncio.to_thread(dongle.wait, lambda: len(dongle.configs) >= 2)
+        assert dongle.net_id == NET and dongle.settings["channel"] == cfg.channel
+        # a refusal is logged by the dongle and shown by "status"
+        dongle.log("DONGLE_CONFIG refused (test)")
+        code, out = await cli_run(cfg, "--json", "status")
+        assert any("refused (test)" in x["text"] for x in json.loads(out)["dongle_logs"])
+        await stop(d, task)
+
+    asyncio.run(scenario())
+    dongle.close()
+
+
+def test_broadcast_acks_counted_once_per_node(tmp_path):
+    dongle, cfg = make(tmp_path)
+    d = Daemon(cfg)
+    d.pending[77] = {"future": None, "acks": []}
+    ack = P.build_packet(P.Header(type=P.T_ACK, net_id=NET, universe=P.NO_UNIVERSE, seq=77), bytes([1, 0]))
+    for _ in range(3):   # the node answers each of the 3 broadcast emissions
+        d.on_radio(-50, NODE_MAC, ack)
+    assert len(d.pending[77]["acks"]) == 1
+    dongle.close()

@@ -31,7 +31,6 @@ void send_frame(const uint8_t* slots, uint16_t n) {
     static uint8_t tx[1 + dmxnow::kDmxSlots];
     tx[0] = 0;   // start code
     std::memcpy(tx + 1, slots, n);
-    uart_wait_tx_done(kUart, pdMS_TO_TICKS(40));
     uart_set_line_inverse(kUart, UART_SIGNAL_TXD_INV);   // break
     esp_rom_delay_us(kBreakUs);
     uart_set_line_inverse(kUart, 0);                     // mark after break
@@ -44,13 +43,20 @@ void run(void*) {
     dmxnow::OutputCadence cadence(10, 22727);
     uint8_t frame[dmxnow::kDmxSlots];
     for (;;) {
-        // wake on new data or at the latest after 5 ms to check the refresh deadline
-        ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(5));
+        // wake on new data, or every tick (1 ms) to hold the 1/44 s refresh deadline
+        ulTaskNotifyTake(pdTRUE, 1);
         if (fresh) {
             fresh = false;
             cadence.on_new_data();
         }
         if (!cadence.due(micros())) continue;
+        // wait for the end of the frame on the line first, then take the latest data:
+        // data arriving during a 22.7 ms frame go out in the very next one (SPEC 5.1)
+        uart_wait_tx_done(kUart, pdMS_TO_TICKS(40));
+        if (fresh) {
+            fresh = false;
+            cadence.on_new_data();
+        }
         uint16_t n;
         portENTER_CRITICAL(&mux);
         std::memcpy(frame, shared, sizeof frame);

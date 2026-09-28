@@ -20,7 +20,9 @@ Raspberry Pi OS **Bookworm** (Python ≥ 3.11), QLC+ installé.
    Si le dongle n'était pas branché : le brancher et relancer `sudo ./install.sh`.
 3. Régler `/etc/dmxnow/dmxnowd.toml` ([exemple](../pi/dmxnowd.toml.example)) :
    - `universes` : univers Art-Net à transmettre (4 au plus par dongle) ;
-   - `channel` : canal radio, **1, 6 ou 11**, le moins encombré par le Wi-Fi du lieu ;
+   - `channel` : canal radio, **1, 6 ou 11**, le moins encombré par le Wi-Fi du lieu.
+     Un nœud neuf démarre sur le canal 6 : sur un autre canal, il trouve seul celui du
+     dongle en un peu plus d'une minute (60 s sans réseau, puis balayage des canaux) ;
    - `power_dbm = 15` : **ne pas augmenter** (≈ 20 dBm PIRE avec l'antenne 5 dBi, limite
      européenne).
 

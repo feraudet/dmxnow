@@ -30,6 +30,8 @@ class FakeDongle:
         self.configs = []
         self.answer_pings = True
         self.node_config = {"universe": 0, "start_address": 1, "name": "node-123456"}
+        self.settings = {"channel": 6, "phy_rate": 0x0B, "power_dbm": 15, "hold_timeout_ms": 10000,
+                         "refresh_hz": 44, "mode": 0}
         self.seq = 0
         self._stop = False
         self.thread = threading.Thread(target=self._run, daemon=True)
@@ -74,14 +76,60 @@ class FakeDongle:
             for ftype, _seq, payload in self.decoder.feed(data):
                 self.frames.append((ftype, payload))
                 if ftype == P.S_PING and self.answer_pings:
-                    self.send(P.S_PONG, payload)
+                    self.send(P.S_PONG, payload[:4])
                 elif ftype == P.S_UNIVERSE:
-                    u, n = struct.unpack_from("<HH", payload)
-                    self.universes.append((u, payload[4:4 + n]))
+                    # same checks as firmware/dongle: universe <= 32767, 1..512 channels,
+                    # exact length, 8 universes at most; refusals are reported by LOG
+                    u, n = struct.unpack_from("<HH", payload) if len(payload) >= 4 else (0, 0)
+                    known = {x for x, _ in self.universes}
+                    if not (1 <= n <= 512 and len(payload) == 4 + n and u <= P.MAX_UNIVERSE):
+                        self.log("UNIVERSE refused: bad universe or length")
+                    elif u not in known and len(known) >= 8:
+                        self.log("UNIVERSE refused: table full (8 universes max)")
+                    else:
+                        self.universes.append((u, payload[4:4 + n]))
                 elif ftype == P.S_DONGLE_CONFIG:
                     self.configs.append(payload)
-                elif ftype == P.S_COMMAND:
+                    if not self._apply_config(payload):
+                        self.log("DONGLE_CONFIG refused (unknown key or value out of range): nothing applied")
+                    self.status()
+                elif ftype == P.S_GET_STATUS:
+                    self.status()
+                elif ftype == P.S_COMMAND and len(payload) >= 10:   # shorter: dropped silently
                     self._command(payload)
+
+
+    # --- like firmware/dongle ---------------------------------------------------------------------
+    def log(self, text: str, level: int = 0):
+        self.send(P.S_LOG, bytes([level]) + text.encode())
+
+    def status(self):
+        s = self.settings
+        self.send(P.S_STATUS, struct.pack("<3sBHBBBIIIII", bytes([1, 0, 0]), s["channel"], self.net_id,
+                                          s["phy_rate"], s["mode"], len({u for u, _ in self.universes}),
+                                          0, 0, 0, 0, 1))
+
+    def _apply_config(self, tlv: bytes) -> bool:
+        """firmware/common/src/dongle.cpp apply_dongle_config: all or nothing."""
+        new, net, i = dict(self.settings), self.net_id, 0
+        while i < len(tlv):
+            if i + 2 > len(tlv) or i + 2 + tlv[i + 1] > len(tlv):
+                return False
+            k, v = tlv[i], tlv[i + 2:i + 2 + tlv[i + 1]]
+            i += 2 + len(v)
+            n = int.from_bytes(v, "little") if v else -1
+            ok = {1: len(v) == 1 and 1 <= n <= 13, 2: len(v) == 2 and n >= 1,
+                  3: len(v) == 1 and n <= 0x0F and n != 0x04, 4: len(v) == 1 and 2 <= n <= 20,
+                  5: len(v) == 4 and n >= 1000, 6: len(v) == 1 and 1 <= n <= 60, 7: len(v) == 1 and n <= 1}.get(k)
+            if not ok:
+                return False
+            if k == 2:
+                net = n
+            else:
+                new[{1: "channel", 3: "phy_rate", 4: "power_dbm", 5: "hold_timeout_ms", 6: "refresh_hz",
+                     7: "mode"}[k]] = n
+        self.settings, self.net_id = new, net
+        return True
 
     def _command(self, payload: bytes):
         cmd_id, flags = struct.unpack_from("<HB", payload)
@@ -117,4 +165,5 @@ class FakeDongle:
             result = 2 if target == P.BROADCAST else 0
         else:
             result = 1   # nobody answers: timeout after 5 attempts
-        self.send(P.S_CMD_RESULT, struct.pack("<H6sBB", cmd_id, target, result, 3 if result == 2 else 1))
+        attempts = {0: 1, 1: 5, 2: 3}[result]   # like the real CommandTracker
+        self.send(P.S_CMD_RESULT, struct.pack("<H6sBB", cmd_id, target, result, attempts))

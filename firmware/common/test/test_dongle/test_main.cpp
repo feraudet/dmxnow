@@ -108,6 +108,8 @@ void test_dongle_config_tlv() {
     TEST_ASSERT_EQUAL_UINT32(10000, s.hold_timeout_ms);
     TEST_ASSERT_EQUAL_UINT8(1, s.mode);
     DongleSettings before = s;
+    const uint8_t no_rate[] = {0x03, 1, 0x04};          // 0x04 is not a wifi_phy_rate_t
+    TEST_ASSERT_FALSE(apply_dongle_config(no_rate, sizeof no_rate, &s));
     const uint8_t bad[] = {0x01, 1, 6, 0x04, 1, 30};   // 30 dBm: refused, nothing applied
     TEST_ASSERT_FALSE(apply_dongle_config(bad, sizeof bad, &s));
     TEST_ASSERT_EQUAL_MEMORY(&before, &s, sizeof s);

@@ -77,9 +77,16 @@ def load(path: str = DEFAULT_PATH) -> Config:
     return c
 
 
+MAX_UNIVERSES = 8   # size of the dongle's universe table (firmware/common, UniverseTable)
+
+
 def check(c: Config):
+    """Same limits as the dongle (firmware/common/src/dongle.cpp): the dongle applies
+    DONGLE_CONFIG all or nothing, so one bad value would leave it on its old settings."""
     if not all(0 <= u <= P.MAX_UNIVERSE for u in c.universes):
         raise ValueError("universes: 0 to 32767")
+    if len(set(c.universes)) > MAX_UNIVERSES:
+        raise ValueError(f"universes: {MAX_UNIVERSES} at most per dongle (4 recommended, SPEC 5.2)")
     if not 1 <= c.channel <= 13:
         raise ValueError("dongle.channel: 1 to 13")
     if not 1 <= c.net_id <= 65535:
@@ -92,6 +99,10 @@ def check(c: Config):
         # 5 dBi dipole on the dongle case: 15 dBm already gives ~20 dBm EIRP (EU limit)
         log.warning("dongle.power_dbm = %d: with the 5 dBi antenna the EIRP exceeds 20 dBm (EU limit)",
                     c.power_dbm)
+    if not c.hold_timeout_ms >= 1000:
+        raise ValueError("dongle.hold_timeout_ms: 1000 or more")
+    if not 1 <= c.refresh_hz <= 60:
+        raise ValueError("dongle.refresh_hz: 1 to 60")
     if c.mode not in ("v1", "v2"):
         raise ValueError("dongle.mode: v1 or v2")
 

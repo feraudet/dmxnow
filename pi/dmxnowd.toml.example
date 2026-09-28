@@ -7,7 +7,7 @@ announce_ip = "127.0.0.1" # address given in ArtPollReply
 
 [dongle]
 port = "/dev/dmx-dongle"
-channel = 6               # 1, 6 or 11 recommended; must match the nodes (they scan after 60 s)
+channel = 6               # 1, 6 or 11 recommended; nodes, new ones included, find it within ~65 s (scan)
 net_id = 4660             # 1..65535, one per installation
 phy_rate = "6M"           # 6M (default), 12M, 24M, 1M, 2M, 5.5M, 11M
 power_dbm = 15            # 15 dBm + 5 dBi dipole = ~20 dBm EIRP, the EU limit: do not raise

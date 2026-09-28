@@ -60,6 +60,7 @@ bool begin(uint8_t ch, uint16_t net_id) {
     net_id_ = net_id;
     if (!queue) queue = xQueueCreate(6, sizeof(Packet));
     WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);   // Arduino would re-apply its own power save on STA start
     WiFi.disconnect();
     esp_wifi_set_ps(WIFI_PS_NONE);
     esp_wifi_set_max_tx_power(60);   // 15 dBm (0.25 dBm steps)

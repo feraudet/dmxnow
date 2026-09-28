@@ -153,7 +153,13 @@ def main(argv=None):
         show_result(res)
     else:
         print(json.dumps(res, indent=1))
+    # non-zero exit for scripts: no answer, or a node that refused (invalid_arg,
+    # auth_failed...), or a dongle running with other settings than the daemon's
     if "acks" in res and res["result"] != "acked" and res["result"] != "broadcast_done":
+        return 1
+    if "acks" in res and any(ack["status"] != "ok" for ack in res["acks"]):
+        return 1
+    if a.cmd == "status" and res.get("dongle_config_ok") is False:
         return 1
     return 0
 

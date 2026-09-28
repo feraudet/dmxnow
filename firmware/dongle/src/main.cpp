@@ -62,6 +62,17 @@ void send_pi(uint8_t type, const uint8_t* payload, size_t len) {
     if (n) Serial.write(wire, n);
 }
 
+
+// LOG to the Pi (PROTOCOL 8.4): level 0 error ... 3 debug, UTF-8 text. Every refusal is
+// reported, so that a misconfiguration never stays silent.
+void send_log(uint8_t level, const char* text) {
+    uint8_t buf[120];
+    buf[0] = level;
+    size_t n = strnlen(text, sizeof buf - 1);
+    std::memcpy(buf + 1, text, n);
+    send_pi(ser::kLog, buf, n + 1);
+}
+
 void send_status() {
     uint8_t p[32];
     std::memcpy(p, kFw, 3);
@@ -104,7 +115,8 @@ void apply_radio() {
     esp_now_rate_config_t rc = {};
     rc.phymode = settings.phy_rate <= 0x07 ? WIFI_PHY_MODE_11B : WIFI_PHY_MODE_11G;
     rc.rate = wifi_phy_rate_t(settings.phy_rate);
-    esp_now_set_peer_rate_config(kBroadcast, &rc);
+    if (esp_now_set_peer_rate_config(kBroadcast, &rc) != ESP_OK)
+        send_log(0, "PHY rate refused by ESP-NOW: previous rate kept");
     sched.universes.set_refresh_hz(settings.refresh_hz);
 }
 
@@ -189,6 +201,7 @@ void handle_command(const uint8_t* p, size_t len, uint32_t now) {
         std::memcpy(r + 2, body, 6);
         r[8] = uint8_t(CommandTracker::Result::Timeout);   // not sent: table full / too long
         r[9] = 0;
+        send_log(0, n ? "COMMAND refused: too many commands in progress" : "COMMAND refused: packet too long");
         send_pi(ser::kCmdResult, r, sizeof r);
     }
 }
@@ -198,8 +211,10 @@ void handle_frame(const SerialDecoder::Frame& f, uint32_t now) {
         case ser::kUniverse:
             if (f.len >= 4) {
                 uint16_t id = get16(f.payload), n = get16(f.payload + 2);
-                if (n >= 1 && n <= kDmxSlots && f.len == 4u + n && id <= kMaxUniverse)
-                    sched.universes.update(id, f.payload + 4, n, now);
+                if (!(n >= 1 && n <= kDmxSlots && f.len == 4u + n && id <= kMaxUniverse))
+                    send_log(0, "UNIVERSE refused: bad universe or length");
+                else if (!sched.universes.update(id, f.payload + 4, n, now))
+                    send_log(0, "UNIVERSE refused: table full (8 universes max)");
             }
             break;
         case ser::kCommand:
@@ -209,6 +224,8 @@ void handle_frame(const SerialDecoder::Frame& f, uint32_t now) {
             if (apply_dongle_config(f.payload, f.len, &settings)) {
                 prefs.putBytes("settings", &settings, sizeof settings);
                 apply_radio();
+            } else {
+                send_log(0, "DONGLE_CONFIG refused (unknown key or value out of range): nothing applied");
             }
             send_status();
             break;
@@ -228,13 +245,17 @@ void handle_frame(const SerialDecoder::Frame& f, uint32_t now) {
 void setup() {
     pinMode(kTxProbePin, OUTPUT);
     Serial.setRxBufferSize(8192);
+    // TX ring: HWCDC drops a whole frame that does not fit (default 256 bytes), so a burst
+    // of ACK / CMD_RESULT after a broadcast command would be lost silently
+    Serial.setTxBufferSize(4096);
     Serial.begin(921600);
     Serial.setTxTimeoutMs(0);   // never block when the Pi does not read
     prefs.begin("dongle", false);
     if (prefs.getBytesLength("settings") == sizeof settings) prefs.getBytes("settings", &settings, sizeof settings);
-    rx_queue = xQueueCreate(16, sizeof(RxItem));
+    rx_queue = xQueueCreate(24, sizeof(RxItem));   // 3 ACK per node for a broadcast command
 
     WiFi.mode(WIFI_STA);
+    WiFi.setSleep(false);   // Arduino would re-apply its own power save on STA start
     WiFi.disconnect();
     esp_wifi_set_ps(WIFI_PS_NONE);
     esp_wifi_set_channel(settings.channel, WIFI_SECOND_CHAN_NONE);

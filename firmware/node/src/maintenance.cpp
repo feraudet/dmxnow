@@ -70,19 +70,27 @@ void page() {
 void post_config() {
     uint8_t tlv[96];
     size_t n = 0;
+    bool range_ok = true;   // a value that does not fit its field is refused, never truncated
+    auto number = [&](const char* arg, long max, long* v) {
+        if (!server->hasArg(arg) || server->arg(arg).length() == 0) return false;
+        *v = server->arg(arg).toInt();
+        if (*v < 0 || *v > max) range_ok = false;
+        return range_ok;
+    };
     auto u16 = [&](uint8_t k, const char* arg) {
-        if (!server->hasArg(arg) || n + 4 > sizeof tlv) return;
-        long v = server->arg(arg).toInt();
+        long v;
+        if (!number(arg, 0xFFFF, &v) || n + 4 > sizeof tlv) return;
         tlv[n++] = k;
         tlv[n++] = 2;
         tlv[n++] = uint8_t(v);
         tlv[n++] = uint8_t(v >> 8);
     };
     auto u8 = [&](uint8_t k, const char* arg) {
-        if (!server->hasArg(arg) || n + 3 > sizeof tlv) return;
+        long v;
+        if (!number(arg, 0xFF, &v) || n + 3 > sizeof tlv) return;
         tlv[n++] = k;
         tlv[n++] = 1;
-        tlv[n++] = uint8_t(server->arg(arg).toInt());
+        tlv[n++] = uint8_t(v);
     };
     if (server->hasArg("name")) {
         String s = server->arg("name");
@@ -98,8 +106,10 @@ void post_config() {
     u8(dmxnow::key::kRelayDmx, "relay_dmx");
     u8(dmxnow::key::kRelayPowerOn, "relay_power_on");
     u8(dmxnow::key::kRadioChannel, "radio_channel");
-    u16(dmxnow::key::kNetId, "net_id");
-    dmxnow::AckStatus st = hooks_.apply_config(tlv, n);
+    // net_id 0 means "not enrolled yet": it is not a value to write (1..65535), so a new
+    // node's form, which shows 0, must still save the other fields
+    if (server->hasArg("net_id") && server->arg("net_id").toInt() != 0) u16(dmxnow::key::kNetId, "net_id");
+    dmxnow::AckStatus st = range_ok ? hooks_.apply_config(tlv, n) : dmxnow::AckStatus::InvalidArg;
     if (st == dmxnow::AckStatus::Ok) {
         server->sendHeader("Location", "/");
         server->send(303);

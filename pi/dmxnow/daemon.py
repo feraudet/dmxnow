@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import collections
 import json
 import logging
 import os
@@ -54,6 +55,10 @@ class Daemon:
         self.nodes = {}              # mac -> dict (last heartbeat + reception data)
         self.pending = {}            # cmd_id -> {"future", "acks"}
         self.dongle_status = {}
+        self.status_event = asyncio.Event()   # set on every STATUS (fresh answer to "status")
+        self.dongle_logs = collections.deque(maxlen=20)
+        self.config_mismatch = False
+        self.config_resent_at = 0.0
         self.stats = {"artdmx": 0, "artdmx_ignored": 0, "artpoll": 0, "radio_rx": 0, "radio_rejected": 0}
 
     # --- Art-Net -> dongle ---------------------------------------------------------------------
@@ -79,8 +84,28 @@ class Daemon:
                 p["future"].set_result({"result": P.CMD_RESULT.get(result, str(result)), "attempts": attempts})
         elif ftype == P.S_STATUS and len(payload) >= 29:
             self.dongle_status = P.decode_status(payload)
+            self.status_event.set()
+            self.check_dongle_config()
         elif ftype == P.S_LOG and payload:
-            log.info("dongle: %s", payload[1:].decode("utf-8", "replace"))
+            text = payload[1:].decode("utf-8", "replace")
+            level = {0: logging.ERROR, 1: logging.WARNING}.get(payload[0], logging.INFO)
+            log.log(level, "dongle: %s", text)
+            self.dongle_logs.append({"time": time.time(), "level": payload[0], "text": text})
+
+
+    def check_dongle_config(self):
+        """The dongle reports its radio settings in every STATUS (every 5 s): if they
+        differ from ours (config refused, or lost while the USB port was coming up),
+        say it and send the configuration again, at most every 10 s."""
+        want = self.cfg.dongle_values()
+        s = self.dongle_status
+        self.config_mismatch = (s.get("channel"), s.get("net_id"), s.get("phy_rate"), s.get("mode")) != (
+            want["channel"], want["net_id"], want["phy_rate"], "v1" if want["mode"] else "v2")
+        if self.config_mismatch and time.time() - self.config_resent_at > 10:
+            log.warning("dongle settings differ from the configuration (dongle: channel %s, net_id %s): "
+                        "sending the configuration again", s.get("channel"), s.get("net_id"))
+            self.config_resent_at = time.time()
+            self.link.send(P.S_DONGLE_CONFIG, P.encode_dongle_config(want))
 
     def on_radio(self, rssi: int, src: bytes, pkt: bytes):
         why, h = P.validate(pkt, self.cfg.net_id, dongle=True)
@@ -97,7 +122,9 @@ class Daemon:
             ack = P.decode_ack(pkt, h)
             ack["mac"] = src.hex(":")
             p = self.pending.get(h.seq)
-            if p is not None:
+            # a broadcast command is sent 3 times: a node answers each repeat with the
+            # same stored ACK (PROTOCOL 6.2), keep one per node
+            if p is not None and all(a["mac"] != ack["mac"] for a in p["acks"]):
                 p["acks"].append(ack)
 
     # --- commands --------------------------------------------------------------------------------
@@ -143,8 +170,15 @@ class Daemon:
                                    stale=now - n["last_seen"] > self.NODE_STALE_S)
                               for m, n in sorted(self.nodes.items(), key=lambda kv: kv[1].get("name", ""))]}
         if cmd == "status":
-            self.link.send(P.S_GET_STATUS)
+            if self.link.connected.is_set():   # wait for the fresh STATUS, not the last one
+                self.status_event.clear()
+                self.link.send(P.S_GET_STATUS)
+                try:
+                    await asyncio.wait_for(self.status_event.wait(), 0.5)
+                except asyncio.TimeoutError:
+                    pass
             return {"dongle_connected": self.link.connected.is_set(), "dongle": self.dongle_status,
+                    "dongle_config_ok": not self.config_mismatch, "dongle_logs": list(self.dongle_logs),
                     "reconnects": self.link.reconnects, "serial_errors_pi": self.link.decoder.errors,
                     "universes": self.cfg.universes, "net_id": self.cfg.net_id, "channel": self.cfg.channel,
                     "authentication": self.key is not None, "stats": self.stats}

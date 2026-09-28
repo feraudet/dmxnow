@@ -51,7 +51,14 @@ uint8_t bits() { return bits_; }
 
 void set(uint8_t ch, uint32_t duty) {
     if (!ready || ch >= 4) return;
-    ledc_set_duty_with_hpoint(kMode, ledc_channel_t(ch), duty, hpoint(ch));
+    // the pulse must end inside the period (hpoint + duty <= 2^bits): whether the LEDC
+    // wraps a pulse past the counter overflow is not documented. The start moves back
+    // just enough; the phase shift is kept whenever it fits, the duty never changes.
+    uint32_t period = 1u << bits_;
+    if (duty > period) duty = period;
+    uint32_t hp = hpoint(ch);
+    if (hp + duty > period) hp = period - duty;
+    ledc_set_duty_with_hpoint(kMode, ledc_channel_t(ch), duty, hp);
     ledc_update_duty(kMode, ledc_channel_t(ch));
 }
 

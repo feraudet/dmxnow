@@ -299,7 +299,7 @@ Mécanisme retenu (ADR 0013) :
 | `0x03` | `GET_CONFIG`    | — | L'ACK contient la configuration complète en TLV (secrets exclus). |
 | `0x04` | `RELAY`         | `mode` u8 : 0 = forcer éteint, 1 = forcer allumé, 2 = automatique (suivre le canal DMX) | Voir SPEC §4.5 (priorités). Soumis à l'intervalle minimal entre commutations. |
 | `0x05` | `MAINTENANCE`   | `timeout_s` u16 (0 = défaut 600) | Passe en mode maintenance (§SPEC 4.9). |
-| `0x06` | `REBOOT`        | — | Redémarre après envoi de l'ACK (délai 200 ms). |
+| `0x06` | `REBOOT`        | — | Redémarre après envoi de l'ACK (délai 600 ms, au-delà de la dernière retransmission du dongle à 450 ms : une répétition est servie par l'historique et non exécutée deux fois ; porté de 200 à 600 ms le 2026-09-28). |
 | `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
 
 ### 6.4 Clés de configuration (TLV)

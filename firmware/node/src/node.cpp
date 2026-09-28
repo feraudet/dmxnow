@@ -37,6 +37,7 @@ constexpr uint32_t kDongleForgetMs = 30000;
 constexpr uint32_t kStreamPresentMs = 1000;
 constexpr uint32_t kScanAfterMs = 60000, kScanDwellMs = 300;
 constexpr uint32_t kOtaValidateMs = 60000;
+constexpr uint32_t kRebootDelayMs = 600;
 constexpr uint32_t kPowerCycleWindowMs = 5000;
 constexpr uint32_t kButtonDebounceMs = 20, kButtonMaintMs = 3000, kButtonResetMs = 10000;
 
@@ -289,12 +290,14 @@ void handle_command(const radio::Packet& p, const Header& h) {
             case Opcode::Maintenance:
                 enter_maintenance(cmd.args_len >= 2 ? get16(cmd.args) : 0);
                 break;
+            // restart after the dongle's last retransmission (450 ms, PROTOCOL 6.2): a
+            // repeat lands in the history and is not executed a second time
             case Opcode::Reboot:
-                reboot_at = now_ms() + 200;
+                reboot_at = now_ms() + kRebootDelayMs;
                 break;
             case Opcode::FactoryReset:
                 if (cmd.args_len < 4 || get32(cmd.args) != kFactoryResetConfirm) st = AckStatus::InvalidArg;
-                else { factory_at_reboot = true; reboot_at = now_ms() + 200; }
+                else { factory_at_reboot = true; reboot_at = now_ms() + kRebootDelayMs; }
                 break;
             default:
                 st = AckStatus::UnknownOpcode;
@@ -303,7 +306,9 @@ void handle_command(const radio::Packet& p, const Header& h) {
     ack[0] = cmd.opcode;
     ack[1] = uint8_t(st);
     if (st != AckStatus::Ok) ack_len = 2;
-    history.remember(h.seq, ack, ack_len);
+    // an authentication failure is not remembered: a forged packet carrying the next
+    // cmd_id would otherwise block the genuine command (answered from the history)
+    if (st != AckStatus::AuthFailed) history.remember(h.seq, ack, ack_len);
     send_packet(MsgType::Ack, h.net_id, kNoUniverse, h.seq, ack, ack_len);
 }
 
@@ -375,6 +380,10 @@ void status_text(char* out, size_t cap) {
 }
 
 void enter_maintenance(uint16_t timeout_s) {
+    if (scanning) {   // back to the configured channel before the AP starts on it
+        scanning = false;
+        radio::set_channel(cfg.radio_channel);
+    }
     maint::Hooks hk;
     hk.apply_config = apply_config;
     hk.config = []() -> const NodeConfig& { return cfg; };
@@ -470,8 +479,11 @@ void setup() {
 
     if (!radio::begin(cfg.radio_channel, cfg.net_id)) Serial.println("dmxnow: radio init failed");
 
-    // three power-ups less than 5 s apart -> maintenance (A6, option)
-    if (cfg.powercycle_maint) {
+    // three power-ups less than 5 s apart -> maintenance (A6, option). Only real power-ups
+    // count: a crash, watchdog, brownout or commanded reboot loop must not open the AP.
+    if (cfg.powercycle_maint && esp_reset_reason() != ESP_RST_POWERON) {
+        if (store::boot_count()) store::set_boot_count(0);
+    } else if (cfg.powercycle_maint) {
         uint8_t n = uint8_t(store::boot_count() + 1);
         if (n >= 3) {
             store::set_boot_count(0);
@@ -514,19 +526,24 @@ void loop() {
 
     if (dongle_known && now - dongle_seen_ms > kDongleForgetMs) dongle_known = false;
 
-    // channel scan after 60 s without our network (A5); DMX output goes on meanwhile
-    if (cfg.net_id && !maint::active() && !scanning && now - net_seen_ms > kScanAfterMs) {
+    // channel scan after 60 s without our network (A5); DMX output goes on meanwhile.
+    // A new node (net_id 0) scans too, for any BEACON or COMMAND: otherwise it stays on
+    // channel 6 and cannot be enrolled by a dongle on another channel. Never in
+    // maintenance: the access point must stay on its channel.
+    if (!maint::active() && !scanning && now - net_seen_ms > kScanAfterMs) {
         scanning = true;
         scan_ch = 0;
         scan_step_ms = now;
     }
-    if (scanning && time_reached(now, scan_step_ms)) {
+    if (scanning && !maint::active() && time_reached(now, scan_step_ms)) {
         scan_ch = uint8_t(scan_ch % 13 + 1);
         radio::set_channel(scan_ch);
         scan_step_ms = now + kScanDwellMs;
     }
 
-    if (channel_at && time_reached(now, channel_at)) {
+    // channel change asked by a command or the web page: 500 ms after the answer, and
+    // only out of maintenance (moving the channel would drop the AP's clients)
+    if (channel_at && !maint::active() && time_reached(now, channel_at)) {
         channel_at = 0;
         radio::set_channel(channel_new);
     }
