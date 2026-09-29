@@ -25,7 +25,25 @@ De gauche à droite :
 - la partie rubans : U4, Q2 à Q5, J5, J6, J8, F2, C7, reliée au reste par trois
   onglets sécables.
 
+### Retirer les rails de JLCPCB
+
+Pour l'assemblage, JLCPCB ajoute un rail de 5 mm en haut et en bas de la carte (elle
+passe à 146 × 75,5 mm). À leur demande (mail du 2026-09-29), le rail du haut tient aussi
+la partie rubans par un petit pont à trous de rupture, près du coin haut droit, vers
+X = 131 à 135 mm : sans lui, la partie rubans ne tenait que par les trois onglets et le
+rail du bas, et risquait de casser en production. Aucune piste ne traverse ce pont.
+
+1. Casser d'abord ce pont : tenir la partie rubans **tout près du pont**, entre le pont
+   et le trou de fixation H3, et plier le rail vers la face arrière. Ne pas faire levier
+   sur Q5, un MOSFET DPAK soudé à environ 1 cm du pont.
+2. Casser ensuite les rails haut et bas sur toute leur longueur, de la même façon.
+3. Ébavurer les bords à la lime douce.
+
+**Ne pas toucher aux trois onglets** entre la partie principale et la partie rubans
+(X = 100 mm) à cette étape : ils portent sept pistes. Les casser ou non se décide au §3.
+
 Contrôle à réception, carte hors tension :
+
 - [ ] aucun composant manquant ni de travers (K1, PS1, borniers WAGO, F1, F2, RV1, C7) ;
 - [ ] fentes d'isolement fraisées sous K1 et PS1, dégagées (pas de résidu de flux ni de
       soudure) ; 🔴
