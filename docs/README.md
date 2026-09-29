@@ -18,6 +18,8 @@ manipulation ; ce document et la liste de contrôle qu'il contient demandent une
 
 ![Carte du nœud](figures/carte.svg)
 
+![Carte dmxnow v0.3, face top (rendu JLCPCB)](figures/jlcpcb-top.png)
+
 ## Ordre de lecture
 
 | # | Document | Pour qui, pour quoi |

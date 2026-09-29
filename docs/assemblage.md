@@ -8,6 +8,23 @@ obligatoire** ([securite.md](securite.md)).
 Les cartes arrivent assemblées par JLCPCB ([hardware/ORDER.md](../hardware/ORDER.md)),
 en une seule pièce (partie principale + partie rubans), **sans fusibles**.
 
+Rendu JLCPCB des gerbers commandés (carte v0.3), pour repérer les composants :
+
+![Carte dmxnow v0.3, face top (rendu JLCPCB)](figures/jlcpcb-top.png)
+
+Face bottom, vue par transparence (même sens que la face top) :
+
+![Carte dmxnow v0.3, face bottom (rendu JLCPCB)](figures/jlcpcb-bottom.png)
+
+De gauche à droite :
+
+- la partie secteur : J1, J4, J7, F1, RV1 ;
+- K1 et PS1, à cheval sur les fentes d'isolement (les traits blancs verticaux) ;
+- la partie commande : U1 et sa zone d'antenne, U2, U3, J2 (DMX), J3 (pastilles de
+  flash), SW1 ;
+- la partie rubans : U4, Q2 à Q5, J5, J6, J8, F2, C7, reliée au reste par trois
+  onglets sécables.
+
 Contrôle à réception, carte hors tension :
 - [ ] aucun composant manquant ni de travers (K1, PS1, borniers WAGO, F1, F2, RV1, C7) ;
 - [ ] fentes d'isolement fraisées sous K1 et PS1, dégagées (pas de résidu de flux ni de
