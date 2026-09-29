@@ -199,7 +199,9 @@ On le fixe à l'heure courante en secondes (environ 1,8 milliard en 2026) : c'es
 au-dessus de tout compteur atteint par les commandes, et cela reste vrai si la
 procédure resert plus tard. Le `cmd_id` est tiré au hasard : un nœud qui n'a pas
 redémarré garde en mémoire les 16 derniers `cmd_id` reçus, et répondrait à une
-commande qui reprend l'un d'eux par l'ancienne réponse, sans l'exécuter.
+commande qui reprend l'un d'eux par l'ancienne réponse, sans l'exécuter. Le démon le
+tire déjà au hasard quand `state.json` manque ou est illisible ; il faut le faire à la
+main après une restauration, car la sauvegarde contient un ancien `cmd_id`.
 
 ```
 sudo systemctl stop dmxnowd

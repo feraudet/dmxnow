@@ -164,6 +164,18 @@ def test_state_counters_survive_a_restart(tmp_path):
     assert again.auth_counter == 3 and again.next_auth_counter() == 4
 
 
+def test_lost_state_starts_cmd_id_at_random(tmp_path, monkeypatch):
+    # nodes keep the ACKs of their last 16 cmd_id in RAM: a Pi that lost state.json and
+    # restarts at cmd_id 1 would get old answers back for commands never executed
+    monkeypatch.setattr(config.secrets, "randbelow", lambda n: 40000)
+    fresh = config.State(str(tmp_path))
+    assert fresh.cmd_id == 40000 and fresh.next_cmd_id() == 40001
+    (tmp_path / "state.json").write_text("not json")
+    assert config.State(str(tmp_path)).cmd_id == 40000     # unreadable file: same as lost
+    (tmp_path / "state.json").write_text('{"auth_counter": 7, "cmd_id": 12}')
+    assert config.State(str(tmp_path)).cmd_id == 12        # kept when the file is there
+
+
 def test_config_file(tmp_path):
     p = tmp_path / "dmxnowd.toml"
     p.write_text('[artnet]\nuniverses = [0, 1, 2]\n[dongle]\nnet_id = 4660\nchannel = 11\nphy_rate = "12M"\n')

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import secrets
 import tomllib
 from dataclasses import dataclass, field
 
@@ -117,7 +118,9 @@ class State:
             with open(self.path) as f:
                 d = json.load(f)
         except (FileNotFoundError, ValueError):
-            d = {}
+            # lost state: nodes still hold the ACKs of their last 16 cmd_id in RAM, so a
+            # restart from 0 could be answered from their history without executing
+            d = {"cmd_id": secrets.randbelow(0x10000)}
         self.auth_counter = int(d.get("auth_counter", 0))
         self.cmd_id = int(d.get("cmd_id", 0))
 
