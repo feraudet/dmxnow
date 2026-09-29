@@ -1,0 +1,16 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph R1["1. Sur le Pi"]
+        direction LR
+        C["dmxnow relay<br/>lyre-cour on"] --> D["dmxnowd signe<br/>HMAC-SHA256<br/>(clé réseau + compteur)"]
+    end
+    subgraph R2["2. Par radio"]
+        direction LR
+        G["Dongle"] == "COMMAND, tentatives<br/>à 0, 30, 90, 210, 450 ms<br/>jusqu'à l'accusé" ==> N["Nœud : vérifie signature<br/>et compteur, exécute<br/>une seule fois"]
+    end
+    subgraph R3["3. Retour"]
+        direction LR
+        A["ACK OK<br/>(unicast)"] --> CR["CMD_RESULT OK<br/>jusqu'à la CLI"]
+    end
+    R1 -- "COMMAND + signature, par USB" --> R2
+    R2 -- "accusé du nœud" --> R3

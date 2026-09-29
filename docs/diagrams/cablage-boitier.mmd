@@ -1,0 +1,21 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    SEC["Secteur (entrée)"] -- "L, N" --> J1
+    SEC -- "PE" --> WG
+    subgraph H["230 V (couvercle orange)"]
+        direction TB
+        J1["J1 IN"] -- "par le relais K1" --> J4["J4 OUT 1"] & J7["J7 OUT 2"]
+        WG["WAGO 221-413 :<br/>les trois PE"]
+    end
+    J4 -- "L, N" --> PR["Projecteur<br/>(alimentation)"]
+    J7 -- "L, N" --> AL["Alim. LED 12/24 V"]
+    WG -- "PE" --> PR & AL
+    subgraph L["Basse tension"]
+        direction TB
+        J2["J2 (DMX)"]
+        J5["J5 (entrée rubans)"]
+        J68["J6, J8 (rubans)"]
+    end
+    AL -- "12/24 V" --> J5
+    J2 -- "XLR-3" --> PD["Projecteur (DMX IN)"]
+    J68 --> RB["Rubans"]

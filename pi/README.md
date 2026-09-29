@@ -1,10 +1,6 @@
-# dmxnow — démon et CLI Raspberry Pi (livrable 8.5)
+# dmxnow : démon et CLI Raspberry Pi (livrable 8.5)
 
-```
-QLC+ ──Art-Net 127.0.0.1:6454──▶ dmxnowd ──USB, trames COBS──▶ dongle ──ESP-NOW──▶ nœuds
-                                    ▲
-                     dmxnow (CLI) ──┘ socket /run/dmxnow/control.sock
-```
+![Vue d'ensemble : QLC+, dmxnowd, dongle, nœuds](../docs/diagrams/vue-ensemble.png)
 
 - **dmxnowd** : reçoit l'Art-Net (ArtDmx), répond aux ArtPoll (ArtPollReply, 4 univers par
   réponse), transmet les univers configurés au dongle, pousse la configuration radio au

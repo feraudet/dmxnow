@@ -1,4 +1,4 @@
-# ADR 0007 — PCB unique sécable (V-cut remplacé par des languettes perforées)
+# ADR 0007 : PCB unique sécable (V-cut remplacé par des languettes perforées)
 
 **Statut :** Accepté (décision 7), amendé le 2026-09-26 : languettes perforées au lieu du V-cut
 
@@ -22,7 +22,7 @@ Une carte ~130 × 50 mm avec V-cut vertical : partie principale ~90 × 50 mm tou
 - Deux PCB distincts : double gestion.
 - Carte fille connectée : connecteur supplémentaire, coût.
 
-## Amendement (2026-09-26) — languettes perforées
+## Amendement (2026-09-26) : languettes perforées
 
 La revue de conception de la rév. 0.2 a montré que le V-cut était inutilisable :
 

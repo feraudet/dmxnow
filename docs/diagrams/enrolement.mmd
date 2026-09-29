@@ -1,0 +1,15 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph R1["1. Découverte"]
+        direction LR
+        N0["Nœud neuf<br/>(net_id 0)"] -- "HEARTBEAT broadcast<br/>« node-3A4F21 »" --> D0["dmxnow nodes :<br/>NOT ENROLLED"]
+    end
+    subgraph R2["2. Enrôlement"]
+        direction LR
+        D1["dmxnow enroll"] -- "SET_CONFIG : net_id, univers,<br/>adresse, nom, dmx_out_slots,<br/>clé réseau" --> N1["Nœud : ACK OK"]
+    end
+    subgraph R3["3. Ensuite"]
+        direction LR
+        N2["Nœud : écoute son net_id,<br/>exige des commandes signées"] -- "HEARTBEAT unicast<br/>(lyre-cour)" --> D2["dmxnowd"]
+    end
+    R1 --> R2 --> R3

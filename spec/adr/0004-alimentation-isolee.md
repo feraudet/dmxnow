@@ -1,6 +1,6 @@
-# ADR 0004 — Alimentation interne isolée Mean Well IRM-03-5
+# ADR 0004 : Alimentation interne isolée Mean Well IRM-03-5
 
-**Statut :** Accepté — décision 4 du cahier des charges, amendée par l'arbitrage A1 (2026-09-25)
+**Statut :** Accepté. Décision 4 du cahier des charges, amendée par l'arbitrage A1 du 2026-09-25.
 
 ## Contexte
 

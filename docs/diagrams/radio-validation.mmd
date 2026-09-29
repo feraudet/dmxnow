@@ -1,0 +1,13 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph R1["Réception d'un paquet radio"]
+        direction LR
+        H["En-tête commun (18 octets)<br/>magic 'DN', version, type,<br/>net_id, univers, seq,<br/>offset, longueur, flags, CRC-16"] --> V{"Validation<br/>(ordre imposé)"}
+    end
+    subgraph R2["Tâche principale"]
+        direction TB
+        U{"DMX_DATA<br/>de son univers ?"} -- oui --> DMX["sortie DMX,<br/>relais, rubans"]
+        U -- non --> I["ignoré"]
+    end
+    R1 -- "invalide : magic, version,<br/>autre net_id, taille, CRC,<br/>type inconnu" --> X["rejeté (compté)"]
+    R1 -- "valide : copié dans la file<br/>de la tâche principale" --> R2

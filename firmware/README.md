@@ -67,7 +67,7 @@ désactiver la vérification.
 | LED d'état (option) | SPEC 4.9, A7 | `node/src/node.cpp` |
 | Maintenance AP+STA, page web, OTA avec retour arrière | SPEC 4.9 | `node/src/maintenance.cpp` |
 
-## Recette sur banc (SPEC 8.3) — à faire sur les premières cartes
+## Recette sur banc (SPEC 8.3) : à faire sur les premières cartes
 
 | # | Essai | Moyen | Critère |
 |---|-------|-------|---------|

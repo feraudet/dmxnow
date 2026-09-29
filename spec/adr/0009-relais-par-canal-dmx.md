@@ -1,4 +1,4 @@
-# ADR 0009 — Commande du relais par un canal DMX
+# ADR 0009 : Commande du relais par un canal DMX
 
 **Statut :** Accepté (décision 9)
 

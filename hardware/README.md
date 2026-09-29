@@ -1,4 +1,4 @@
-# dmxnow — matériel
+# dmxnow : matériel
 
 PCB du nœud : 2 couches, cuivre 2 oz, **146 × 54 mm** plus une bande de 47,5 × 11,5 mm
 au-dessus de la zone 230 V (porte-fusible F1), séparation à X = 100 mm par fente fraisée

@@ -1,4 +1,4 @@
-# ADR 0010 — Boîtier imprimé 3D paramétrique
+# ADR 0010 : Boîtier imprimé 3D paramétrique
 
 **Statut :** Accepté (décision 10)
 

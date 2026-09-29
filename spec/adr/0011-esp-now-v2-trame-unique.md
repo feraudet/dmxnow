@@ -1,4 +1,4 @@
-# ADR 0011 — ESP-NOW v2, un univers par paquet, plateforme pioarduino
+# ADR 0011 : ESP-NOW v2, un univers par paquet, plateforme pioarduino
 
 **Statut :** Accepté (arbitrage A8, 2026-09-25)
 

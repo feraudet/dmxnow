@@ -1,4 +1,4 @@
-# ADR 0006 — Rubans LED : alimentation externe, 4 PWM côté masse
+# ADR 0006 : Rubans LED : alimentation externe, 4 PWM côté masse
 
 **Statut :** Accepté (décision 6)
 

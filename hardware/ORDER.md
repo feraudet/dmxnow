@@ -1,4 +1,4 @@
-# Commande JLCPCB — première série (5 nœuds montés)
+# Commande JLCPCB : première série (5 nœuds montés)
 
 🔴 **Avant de payer** : relecture humaine de [`REVIEW.md`](REVIEW.md) (sections 1 et 2
 en priorité) faite et signée, CI `hardware` verte sur le commit commandé.

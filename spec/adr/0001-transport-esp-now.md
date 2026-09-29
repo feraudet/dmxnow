@@ -1,4 +1,4 @@
-# ADR 0001 — Transport radio ESP-NOW
+# ADR 0001 : Transport radio ESP-NOW
 
 **Statut :** Accepté (cahier des charges, décision 1)
 

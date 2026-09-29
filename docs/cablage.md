@@ -6,16 +6,7 @@ fait **fiche secteur débranchée**. À la fin, dérouler la liste de contrôle 
 
 ## Vue d'ensemble
 
-```
-            ┌──────────── boîtier du nœud (vue de dessus) ────────────────────────────┐
- secteur ──▶│ PE ─▶ WAGO 221-413 ◀─ PE ─┐                                              │
- (entrée)   │ L,N ─▶ J1 IN              │   ║cloison║                                 │
- projecteur◀│ L,N ◀─ J4 OUT 1  ◀── PE ──┤   ║       ║  ESP32 · DMX ─▶ J2 ─▶ XLR-3 ─────┼─▶ projecteur (DMX IN)
- alim. LED ◀│ L,N ◀─ J7 OUT 2  ◀── PE ──┘   ║       ║                                  │
-            │  230 V (couvercle orange)      ║       ║  basse tension │ rubans  J5 ◀───┼── alim. LED 12/24 V
-            │                                                         │ J6,J8 ─────────┼─▶ rubans
-            └─────────────────────────────────────────────────────────────────────────┘
-```
+![Raccordements du boîtier du nœud](diagrams/cablage-boitier.png)
 
 ![Emplacement des borniers](figures/carte.svg)
 
@@ -31,7 +22,7 @@ n'est pas nécessaire ; s'il est utilisé, sa longueur doit correspondre au dén
 | **J1** | `IN L/N` | Câble d'entrée (vers la fiche secteur) : **L** (marron) et **N** (bleu) |
 | **J4** | `OUT L/N` | Sortie 1, commutée par le relais : projecteur |
 | **J7** | `OUT L/N` | Sortie 2, commutée par le relais : alimentation des rubans (ou second appareil) |
-| **WAGO 221-413** | — | Les trois **PE** (vert-jaune) : entrée, sortie 1, sortie 2 |
+| **WAGO 221-413** | - | Les trois **PE** (vert-jaune) : entrée, sortie 1, sortie 2 |
 
 - Câble recommandé : **H05VV-F 3G1,5** (Ø 8 à 9 mm, dans la plage du presse-étoupe M16).
 - Le relais coupe la **phase** (L) des deux sorties ; le **neutre n'est pas coupé**.
@@ -74,7 +65,7 @@ branche directement sur l'entrée DMX du projecteur.
 - Souder hors boîtier, gaine thermorétractable sur chaque soudure, puis passer le câble
   dans le presse-étoupe avant de souder (la fiche XLR ne passe pas dedans).
 
-## 4. Rubans LED (carte entière) — TBTS
+## 4. Rubans LED (carte entière) : TBTS
 
 | Bornier | Sérigraphie | Raccorder |
 |---------|-------------|-----------|
@@ -103,7 +94,7 @@ selon la longueur réelle des câbles et la chute de tension admise].
 | Canal | Carte cassée | Carte entière, 8 bits (`pwm_mode=0`) | Carte entière, 16 bits (`pwm_mode=1`) |
 |-------|--------------|--------------------------------------|---------------------------------------|
 | `start_address` | Relais (≥ 128 = allumé) | Relais | Relais |
-| +1 … +4 | — | Rubans 1 à 4 | Ruban 1 MSB, LSB, ruban 2 MSB, LSB… (+1 … +8) |
+| +1 … +4 | - | Rubans 1 à 4 | Ruban 1 MSB, LSB, ruban 2 MSB, LSB… (+1 … +8) |
 
 Si `relay_dmx=0`, le relais ne suit plus le DMX et les rubans commencent à
 `start_address`. La ligne DMX filaire recopie **tout l'univers** : le projecteur garde

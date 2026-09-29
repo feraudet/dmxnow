@@ -1,4 +1,4 @@
-# ADR 0003 — Microcontrôleur ESP32-C3-MINI-1
+# ADR 0003 : Microcontrôleur ESP32-C3-MINI-1
 
 **Statut :** Accepté (décision 3)
 

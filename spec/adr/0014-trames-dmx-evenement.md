@@ -1,4 +1,4 @@
-# ADR 0014 — Émission DMX sur événement et longueur de trame configurable
+# ADR 0014 : Émission DMX sur événement et longueur de trame configurable
 
 **Statut :** Accepté (arbitrage A3 : défaut 512, 2026-09-25)
 

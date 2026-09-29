@@ -1,4 +1,4 @@
-# ADR 0005 — Relais de coupure Omron G5RL-1A-E-HR
+# ADR 0005 : Relais de coupure Omron G5RL-1A-E-HR
 
 **Statut :** Accepté (décision 5), amendé : G5RL-U1A-E remplacé par G5RL-1A-E-HR
 
@@ -22,7 +22,7 @@ Un relais Omron G5RL-1A-E-HR (LCSC C113250), bobine 5 V DC, contact NO 16 A, com
 - Relais statique (triac/SSR) : fuites, échauffement, mauvaise tenue aux charges capacitives.
 - Relais 10 A standard : soudure des contacts à l'appel de courant.
 
-## Amendement — G5RL-1A-E-HR
+## Amendement : G5RL-1A-E-HR
 
 La référence initiale G5RL-U1A-E est la version **bistable** (verrouillage, deux bobines
 set/reset) de la série G5RL : elle ne peut pas être commandée par un simple MOSFET et

@@ -1,0 +1,12 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    A["dmxnow maintenance"] --> M
+    B["SW1 ≥ 3 s"] --> M
+    C["3 mises sous tension<br/>à moins de 5 s"] --> M
+    M["Maintenance<br/>point d'accès dmxnow-nom<br/>(WPA2, même canal)"] --> W["http://192.168.4.1<br/>état, réglages, relais"]
+    W --> O["Téléverser firmware.bin"]
+    O --> R["Redémarrage sur<br/>la nouvelle image"]
+    R --> V{"paquet radio valide<br/>en 60 s ?"}
+    V -- oui --> OK["image confirmée"]
+    V -- non --> RB["retour automatique<br/>à l'ancienne image"]
+    S["SW1 ≥ 10 s"] --> FR["remise à zéro usine<br/>(clé et mot de passe compris)"]

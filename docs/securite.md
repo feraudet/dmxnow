@@ -1,6 +1,6 @@
 # Sécurité
 
-🔴 **RELECTURE HUMAINE OBLIGATOIRE** — ce document engage la sécurité des personnes. Il
+🔴 **RELECTURE HUMAINE OBLIGATOIRE** : ce document engage la sécurité des personnes. Il
 doit être relu et validé par une personne qualifiée en électricité avant toute mise sous
 tension. Les exigences de référence sont dans [SPEC §2.3](../spec/SPEC.md) (ES-01 à ES-08).
 
@@ -70,7 +70,7 @@ cases sont cochées.
 - [ ] Pastilles J3 libres : aucun câble de programmation raccordé.
 
 **Câblage secteur** (couvercle orange ouvert)
-- [ ] Entrée sur **J1** (IN), sorties sur **J4** et **J7** (OUT) — L et N à leur place
+- [ ] Entrée sur **J1** (IN), sorties sur **J4** et **J7** (OUT), L et N à leur place
       (sérigraphie « L/N »), conducteurs de 1,5 mm² dénudés à la longueur WAGO (11 à 13 mm [À valider, fiche WAGO 2604]),
       aucun brin hors du bornier, leviers fermés.
 - [ ] Les trois PE dans le **WAGO 221-413**, leviers fermés, aucun PE sur la carte.

@@ -1,6 +1,6 @@
-# dmxnow — Spécification
+# dmxnow : Spécification
 
-Statut : **v1.0 — validée le 2026-09-25** (arbitrages A1 à A8 tranchés, A6 révisé : bouton SW1 + option 3 coupures, remise à zéro par appui de 10 s). Aucune implémentation ne démarre
+Statut : **v1.0, validée le 2026-09-25** (arbitrages A1 à A8 tranchés, A6 révisé : bouton SW1 + option 3 coupures, remise à zéro par appui de 10 s). Aucune implémentation ne démarre
 avant validation de ce document, de [PROTOCOL.md](PROTOCOL.md) et des [ADR](adr/).
 
 Conventions :
@@ -81,28 +81,11 @@ sur un même réseau, codes de départ DMX non nuls.
 
 ### 3.1 Système
 
-```
-┌──────────── Raspberry Pi ────────────┐        ┌── dongle XIAO ESP32-C3 ──┐
-│ QLC+ ──Art-Net──▶ 127.0.0.1:6454     │  USB   │ COBS/CRC ─▶ file d'émission│  ESP-NOW broadcast
-│            dmxnowd (asyncio) ────────┼───────▶│ univers + commandes ──────┼──────────────▶ nœuds
-│  CLI ◀── socket Unix ──┘             │◀───────┤ heartbeats / ACK ◀────────┼◀── unicast ── nœuds
-└──────────────────────────────────────┘        └───────────────────────────┘
-```
+![Système : Raspberry Pi, dongle, nœuds](../docs/diagrams/vue-ensemble.png)
 
 ### 3.2 Nœud
 
-```
-Secteur ─▶ J1 ─┬─ L_IN ─▶ K1 (NO) ─▶ L_SW ─▶ J4 / J4b (réf. J7) ─▶ projecteur + alim LED externe
-               ├─ F1 ─▶ RV1 ─▶ PS1 (IRM-03-5, isolé) ─▶ +5V ─▶ U3 (AP2112K) ─▶ +3V3
-               └─ N ──────────────────────────────────▶ J4 / J4b
-PE (cordons) ─▶ WAGO 221-413 hors carte, compartiment 230 V
-+3V3 ─▶ U1 ESP32-C3-MINI-1
-U1 IO4 ─▶ U2 SP3485 ─▶ D1 SM712 ─▶ J2 ─▶ queue XLR ─▶ entrée DMX du projecteur
-U1 IO5 ─▶ Q1 AO3400 ─▶ bobine K1 (D2 roue libre)
-────── ligne de séparation à languettes (BOARD_SENSE, PWM1-4, +5V, GND seulement) ──────
-J5 12/24 V ─▶ F2 20 A ─▶ D3, C7, C8 ─▶ VLED ─▶ J6-VLED ─▶ rubans ─▶ J6-CH1, J8-CH2..4 ─▶ Q2..Q5 ─▶ GND_LED
-U1 IO6/7/10/3 ─▶ U4 74AHCT125 (5 V) ─▶ R7..R10 ─▶ grilles Q2..Q5
-```
+![Schéma fonctionnel détaillé du nœud](../docs/diagrams/noeud-detail.png)
 
 ### 3.3 Répartition du code
 
@@ -128,7 +111,7 @@ Mode Wi-Fi des nœuds : STA non associée, `WIFI_PS_NONE` (l'économie d'énergi
 introduirait des latences de l'ordre de l'intervalle de balise, 100 ms). Protocoles
 802.11b/g/n activés.
 
-**Repli sur changement de canal [ARBITRAGE A5 — retenu]** : un nœud qui ne reçoit plus
+**Repli sur changement de canal [ARBITRAGE A5, retenu]** : un nœud qui ne reçoit plus
 aucun paquet de son réseau depuis 60 s balaie les canaux 1 à 13 (écoute 300 ms par canal)
 jusqu'à retrouver son `net_id` (DMX_DATA ou BEACON), puis adopte ce canal et le persiste.
 La dernière trame DMX continue d'être émise pendant le balayage. Évite qu'un nœud reste
@@ -142,7 +125,7 @@ ESP32-C3-MINI-1 (flash intégrée 4 Mo, antenne PCB intégrée). GPIO11 à GPIO1
 
 | GPIO   | Fonction          | Remarques |
 |--------|-------------------|-----------|
-| IO0    | STATUS_LED (option) | R19 330 Ω en série (LED rouge KT-0603R, VF ≈ 2,0 V, ~4 mA ; une LED verte InGaN VF ≈ 3 V ne s'allumerait pas sous 3,3 V), D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7 — option], §4.9 |
+| IO0    | STATUS_LED (option) | R19 330 Ω en série (LED rouge KT-0603R, VF ≈ 2,0 V, ~4 mA ; une LED verte InGaN VF ≈ 3 V ne s'allumerait pas sous 3,3 V), D4 LED CMS 0603 vers GND ; composants à monter en option [ARBITRAGE A7, option], §4.9 |
 | IO1    | BOARD_SENSE       | Entrée, R23 100 kΩ vers 3V3 sur la partie principale (+ pull-up interne) ; GND sur la partie rubans (R21 0 Ω) |
 | IO2    | libre (strapping) | R4 10 kΩ pull-up, doit être haut au démarrage |
 | IO3    | PWM4              | via U4 |
@@ -162,12 +145,12 @@ masse au démarrage ⇒ maintenance » est donc reformulée : l'appui se fait **
 démarrage de l'application, sur le bouton SW1 (§4.9) ou la pastille J3-BOOT. Maintenir SW1
 pendant la mise sous tension reste utile : c'est l'entrée du mode téléchargement ROM pour
 un flash par J3. Autre entrée sans ouverture du boîtier : 3 mises sous tension rapprochées,
-activable par configuration [ARBITRAGE A6 — option], §4.9.
+activable par configuration [ARBITRAGE A6, option], §4.9.
 
 ### 4.3 Alimentation basse tension et budget 🔴 RELECTURE HUMAINE OBLIGATOIRE (partie PS1)
 
 PS1 **Mean Well IRM-03-5** : 85 à 264 V AC → 5 V, 600 mA (3 W), homologué IEC/EN/UL
-62368-1 selon le fabricant [V-HW-09], environ 6 € **[ARBITRAGE A1 — Mean Well retenu,
+62368-1 selon le fabricant [V-HW-09], environ 6 € **[ARBITRAGE A1, Mean Well retenu,
 amende la décision 4]**. Raison : les modules Hi-Link (HLK-PM05, décision initiale) ont des
 certifications difficiles à vérifier et sont souvent contrefaits ; pour un boîtier publié
 et refabriqué par d'autres, un module certifié réduit le risque d'isolement (R-03).
@@ -192,11 +175,11 @@ Budget sur +5 V (valeurs à confirmer en datasheet) :
 
 | Consommateur                          | Moyen   | Crête   | Source |
 |---------------------------------------|---------|---------|--------|
-| ESP32-C3 en réception continue + CPU 160 MHz (via U3) | ~100 mA | — | [V-HW-02] |
-| ESP32-C3 en émission (heartbeats, brefs ; jusqu'à ~350 mA en 802.11b 20 dBm selon la fiche) | — | ~350 mA | [V-HW-02] |
+| ESP32-C3 en réception continue + CPU 160 MHz (via U3) | ~100 mA | - | [V-HW-02] |
+| ESP32-C3 en émission (heartbeats, brefs ; jusqu'à ~350 mA en 802.11b 20 dBm selon la fiche) | - | ~350 mA | [V-HW-02] |
 | SP3485 pilotant une ligne terminée 120 Ω (via U3) | ~20 mA | ~35 mA (2 terminaisons) | [V-HW-06] |
 | Bobine K1 5 V (≈ 400 mW)              | ~80 mA  | ~80 mA  | [V-HW-03] |
-| U4 (ΔICC 1,35-1,5 mA par entrée tenue à 3,3 V) + charges de grille (4 × Qg × fPWM) | ~7 mA | —       | — |
+| U4 (ΔICC 1,35-1,5 mA par entrée tenue à 3,3 V) + charges de grille (4 × Qg × fPWM) | ~7 mA | -       | - |
 | **Total**                             | **~200 mA** | **~470 mA** | ≤ 600 mA (IRM-03-5) : marge ~20 % en crête |
 
 Régulateur U3 AP2112K-3.3 (600 mA, faible chute) : dissipation moyenne
@@ -240,7 +223,7 @@ relais **bistable** (deux bobines), incompatible avec la commande par MOSFET : r
 le -1A-E-HR, même boîtier et même implantation (décision 5 amendée, ADR 0005). Q1 AO3400 (VGS(th) max 1,45 V, commandable
 en 3,3 V), R5 100 Ω limite le courant de grille et amortit, R6 100 kΩ maintient Q1 bloqué
 pendant le démarrage. D2 1N4148W en roue libre : la roue libre par simple diode ralentit
-l'ouverture du contact (quelques ms) — acceptable ici et même favorable (pas de rebond) ;
+l'ouverture du contact (quelques ms), acceptable ici et même favorable (pas de rebond) ;
 à confirmer que la vitesse d'ouverture n'aggrave pas l'érosion à la coupure de charges
 capacitives (charges LED : l'usure se fait surtout à la fermeture, sur l'appel de courant).
 
@@ -333,17 +316,17 @@ partie rubans.
 
 Zonage (vue de dessus) :
 
-```
-X: 0            46 49 52                        96  100 104                          146
-┌───────────────┬──┬──┬─────────────────────────┬───┊───┬───────────────────────────┐
-│ J1 (L N)      │  │  │ K1 bobine  Q1 D2  U3    │   ┊   │ Q2..Q5 (DPAK)   J8 (CH2..4)│
-│ J4 (L_SW N)   │ f│  │ PS1 sorties  J3 SW1     │   ┊   │ R7..R14         J6 (VLED,  │
-│ J4b(L_SW N)   │ e│6 │ U1 ESP32 [antenne ↑]    │   ┊   │ U4 C9 C7  D3    CH1) C8    │
-│ K1 contacts F1│ n│mm│ U2 D1 J2 (DMX)          │   ┊   │ F2 (ATO)        J5 (12/24V)│
-│ PS1 entrée RV1│ t│  │                         │ fente │                            │
-│   ZONE 230 V  │ e│  │   ZONE BASSE TENSION    │4mm┊4mm│   PARTIE SÉCABLE (TBTS)    │
-└───────────────┴──┴──┴─────────────────────────┴───┊───┴───────────────────────────┘
-```
+| Zone | X (mm) | Contenu |
+|------|--------|---------|
+| 230 V | 0 à 46 | J1 (L N), J4 (L_SW N), J4b (L_SW N), contacts de K1, F1, entrée de PS1, RV1 |
+| Isolement | 46 à 52 | fente, puis 6 mm d'isolement |
+| Basse tension | 52 à 96 | bobine de K1, Q1, D2, U3, sorties de PS1, J3, SW1, U1 (antenne en haut), U2, D1, J2 (DMX) |
+| Ligne de séparation | 96 à 104 | fente de 4 mm de part et d'autre de la ligne des languettes |
+| Partie sécable (TBTS) | 104 à 146 | Q2 à Q5 (DPAK), R7 à R14, U4, C9, C7, D3, F2 (ATO), J8 (CH2 à CH4), J6 (VLED, CH1), C8, J5 (12/24 V) |
+
+Rendu JLCPCB de la carte réalisée (face top) :
+
+![Carte dmxnow v0.3, face top (rendu JLCPCB)](../docs/figures/jlcpcb-top.png)
 
 L'antenne de U1 est placée en bord de carte, côté opposé à la zone 230 V et éloignée des
 MOSFET, avec zone d'exclusion cuivre sur les deux couches (dimensions selon le guide de
@@ -366,7 +349,7 @@ conception matérielle Espressif [V-HW-02]).
 - Les distances seront vérifiées par règles DRC par classe de réseaux (`netclass` MAINS vs
   LV : clearance 6 mm) et par un contrôle scripté de ligne de fuite simplifié.
 
-#### 4.8.3 Chemins de puissance secteur — **[ARBITRAGE A2 — cuivre 16 A retenu]**
+#### 4.8.3 Chemins de puissance secteur : **[ARBITRAGE A2, cuivre 16 A retenu]**
 
 Le chemin de charge (J1 → K1 → J4) n'a **aucun fusible sur la carte** (F1 ne protège que
 PS1). Il est donc protégé uniquement par le disjoncteur amont, typiquement **16 A** en
@@ -375,7 +358,7 @@ France. Une carte dimensionnée pour 10 A pourrait être surchargée durablement
 16 A** (le relais et les borniers le sont), charge nominale déclarée de 10 A marquée sur
 le boîtier, pas de fusible de charge sur la carte.
 
-Calcul (IPC-2221, couche externe, `I = 0,048 × ΔT^0,44 × A^0,725`, A en mil²) — formule
+Calcul (IPC-2221, couche externe, `I = 0,048 × ΔT^0,44 × A^0,725`, A en mil²) : formule
 conservatrice ; à recouper avec les abaques IPC-2152 (par ex. Saturn PCB Toolkit) :
 
 | Courant | ΔT    | Section requise | Largeur en 2 oz (2,8 mil) |
@@ -389,7 +372,7 @@ Règle de conception proposée : pistes de puissance **≥ 5 mm sur les deux fac
 parallèle**, reliées par une rangée de vias (ou recouvertes d'étain par ouverture du vernis),
 longueurs minimisées (< 30 mm). Résistance d'une piste 5 mm × 70 µm × 30 mm ≈ 1,5 mΩ par
 face. Pertes à 10 A dans le cuivre, les contacts du relais et 6 bornes : ~1,5 à 2,5 W au
-total (dominé par le contact du relais) — à prendre en compte dans le boîtier (R-08) ;
+total (dominé par le contact du relais), à prendre en compte dans le boîtier (R-08) ;
 elles tombent sous 0,1 W pour une charge réaliste de 1 à 2 A. Alternative mentionnée par le
 cahier des charges : fils soudés sur les broches du relais, retenue seulement si le
 placement ne permet pas les largeurs.
@@ -450,7 +433,7 @@ contrôle pour la relecture humaine.
 
 ### 4.9 Maintenance et OTA
 
-- **Bouton SW1 [ARBITRAGE A6 — ajouté le 2026-09-25]**, toujours monté : bouton tactile
+- **Bouton SW1 [ARBITRAGE A6, ajouté le 2026-09-25]**, toujours monté : bouton tactile
   entre IO9 (net BOOT, pull-up R2 existant) et GND, placé en zone basse tension loin de
   l'antenne et de la zone 230 V, actionné depuis l'extérieur par un poussoir imprimé
   **encastré** dans le couvercle basse tension (accès avec une pointe type trombone, pour
@@ -467,7 +450,7 @@ contrôle pour la relecture humaine.
   - maintenu pendant la mise sous tension : mode téléchargement ROM (pas notre firmware).
   Coût : ~0,10 € + poussoir imprimé.
 - Entrée : commande `MAINTENANCE`, bouton SW1, pastille J3-BOOT, ou **3 mises sous tension
-  rapprochées [ARBITRAGE A6 — option]**, activée par la clé de configuration
+  rapprochées [ARBITRAGE A6, option]**, activée par la clé de configuration
   `powercycle_maint` (**activée par défaut**, désactivable par nœud ; complémentaire de
   SW1 quand le nœud est hors de portée de main, par exemple sur une perche). Principe : au démarrage, le nœud incrémente un compteur
   NVS et le remet à zéro après 5 s de fonctionnement ; si le compteur atteint 3 (trois
@@ -476,7 +459,7 @@ contrôle pour la relecture humaine.
   manœuvre coupe et rétablit aussi le projecteur, à documenter. Permet de récupérer un
   nœud dont le canal ou le `net_id` est inconnu sans ouvrir le boîtier. Désactivée, le
   compteur n'est ni lu ni écrit.
-- **LED d'état [ARBITRAGE A7 — option]** : l'empreinte D4 (LED CMS 0603) + R19 (330 Ω,
+- **LED d'état [ARBITRAGE A7, option]** : l'empreinte D4 (LED CMS 0603) + R19 (330 Ω,
   LED rouge VF ≈ 2,0 V : ~4 mA sous 3,3 V, suffisant pour un guide de lumière) est **toujours présente** sur le
   PCB, câblée sur IO0 (broche libre, sans rôle de strapping sur l'ESP32-C3). Les deux
   composants sont **non montés par défaut** (DNP) ; la génération des sorties produit deux
@@ -553,7 +536,7 @@ contrôle pour la relecture humaine.
   - secteur entrée, sortie projecteur, sortie alimentation LED : presse-étoupes M16 ou PG9
     selon le diamètre des cordons H05VV-F 3G1,5 (≈ 8 à 9 mm) [V-ENC-01] **plus** étrier
     de serrage imprimé vissé (arrêt de traction indépendant du presse-étoupe) ;
-  - queue DMX : PG7 (plage 3 à 6,5 mm) — les câbles DMX 120 Ω font souvent 6 à 6,5 mm :
+  - queue DMX : PG7 (plage 3 à 6,5 mm) ; les câbles DMX 120 Ω font souvent 6 à 6,5 mm :
     à vérifier, sinon M12 [V-ENC-01] ;
   - version entière : entrée 12/24 V et sortie rubans, presse-étoupes PG7/PG9.
 - Rien de métallique devant l'antenne (inserts et vis hors d'une zone de 15 mm autour).
@@ -579,7 +562,7 @@ contrôle pour la relecture humaine.
   couvercle basse tension.
 - Exports : STL et STEP pour chaque pièce et chaque variante (avec et sans `light_pipe`),
   rendu PNG assemblé.
-- **Réalisation (livrable 8.6, 2026-09-26)** — détails et justifications dans
+- **Réalisation (livrable 8.6, 2026-09-26)** : détails et justifications dans
   `enclosure/README.md` :
   - géométrie de la carte exportée du PCB (`hardware/gen/export_board.py` →
     `enclosure/board.json`, contrôlé en CI) plutôt qu'un STEP : plusieurs empreintes du
@@ -633,7 +616,7 @@ De plus, beaucoup de projecteurs n'appliquent les valeurs qu'en fin de trame (au
 suivant), ce qui ajoute une durée de trame complète : encore un argument pour les trames
 courtes.
 
-**[ARBITRAGE A3 — défaut 512 retenu]** : l'objectif < 10 ms n'est tenable qu'avec des trames DMX courtes
+**[ARBITRAGE A3, défaut 512 retenu]** : l'objectif < 10 ms n'est tenable qu'avec des trames DMX courtes
 (n'émettre que jusqu'au dernier canal utile du projecteur). Le DMX512 l'autorise (trames de
 24 à 512 canaux ; intervalle break à break ≥ 1204 µs, respecté dès 24 canaux). Certains
 appareils anciens supportent mal les trames courtes. Proposition : paramètre
@@ -680,7 +663,7 @@ trame, soit environ une fois toutes les 6 heures par univers ; à 5 %, une fois 
 | Bouton SW1 (A6)                         | 0,1 €         | 0,1 € |
 | WAGO 2604 : 3 × 2 pôles (+ 2 × 2 + 3 pôles), WAGO 221-413 | 5,5 € (+ 5 €) | 5,5 € |
 | SP3485, SM712, AP2112K, AO3400, passifs | 1,5 €         | 1,5 € |
-| Partie rubans : 4 × AOD2610E, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | — |
+| Partie rubans : 4 × AOD2610E, 74AHCT125, porte-fusible ATO + fusible, C7, D3, passifs | 3,5 € | - |
 | PCB 2 couches 2 oz + assemblage CMS JLCPCB (répartis) | 5 € | 5 € |
 | Boîtier ABS-FR V-0 (~150 g / ~115 g, pièces pleines) + inserts + vis | 7 € | 5,5 € |
 | Presse-étoupes (5 × M16 + M12 / 3 × M16 + M12) | 3,5 € | 2,5 € |
@@ -787,7 +770,7 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 | A8 | ESP-NOW v2 + pioarduino (ADR 0011) | **Oui**, repli v1 fragmenté implémenté | v1 fragmenté seul |
 | A9 | Routage 230 V 16 A en 2 couches avec trois borniers 3 pôles (constaté infaisable proprement) | **PE hors carte** : J1, J4, J4b en WAGO 2604 2 pôles (L, N) ; PE réunis par un WAGO 221-413 dans le compartiment 230 V (2026-09-26) | PCB 4 couches ; carte plus haute |
 
-Question close (2026-09-26, 5ᵉ revue) : **alimentation de programmation** — injecter
+Question close (2026-09-26, 5ᵉ revue), **alimentation de programmation** : injecter
 3,3 V sur J3-3V3 alimenterait la sortie d'un AP2112K non alimenté, courant inverse non
 garanti par la fiche [V-HW-05]. J3 reçoit une 7ᵉ pastille **J3-5V** (+5V, entrée du
 régulateur) : la carte se programme hors secteur en alimentant par J3-5V (adaptateur USB
@@ -814,12 +797,12 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-HW-12 | ✅ Capacités JLCPCB relevées : V-cut ≥ 70 × 70 mm et cuivre ≥ 0,4 mm de l'axe (d'où les languettes), languette perforée ≥ 5 mm, trous 0,5-0,8 mm, fente non métallisée ≥ 1 mm, 2 oz : piste/espace ≥ 0,16 mm, anneau ≥ 0,254 mm (vias 0,9/0,35 mm) | jlcpcb.com/capabilities | faible |
 | V-HW-13 | ✅ Références LCSC vérifiées (stock, prix, 2026-09-26) ; WAGO 2604-1105 arrêté (remplacé par 2604-1102 + 2604-1103, 2026-09-26) ; reste le coût de l'assemblage traversant (devis JLCPCB) | LCSC, jlcpcb.com | faible |
 | V-HW-14 | SW1 : référence de bouton tactile CMS disponible chez LCSC (ex. 4 × 4 mm ou 6 × 6 mm, hauteur compatible avec le poussoir), course et force d'actionnement | LCSC, fiche fabricant | faible |
-| V-FW-01 | ✅ Épinglé (2026-09-27) : pioarduino **55.03.312** = Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5, `ESP_NOW_MAX_DATA_LEN_V2` = 1470 présent, compilation vérifiée pour l'ESP32-C3-MINI-1 (`firmware/node`) et le XIAO ESP32-C3 (`firmware/dongle`) | github.com/pioarduino/platform-espressif32 (releases) | — |
+| V-FW-01 | ✅ Épinglé (2026-09-27) : pioarduino **55.03.312** = Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5, `ESP_NOW_MAX_DATA_LEN_V2` = 1470 présent, compilation vérifiée pour l'ESP32-C3-MINI-1 (`firmware/node`) et le XIAO ESP32-C3 (`firmware/dongle`) | github.com/pioarduino/platform-espressif32 (releases) | - |
 | V-FW-02 | ✅ `esp_now_set_peer_rate_config()` présent dans IDF 5.5.5 (en-têtes Arduino 3.3.12), utilisé pour le pair broadcast et le dongle ; effet réel à mesurer au banc | ESP-IDF API ESP-NOW (v5.5) | faible |
-| V-FW-03 | ✅ Sans objet : le repli prévu est retenu d'emblée (pilote UART maison, break par inversion de ligne, `firmware/node/src/dmx_out.cpp`) — aucune dépendance à `esp_dmx`. Timings à mesurer à l'analyseur logique (recette 8.3) | — | — |
+| V-FW-03 | ✅ Sans objet : le repli prévu est retenu d'emblée (pilote UART maison, break par inversion de ligne, `firmware/node/src/dmx_out.cpp`), aucune dépendance à `esp_dmx`. Timings à mesurer à l'analyseur logique (recette 8.3) | - | - |
 | V-FW-04 | Débit et latence réels de l'USB Serial/JTAG de l'ESP32-C3 côté Linux | Mesure sur banc | moyenne |
 | V-FW-05 | Réception ESP-NOW maintenue en mode AP+STA | Mesure ; ESP-IDF doc ESP-NOW (coexistence) | faible |
-| V-FW-06 | ✅ `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` dans les bibliothèques précompilées Arduino 3.3.12 ; `verifyRollbackLater()` surchargé, image validée au premier paquet radio valide, retour arrière après 60 s | sdkconfig d'Arduino-ESP32 3.3.12 | — |
+| V-FW-06 | ✅ `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` dans les bibliothèques précompilées Arduino 3.3.12 ; `verifyRollbackLater()` surchargé, image validée au premier paquet radio valide, retour arrière après 60 s | sdkconfig d'Arduino-ESP32 3.3.12 | - |
 | V-FW-07 | Format exact de la trame ESP-NOW v2 (surcoût en octets) | ESP-IDF doc ESP-NOW, *Frame Format* | faible (affecte le calcul d'occupation de ±10 %) |
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
@@ -827,7 +810,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
 | V-ENC-04 | Boîtier du dongle : épaisseur du PCB du XIAO (1,2 mm prévu), dépassement de l'USB-C (1,0 mm), hauteur des composants (3,4 mm) ; embase RP-SMA du câble KW-1518 : filetage 1/4"-36 (trou 6,6 mm), corps intérieur Ø 9,4 × 9 mm | Mesure sur les pièces reçues | faible |
 | V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
-| V-SYS-02 | ✅ XLR **3 broches** sur tout le parc (confirmé par l'utilisateur le 2026-09-27) : queue en NC3FXX femelle (1 masse, 2 Data −, 3 Data +) ; XLR 5 broches seulement par adaptateur si un appareil l'impose | Toi | — |
+| V-SYS-02 | ✅ XLR **3 broches** sur tout le parc (confirmé par l'utilisateur le 2026-09-27) : queue en NC3FXX femelle (1 masse, 2 Data −, 3 Data +) ; XLR 5 broches seulement par adaptateur si un appareil l'impose | Toi | - |
 
 ---
 
@@ -856,11 +839,11 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 
 | Outil | État | Action proposée |
 |-------|------|-----------------|
-| Git 2.43 | présent | — |
-| Python 3.11 | présent | — |
+| Git 2.43 | présent | - |
+| Python 3.11 | présent | - |
 | Java (OpenJDK 21) | présent | nécessaire à Freerouting |
-| KiCad 8+ / `kicad-cli` | KiCad **7.0.11** installé (PPA KiCad bloqué par le proxy) : génération, API pcbnew et DRC local. ERC, DRC de référence et rendus 3D en **KiCad 9** dans la CI (image `kicad/kicad:9.0`) | — |
-| SKiDL | non utilisé (dépendances non installables ; génération directe des fichiers KiCad) | — |
-| CadQuery | 2.8.0 installé (`pip install -r enclosure/requirements.txt`) ; rendus via OSMesa (`libosmesa6`) | — |
-| Freerouting | 2.1.0 installé (`/opt/freerouting/freerouting.jar`) | — |
-| PlatformIO | 6.2 installé ; plateforme pioarduino 55.03.312 épinglée dans `firmware/node/platformio.ini` | — |
+| KiCad 8+ / `kicad-cli` | KiCad **7.0.11** installé (PPA KiCad bloqué par le proxy) : génération, API pcbnew et DRC local. ERC, DRC de référence et rendus 3D en **KiCad 9** dans la CI (image `kicad/kicad:9.0`) | - |
+| SKiDL | non utilisé (dépendances non installables ; génération directe des fichiers KiCad) | - |
+| CadQuery | 2.8.0 installé (`pip install -r enclosure/requirements.txt`) ; rendus via OSMesa (`libosmesa6`) | - |
+| Freerouting | 2.1.0 installé (`/opt/freerouting/freerouting.jar`) | - |
+| PlatformIO | 6.2 installé ; plateforme pioarduino 55.03.312 épinglée dans `firmware/node/platformio.ini` | - |

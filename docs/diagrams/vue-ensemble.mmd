@@ -1,0 +1,13 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph PI["Raspberry Pi"]
+        direction TB
+        QLC["QLC+"] -- "Art-Net 127.0.0.1:6454" --> D["dmxnowd (démon)"]
+        CLI["dmxnow (CLI)"] <-- "socket Unix" --> D
+    end
+    D <-- "USB, trames COBS + CRC" --> DG["Dongle XIAO ESP32-C3<br/>+ antenne 5 dBi"]
+    DG == "ESP-NOW broadcast :<br/>univers DMX, commandes, balise" ==> N["Nœud<br/>(un par projecteur)"]
+    N -. "unicast : heartbeats, accusés" .-> DG
+    N --> X["sortie DMX filaire"] --> P["Projecteur"]
+    N --> R["relais 230 V"] -- "alimentation" --> P
+    N --> W["4 PWM 12/24 V<br/>(carte entière)"] --> S["Rubans LED"]

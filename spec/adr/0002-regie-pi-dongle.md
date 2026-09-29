@@ -1,4 +1,4 @@
-# ADR 0002 — Régie Raspberry Pi + QLC+ + dongle XIAO ESP32-C3
+# ADR 0002 : Régie Raspberry Pi + QLC+ + dongle XIAO ESP32-C3
 
 **Statut :** Accepté (décision 2)
 

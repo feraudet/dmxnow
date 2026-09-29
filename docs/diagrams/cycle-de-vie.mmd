@@ -1,0 +1,18 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+stateDiagram-v2
+    [*] --> Demarrage
+    Demarrage: Démarrage<br/>PWM à 0 en premier, relais à son état de démarrage
+    Demarrage --> NonEnrole: net_id = 0 (neuf)
+    Demarrage --> Recherche: net_id connu
+    NonEnrole: Non enrôlé<br/>n'accepte que la configuration
+    NonEnrole --> Recherche: dmxnow enroll
+    Recherche: Recherche du réseau
+    Recherche --> Connecte: BEACON ou DMX de son net_id
+    Connecte: Connecté<br/>dongle appris, heartbeats en unicast
+    Connecte --> Flux: DMX de son univers
+    Flux: Flux DMX<br/>trame émise, relais et rubans suivent
+    Flux --> Connecte: plus de DMX<br/>(dernière trame conservée ou noir)
+    Connecte --> Recherche: 30 s sans dongle
+    Recherche --> Balayage: 60 s sans réseau
+    Balayage: Balayage des canaux 1 à 13
+    Balayage --> Connecte: net_id retrouvé<br/>(canal mémorisé)

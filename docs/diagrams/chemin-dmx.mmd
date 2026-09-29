@@ -1,0 +1,15 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph R1["Raspberry Pi"]
+        direction LR
+        Q["QLC+"] -- "1. ArtDmx<br/>univers 0, 512 octets" --> D["dmxnowd"]
+    end
+    subgraph R2["Radio"]
+        direction LR
+        G["Dongle"] == "3. DMX_DATA broadcast<br/>1 paquet = 1 univers<br/>répété à 44 Hz" ==> N["Nœud<br/>vérifie version, net_id,<br/>univers, CRC"]
+    end
+    subgraph R3["Scène"]
+        P["Projecteur"]
+    end
+    R1 -- "2. UNIVERSE par USB (COBS + CRC)" --> R2
+    R2 -- "4. trame DMX filaire, dès réception puis 44 Hz" --> R3

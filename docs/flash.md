@@ -35,7 +35,7 @@ Pastilles **J3** (pas 2,54 mm, non équipées) :
 | J3 | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
 |----|---|---|---|---|---|---|---|
 | Signal | 3V3 ⛔ | **GND** | **D−** | **D+** | EN | BOOT | **5V** |
-| Câble USB | — | noir | blanc | vert | — | — | rouge |
+| Câble USB | - | noir | blanc | vert | - | - | rouge |
 
 - Câble USB-A (ou USB-C) coupé, ou connecteur USB de récupération : **5V → pastille 7**,
   GND → 2, D− → 3, D+ → 4. Les couleurs ci-dessus sont les plus courantes, **à vérifier au

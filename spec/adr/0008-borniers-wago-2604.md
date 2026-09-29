@@ -1,4 +1,4 @@
-# ADR 0008 — Borniers WAGO série 2604
+# ADR 0008 : Borniers WAGO série 2604
 
 **Statut :** Accepté (décision 8), amendé par l'arbitrage A9 (2026-09-26)
 

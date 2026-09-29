@@ -6,11 +6,7 @@ ESP-NOW à des **nœuds**. Chaque nœud rend une ligne DMX filaire vers un proje
 commute son alimentation 230 V par un relais et, sur la carte entière, pilote quatre
 canaux de rubans LED 12/24 V.
 
-```
-QLC+ ─Art-Net─▶ dmxnowd (Pi) ─USB─▶ dongle ─ESP-NOW─▶ nœud ─┬─ DMX (XLR-3) ─▶ projecteur
-                                                              ├─ relais 230 V ─▶ alimentation du projecteur
-                                                              └─ 4 × PWM 12/24 V ─▶ rubans (carte entière)
-```
+![Vue d'ensemble : QLC+, démon, dongle, nœuds](diagrams/vue-ensemble.png)
 
 🔴 **Le nœud est raccordé au secteur.** Lire [securite.md](securite.md) avant toute
 manipulation ; ce document et la liste de contrôle qu'il contient demandent une
@@ -24,7 +20,7 @@ manipulation ; ce document et la liste de contrôle qu'il contient demandent une
 
 | # | Document | Pour qui, pour quoi |
 |---|----------|---------------------|
-| 0 | [fonctionnement.md](fonctionnement.md) | **Comprendre** : principes, radio, nœud, relais, rubans, commandes, maintenance, options — illustré |
+| 0 | [fonctionnement.md](fonctionnement.md) | **Comprendre** : principes, radio, nœud, relais, rubans, commandes, maintenance, options (illustré) |
 | 1 | [securite.md](securite.md) 🔴 | Tout le monde : règles, essais du prototype, **liste de contrôle avant mise sous tension** |
 | 2 | [assemblage.md](assemblage.md) | Réception des cartes, fusibles, découpe de la partie rubans, impression et montage du boîtier, dongle |
 | 3 | [flash.md](flash.md) | Premier chargement du firmware (nœud par J3, dongle par USB-C), mises à jour OTA |

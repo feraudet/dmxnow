@@ -1,0 +1,21 @@
+%%{init: {'theme': 'base', 'themeVariables': {'fontFamily': 'Arial', 'fontSize': '16px', 'primaryColor': '#2C3E50', 'primaryTextColor': '#FFFFFF', 'primaryBorderColor': '#1A252F', 'lineColor': '#3498DB', 'secondaryColor': '#3498DB', 'tertiaryColor': '#1ABC9C', 'textColor': '#2C3E50', 'titleColor': '#2C3E50', 'clusterBkg': '#EAF2F8', 'clusterBorder': '#95A5A6', 'edgeLabelBackground': '#3498DB', 'noteBkgColor': '#EAF2F8', 'noteTextColor': '#2C3E50', 'actorBkg': '#2C3E50', 'actorTextColor': '#FFFFFF', 'signalColor': '#2C3E50', 'signalTextColor': '#2C3E50', 'labelBoxBkgColor': '#3498DB', 'labelTextColor': '#FFFFFF', 'loopTextColor': '#2C3E50', 'stateLabelColor': '#FFFFFF', 'transitionLabelColor': '#FFFFFF'}, 'flowchart': {'rankSpacing': 35, 'nodeSpacing': 35, 'padding': 10, 'subGraphTitleMargin': {'top': 8, 'bottom': 16}}}%%
+flowchart TB
+    subgraph M["230 V (couvercle orange)"]
+        direction LR
+        J1["J1 entrée L, N"] --> F1["F1 T500 mA<br/>RV1 varistance"] --> PS1["PS1 alimentation<br/>isolée 5 V"]
+        J1 --> K1["K1 relais 16 A"] -- "L commutée,<br/>N direct" --> J47["J4, J7 sorties"]
+        PE["3 × PE : WAGO 221-413<br/>(hors carte)"]
+    end
+    subgraph B["Basse tension"]
+        direction LR
+        V5["+5 V, régulateur 3,3 V"] --> U1["ESP32-C3<br/>radio + logique<br/>SW1, J3 programmation"]
+        U1 --> U2["SP3485<br/>+ protection"] --> J2["J2 vers XLR-3"]
+        U1 --> Q1["Q1 pilote la<br/>bobine de K1"]
+    end
+    subgraph S["Rubans, partie sécable"]
+        direction LR
+        J5["J5 alim. LED"] --> F2["F2 20 A"] --> J6["J6 V+ commun"]
+        U4["U4 5 V"] --> Q["Q2..Q5 MOSFET"] --> J68["J6/J8 canaux 1 à 4"]
+    end
+    M == "PS1 : isolement renforcé" ==> B
+    B -- "4 PWM vers U4" --> S

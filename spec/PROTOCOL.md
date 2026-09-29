@@ -1,4 +1,4 @@
-# dmxnow — Spécification du protocole
+# dmxnow : Spécification du protocole
 
 Version du protocole : **1** (validé le 2026-09-25)
 Documents liés : [SPEC.md](SPEC.md), [ADR 0001](adr/0001-transport-esp-now.md),
@@ -16,14 +16,7 @@ Conventions :
 
 ## 1. Vue d'ensemble
 
-```
-QLC+ ──Art-Net UDP 127.0.0.1:6454──▶ démon Pi ──USB CDC, trames COBS──▶ dongle XIAO ESP32-C3
-                                                                            │
-                                         ESP-NOW broadcast (DMX_DATA, COMMAND, BEACON)
-                                                                            ▼
-                                                                         nœuds
-                                         ESP-NOW unicast vers le dongle (HEARTBEAT, ACK)
-```
+![Vue d'ensemble : QLC+, démon, dongle, nœuds](../docs/diagrams/vue-ensemble.png)
 
 Deux liaisons sont spécifiées :
 1. **Liaison radio** dongle ↔ nœuds (ESP-NOW), §2 à §7.
@@ -66,12 +59,12 @@ Justification (détails et calculs dans SPEC.md §5) :
 | Paramètre            | Valeur par défaut | Plage / options                                  | Porté par        |
 |----------------------|-------------------|--------------------------------------------------|------------------|
 | Canal Wi-Fi          | 6                 | 1 à 13 (recommandé : 1, 6 ou 11)                 | dongle et nœuds  |
-| Mode Wi-Fi           | STA non associé, économie d'énergie désactivée (`WIFI_PS_NONE`) | — | tous |
+| Mode Wi-Fi           | STA non associé, économie d'énergie désactivée (`WIFI_PS_NONE`) | - | tous |
 | Débit PHY d'émission | 802.11g 6 Mbit/s (OFDM) | 1, 2, 5,5, 11 Mbit/s (DSSS) ; 6, 12, 24 Mbit/s (OFDM) | émetteur (dongle ; nœuds pour HEARTBEAT/ACK) |
 | Puissance d'émission | 15 dBm            | 2 à 20 dBm                                       | dongle et nœuds  |
-| Adresse DMX_DATA, COMMAND, BEACON | broadcast `FF:FF:FF:FF:FF:FF` | — | dongle |
+| Adresse DMX_DATA, COMMAND, BEACON | broadcast `FF:FF:FF:FF:FF:FF` | - | dongle |
 | Adresse HEARTBEAT, ACK | MAC du dongle (unicast) | broadcast tant que le dongle est inconnu | nœuds |
-| Chiffrement ESP-NOW  | aucun (le broadcast ne peut pas être chiffré par ESP-NOW) | — | — |
+| Chiffrement ESP-NOW  | aucun (le broadcast ne peut pas être chiffré par ESP-NOW) | - | - |
 
 Remarques :
 - Le débit se règle par pair avec `esp_now_set_peer_rate_config()` (IDF ≥ 5.x), y
@@ -141,7 +134,7 @@ une copie en mémoire tampon (le callback s'exécute dans la tâche Wi-Fi).
 | Code   | Nom          | Sens              | Adressage  | Périodicité |
 |--------|--------------|-------------------|------------|-------------|
 | `0x01` | `DMX_DATA`   | dongle → nœuds    | broadcast  | ≥ 44 Hz par univers actif |
-| `0x02` | *réservé* `DMX_SYNC` | — | — | non utilisé en v1 |
+| `0x02` | *réservé* `DMX_SYNC` | - | - | non utilisé en v1 |
 | `0x10` | `COMMAND`    | dongle → nœud(s)  | broadcast, cible dans la charge utile | à la demande, répétée (§6) |
 | `0x11` | `ACK`        | nœud → dongle     | unicast    | en réponse à COMMAND |
 | `0x20` | `HEARTBEAT`  | nœud → dongle     | unicast (broadcast si dongle inconnu) | 2 s ± 250 ms |
@@ -296,10 +289,10 @@ Mécanisme retenu (ADR 0013) :
 |--------|-----------------|-----------|-------|
 | `0x01` | `IDENTIFY`      | `duration_s` u16 (0 = arrêt) | Fait clignoter le nœud à 1 Hz : sorties PWM (si rubans) à 100 %/0 %, et le canal DMX `identify_slot` (s'il est configuré) à 255/0 en écrasant la valeur reçue. Défaut 10 s. |
 | `0x02` | `SET_CONFIG`    | liste TLV (§6.4) | Applique et persiste la configuration de façon atomique (tout ou rien). |
-| `0x03` | `GET_CONFIG`    | — | L'ACK contient la configuration complète en TLV (secrets exclus). |
+| `0x03` | `GET_CONFIG`    | - | L'ACK contient la configuration complète en TLV (secrets exclus). |
 | `0x04` | `RELAY`         | `mode` u8 : 0 = forcer éteint, 1 = forcer allumé, 2 = automatique (suivre le canal DMX) | Voir SPEC §4.5 (priorités). Soumis à l'intervalle minimal entre commutations. |
 | `0x05` | `MAINTENANCE`   | `timeout_s` u16 (0 = défaut 600) | Passe en mode maintenance (§SPEC 4.9). |
-| `0x06` | `REBOOT`        | — | Redémarre après envoi de l'ACK (délai 600 ms, au-delà de la dernière retransmission du dongle à 450 ms : une répétition est servie par l'historique et non exécutée deux fois ; porté de 200 à 600 ms le 2026-09-28). |
+| `0x06` | `REBOOT`        | - | Redémarre après envoi de l'ACK (délai 600 ms, au-delà de la dernière retransmission du dongle à 450 ms : une répétition est servie par l'historique et non exécutée deux fois ; porté de 200 à 600 ms le 2026-09-28). |
 | `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
 
 ### 6.4 Clés de configuration (TLV)
@@ -346,7 +339,7 @@ En-tête : `universe` = `0xFFFF`, `seq` = `cmd_id` acquitté.
 
 ---
 
-## 7. Authentification des commandes (arbitrage A4 — retenu)
+## 7. Authentification des commandes (arbitrage A4, retenu)
 
 Menace visée : un tiers (ou une autre installation dmxnow mal configurée) qui enverrait
 `MAINTENANCE` (ouvre un point d'accès et l'OTA), `FACTORY_RESET` ou `RELAY`. Le `net_id`
@@ -398,13 +391,13 @@ la longueur est < 4 ou dont le CRC est faux est jetée (compteur `serial_errors`
 | `0x02` | `COMMAND`       | `cmd_id` u16, `flags` u8 (bit 2 = AUTH), `target` 6, `opcode` u8, `args`…, remorque AUTH éventuelle (déjà calculée par le Pi) |
 | `0x03` | `DONGLE_CONFIG` | TLV : `0x01` canal u8, `0x02` `net_id` u16, `0x03` débit PHY u8 (énumération `wifi_phy_rate_t`), `0x04` puissance dBm u8, `0x05` `hold_timeout_ms` u32, `0x06` rafraîchissement Hz u8 (défaut 44), `0x07` mode radio u8 (0 = v2, 1 = fragmenté v1). Persisté en NVS du dongle. |
 | `0x04` | `PING`          | `token` u32 |
-| `0x05` | `GET_STATUS`    | — |
+| `0x05` | `GET_STATUS`    | - |
 
 ### 8.4 Messages dongle → Pi
 
 | Type   | Nom          | Charge utile |
 |--------|--------------|--------------|
-| `0x81` | `RADIO_RX`   | `rssi` i8, `src_mac` 6, paquet ESP-NOW brut complet (en-tête inclus) — HEARTBEAT et ACK sont ainsi décodés par le Pi avec le même parseur que les firmwares |
+| `0x81` | `RADIO_RX`   | `rssi` i8, `src_mac` 6, paquet ESP-NOW brut complet (en-tête inclus). HEARTBEAT et ACK sont ainsi décodés par le Pi avec le même parseur que les firmwares |
 | `0x82` | `CMD_RESULT` | `cmd_id` u16, `target` 6, `result` u8 (0 acquitté, 1 expiré sans ACK, 2 broadcast terminé), `attempts` u8 |
 | `0x83` | `STATUS`     | `fw_version` 3, `channel` u8, `net_id` u16, `phy_rate` u8, `mode` u8, `active_universes` u8, `tx_ok` u32, `tx_fail` u32, `serial_errors` u32, `coalesced` u32, `uptime_s` u32 |
 | `0x84` | `PONG`       | `token` u32 |
