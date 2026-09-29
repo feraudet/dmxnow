@@ -34,6 +34,10 @@ compteurs) :
 
 Pour utiliser la CLI sans `sudo` : `sudo usermod -a -G dmxnow $USER` puis se reconnecter.
 
+Sauvegarder `/etc/dmxnow` et `/var/lib/dmxnow` après chaque enrôlement. Réinstaller le
+Pi sans cette sauvegarde, ou avec une sauvegarde ancienne, fait refuser les commandes
+par les nœuds : procédure dans [docs/mise-en-service.md §9](../docs/mise-en-service.md).
+
 ## Configuration de QLC+
 
 Entrées/Sorties → univers → sortie **Art-Net**, interface `127.0.0.1`, univers Art-Net =

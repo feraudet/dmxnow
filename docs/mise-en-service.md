@@ -28,6 +28,13 @@ Raspberry Pi OS **Bookworm** (Python ≥ 3.11), QLC+ installé.
 
    Puis `sudo systemctl restart dmxnowd`.
 4. Vérifier : `dmxnow status` doit indiquer le dongle connecté, le canal et le `net_id`.
+5. Sauvegarder l'état du Pi hors du Pi (clé USB, autre machine), et refaire cette
+   sauvegarde après chaque enrôlement ; sans elle, perdre la carte SD oblige à
+   réenrôler tous les nœuds (§9) :
+   ```
+   sudo tar czf dmxnow-pi.tgz /etc/dmxnow /var/lib/dmxnow
+   ```
+   L'archive contient la clé réseau : la garder en lieu sûr.
 
 ## 2. QLC+
 
@@ -146,9 +153,70 @@ bout de 60 s sans réseau (A5).
 | Nœud absent de `dmxnow nodes` | Pas de secteur, F1 fondu 🔴, mauvais canal, trop loin | Attendre 60 s (balayage) ; rapprocher le dongle ; ne jamais remplacer F1 sans chercher la cause ([securite.md §5](securite.md)) |
 | `SILENT` | Nœud éteint ou hors de portée | RSSI précédent, obstacles métalliques, antenne du dongle verticale |
 | `NOT ENROLLED` après enrôlement | Remise à zéro (SW1 10 s) ou commande perdue | Relancer `dmxnow enroll` |
-| `AUTH_FAILED` | Nœud enrôlé par un autre Pi ou clé réinstallée | `factory-reset` par SW1 (10 s), puis réenrôler |
+| `AUTH_FAILED` sur tous les nœuds | Pi réinstallé ou restauré : compteur d'authentification revenu en arrière, ou clé perdue | §9 |
+| `AUTH_FAILED` sur un seul nœud | Nœud enrôlé par un autre Pi | `factory-reset` par SW1 (10 s), puis réenrôler |
 | Projecteur sans réaction, relais OK | Adresse du projecteur, câble ou fiche XLR, terminaison 120 Ω, `--slots` trop petit | Adresse ≤ `dmx_out_slots` ; brochage XLR ([cablage.md §3](cablage.md)) |
 | Relais ne suit pas le DMX | `relay_dmx` = 0, relais forcé (`*` dans `dmxnow nodes`), intervalle minimal | `dmxnow relay <nœud> auto` |
 | Rubans éteints | Carte cassée (variante), polarité de J5, F2, alimentation LED sur J7 éteinte avec le relais | Variante dans `dmxnow nodes` ; J5 au multimètre (hors secteur) |
 | Scintillement, pertes (`lost` croissant) | Wi-Fi sur le même canal, portée | Changer de canal (§6) |
 | Mise à jour OTA annulée | Aucun paquet radio dans les 60 s après le redémarrage | Refaire l'OTA à portée du dongle, démon en marche |
+
+## 9. Réinstaller le Pi ou perdre son état
+
+Le Pi garde trois choses dont les nœuds dépendent :
+
+| Fichier | Contenu | Si on le perd |
+|---------|---------|---------------|
+| `/etc/dmxnow/dmxnowd.toml` | `net_id`, canal radio, univers | `install.sh` tire un **nouveau** `net_id` : les nœuds n'écoutent plus ce réseau (ni DMX, ni commandes) |
+| `/etc/dmxnow/net_key` | Clé réseau | Les nœuds refusent toute commande (`AUTH_FAILED`, sauf `IDENTIFY`) |
+| `/var/lib/dmxnow/state.json` | Compteur d'authentification, dernier `cmd_id` | Le compteur repart à 0 ; chaque nœud refuse tout compteur inférieur ou égal au dernier qu'il a accepté : `AUTH_FAILED` partout |
+
+Le DMX n'est pas signé : tant que le `net_id` et le canal sont les bons, les projecteurs
+et les rubans continuent de fonctionner. Seules les commandes (`dmxnow set`, `relay`,
+`reboot`...) échouent.
+
+### 9.1 Avec la sauvegarde (§1, étape 5)
+
+1. Réinstaller Raspberry Pi OS, cloner le repo.
+2. Restaurer **avant** de lancer l'installeur, qui garde les fichiers déjà en place :
+   ```
+   sudo tar xzf dmxnow-pi.tgz -C /
+   sudo ./install.sh
+   ```
+3. Avancer le compteur (§9.3) : la sauvegarde peut dater d'avant les dernières
+   commandes, et un compteur en retard donne `AUTH_FAILED`.
+
+### 9.2 Sans sauvegarde, mais `net_id` et clé connus
+
+Reprendre le `net_id` et le canal sur la page de maintenance d'un nœud (§5) et les
+reporter dans `dmxnowd.toml`. Remettre la clé dans `/etc/dmxnow/net_key` (64 chiffres
+hexadécimaux, propriétaire `dmxnow`, droits `0600`). Puis avancer le compteur (§9.3).
+
+### 9.3 Avancer le compteur d'authentification
+
+Le compteur n'a pas besoin de valoir exactement l'ancien : il suffit qu'il le dépasse.
+On le fixe à l'heure courante en secondes (environ 1,8 milliard en 2026) : c'est bien
+au-dessus de tout compteur atteint par les commandes, et cela reste vrai si la
+procédure resert plus tard. Le `cmd_id` est tiré au hasard : un nœud qui n'a pas
+redémarré garde en mémoire les 16 derniers `cmd_id` reçus, et répondrait à une
+commande qui reprend l'un d'eux par l'ancienne réponse, sans l'exécuter.
+
+```
+sudo systemctl stop dmxnowd
+echo "{\"auth_counter\": $(date +%s), \"cmd_id\": $(shuf -i 1-65535 -n 1)}" \
+  | sudo tee /var/lib/dmxnow/state.json
+sudo chown dmxnow:dmxnow /var/lib/dmxnow/state.json
+sudo systemctl start dmxnowd
+dmxnow get <nœud>        # doit répondre « ok »
+```
+
+### 9.4 Clé perdue
+
+Sans la clé, aucune commande signée n'est possible. Pour chaque nœud :
+
+1. Remise à zéro usine par SW1 maintenu **≥ 10 s** (§5) : elle efface la configuration,
+   la clé, le compteur et le mot de passe de maintenance.
+2. Réenrôler le nœud (§3) avec les mêmes univers et adresses, puis redéfinir le mot de
+   passe de maintenance.
+
+Faire ensuite la sauvegarde du §1 (étape 5).
