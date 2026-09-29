@@ -23,11 +23,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Mermaid diagrams parse
+      - name: Diagrams are PNG with their Mermaid source next to them
+        run: |
+          if grep -rln '```mermaid' --include='*.md' .; then
+            echo "raw Mermaid in Markdown: render it to docs/diagrams/<name>.png"; exit 1
+          fi
+          for f in docs/diagrams/*.mmd; do
+            [ -f "${f%.mmd}.png" ] || { echo "missing ${f%.mmd}.png"; exit 1; }
+          done
+          for f in docs/diagrams/*.png; do
+            [ -f "${f%.png}.mmd" ] || { echo "missing ${f%.png}.mmd"; exit 1; }
+          done
+      - name: Mermaid sources parse
         run: |
           npm install --no-save @mermaid-js/mermaid-cli@11
           echo '{"args":["--no-sandbox"]}' > /tmp/pp.json
-          for f in docs/*.md; do
-            grep -q '```mermaid' "$f" || continue
-            npx mmdc -p /tmp/pp.json -i "$f" -o "/tmp/$(basename "$f" .md)-out.md" -e svg
+          for f in docs/diagrams/*.mmd; do
+            npx mmdc -p /tmp/pp.json -i "$f" -o "/tmp/$(basename "$f" .mmd).svg"
           done
