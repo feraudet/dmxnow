@@ -1,0 +1,30 @@
+Licences de dmxnow
+==================
+
+Copyright 2026 Cyril Feraudet
+
+Ce repo contient du matériel et du logiciel. Chaque partie a sa licence ; les textes
+complets sont dans LICENSES/.
+
+| Chemin                                   | Licence                           |
+|------------------------------------------|-----------------------------------|
+| hardware/ (hors hardware/lib, voir plus bas), enclosure/, docs/, spec/ | CERN-OHL-S-2.0 (matériel ouvert, réciprocité forte) |
+| firmware/, pi/, .github/, docs/tools/, docs/figures/make_figures.py    | GPL-3.0-or-later                  |
+| hardware/lib/vendor/ (empreintes KiCad officielles)                    | CC-BY-SA-4.0, KiCad Library Team  |
+| hardware/lib/Espressif.pretty/, hardware/lib/3dmodels/ (Espressif)     | CC-BY-SA-4.0, Espressif Systems   |
+
+CERN-OHL-S-2.0 : qui fabrique ou distribue une carte ou un boîtier dmxnow, modifié ou
+non, doit fournir les sources de conception (fichiers KiCad, scripts de génération,
+modèles CadQuery, documentation) sous la même licence.
+
+GPL-3.0-or-later : qui distribue un firmware ou un démon dmxnow, modifié ou non, doit
+fournir le code source sous la même licence.
+
+Bibliothèques tierces (hardware/lib/vendor, Espressif) : CC-BY-SA-4.0 avec l'exception
+des bibliothèques KiCad : dans la mesure où une conception électronique qui les utilise
+serait une adaptation, l'article 3 de la licence ne s'applique pas à cette conception
+ni aux fichiers qu'elle produit. Sources : https://www.kicad.org/libraries/license/ et
+https://github.com/espressif/kicad-libraries.
+
+Aucune garantie : voir les sections « Disclaimer of Warranty » et « Limitation of
+Liability » de chaque licence. Ce projet manipule du 230 V : lire docs/securite.md.
