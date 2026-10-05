@@ -81,6 +81,12 @@ JLCPCB montre chaque composant sur la carte ; comparer à la sérigraphie :
 - **WAGO J1, J4, J7** : entrée des fils vers le bord gauche ; **J5, J6, J8** : vers le bord droit.
 - **F1, F2** : supports seulement (fusibles non fournis).
 
+Première commande (placement validé le 2026-10-05) : JLCPCB a corrigé une seule pièce,
+U3, de 270° à 0°. Le décalage de rotation du boîtier SOT-23-5 est corrigé dans
+`gen/fab.py` et les fichiers CPL sont à jour : la prochaine commande n'a plus besoin de
+cette correction. Les 57 autres pièces étaient justes au degré et au centième de
+millimètre près.
+
 ## 5. Achats hors JLCPCB (5 nœuds + rechanges)
 
 | Article | Qté | Note |

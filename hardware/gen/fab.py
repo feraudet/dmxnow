@@ -75,7 +75,7 @@ def _smt(p):
 # in footprint coordinates (mm, KiCad axes); JLC rotation = KiCad rotation + offset.
 JLC_FIX = {
     "SOT-23": (180, 0.0, 0.0),
-    "SOT-23-5": (270, 0.0, 0.0),
+    "SOT-23-5": (0, 0.0, 0.0),           # U3 (C51118): corrected by JLC engineering, order 2026-10
     "SOIC-8_3.9x4.9mm_P1.27mm": (270, 0.0, 0.0),
     "SOIC-14_3.9x8.7mm_P1.27mm": (270, 0.0, 0.0),
     "TO-252-2": (180, -1.8, 0.0),        # JLC (C282428): tab on the left; origin 1.8 mm towards the leads
