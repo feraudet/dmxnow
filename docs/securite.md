@@ -69,7 +69,7 @@ cases sont cochées.
 - [ ] Aucun fil, aucune vis, aucun débris dans le compartiment 230 V.
 - [ ] Pastilles J3 libres : aucun câble de programmation raccordé.
 
-**Câblage secteur** (couvercle orange ouvert)
+**Câblage secteur** (couvercle ouvert)
 - [ ] Entrée sur **J1** (IN), sorties sur **J4** et **J7** (OUT), L et N à leur place
       (sérigraphie « L/N »), conducteurs de 1,5 mm² dénudés à la longueur WAGO (11 à 13 mm [À valider, fiche WAGO 2604]),
       aucun brin hors du bornier, leviers fermés.
@@ -78,13 +78,11 @@ cases sont cochées.
       de chaque sortie (quelques centaines de mΩ au plus).
 - [ ] Chaque câble serré par son presse-étoupe **et** sa barre d'étrier ; essai de
       traction à la main sans mouvement des conducteurs.
-- [ ] Couvercle 230 V remis et **vissé** (4 vis).
-
-**Basse tension** (couvercle bleu ouvert)
+**Basse tension** (couvercle ouvert)
 - [ ] Queue DMX soudée sur J2 (GND, B−, A+), sortie par son presse-étoupe.
 - [ ] Carte entière : alimentation LED **certifiée TBTS à sortie isolée**, raccordée à
       **J5 en respectant « + » et « − »** ; rubans sur J6/J8 (V+ commun, canaux 1 à 4).
-- [ ] Couvercle basse tension vissé.
+- [ ] Couvercle remis et **vissé** (8 vis), jupe descendue sans forcer.
 
 **Installation**
 - [ ] Prise protégée par un disjoncteur ≤ 16 A et un différentiel 30 mA.

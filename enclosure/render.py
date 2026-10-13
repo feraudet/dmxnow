@@ -11,7 +11,7 @@ import vtk
 
 import enclosure as E
 
-COLORS = {"base": (0.85, 0.85, 0.82), "cover_230v": (0.95, 0.55, 0.15), "lid_lv": (0.55, 0.62, 0.72),
+COLORS = {"base": (0.85, 0.85, 0.82), "lid": (0.55, 0.62, 0.72),
           "pcb": (0.1, 0.45, 0.2), "parts": (0.25, 0.25, 0.28), "clamp": (0.95, 0.55, 0.15)}
 
 
@@ -63,8 +63,7 @@ def main():
     d = os.path.join(E.OUT, variant)
     os.makedirs(d, exist_ok=True)
     base = E.base(variant)
-    cover = E.cover_230v(variant)
-    lid = E.lid_lv(variant)
+    lid = E.lid(variant)
     pcb = E.board_solid(variant)
     parts = None
     for _, b in E.part_boxes(variant):
@@ -73,7 +72,7 @@ def main():
     for i, (name, wall, pos, z, dia, _) in enumerate(E.GLANDS[:3]):
         bar = E.clamp_bar().translate((E.X_IN_L + E.NUT_T, E.Y(pos), 15.0 + E.CABLE_D / 2 - 1.2))
         common.append(_actor(bar, COLORS["clamp"]))
-    render(common + [_actor(cover, COLORS["cover_230v"]), _actor(lid, COLORS["lid_lv"])],
+    render(common + [_actor(lid, COLORS["lid"])],
            os.path.join(d, "assembly_closed.png"), -35, 35)
     render(common, os.path.join(d, "assembly_open.png"), -35, 50)
 

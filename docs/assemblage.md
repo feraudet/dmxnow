@@ -86,8 +86,7 @@ d'impression. Détail, cotes et achats : [enclosure/README.md](../enclosure/READ
 | Pièce | Qté |
 |-------|-----|
 | `base` | 1 |
-| `cover_230v` (couvercle 230 V) | 1 |
-| `lid_lv` (couvercle basse tension ; `lid_lv_light_pipe` si la LED D4 est montée) | 1 |
+| `lid` (couvercle unique ; `lid_light_pipe` si la LED D4 est montée) | 1 |
 | `clamp_bar` (barre d'étrier) | 3 |
 | `sw1_plunger` + `sw1_collar` | 1 + 1 |
 
@@ -102,23 +101,22 @@ d'impression. Détail, cotes et achats : [enclosure/README.md](../enclosure/READ
 
 Achats (presse-étoupes, inserts, vis, WAGO 221-413) : [enclosure/README.md §Achats](../enclosure/README.md).
 
-1. **Inserts à chaud** M3 (Ø 4,0 × 5,7 mm) dans les bossages des couvercles, la sellette
+1. **Inserts à chaud** M3 (Ø 4,0 × 5,7 mm) dans les bossages du couvercle, la sellette
    des étriers et les plots H2 (et H3 sur la carte entière). Insert droit, affleurant.
 2. **WAGO 221-413** clipsé dans son logement, chambre de gauche (côté 230 V).
 3. **Presse-étoupes** : M16 ×3 côté secteur, M16 ×2 côté rubans (carte entière), M12 pour
    le DMX. Contre-écrous à l'intérieur, **méplat contre méplat** (les trois écrous secteur
    sont serrés les uns contre les autres).
-4. **Poussoir SW1** : glisser le poussoir dans son tube par-dessous le couvercle basse
-   tension, emmancher (ou coller) le collier.
+4. **Poussoir SW1** : glisser le poussoir dans son tube par-dessous le couvercle,
+   emmancher (ou coller) le collier.
 5. **Flasher le nœud maintenant**, carte encore hors boîtier : [flash.md](flash.md).
 6. **Poser la carte** : l'ergot imprimé traverse H1 (pas de vis métallique près de
    l'antenne), les languettes de la cloison entrent dans les fentes d'isolement sous K1
    et PS1 🔴 ; la carte repose à plat sur ses plots. Visser H2 (et H3) : M3 × 6 +
    **rondelle isolante**.
 7. Câbler : [cablage.md](cablage.md).
-8. Visser le **couvercle basse tension** (M3 × 6), puis le **couvercle 230 V** par-dessus
-   son bord (M3 × 6). 🔴 La jupe du couvercle 230 V doit descendre sans forcer entre K1/PS1
-   et la cloison.
+8. Poser le **couvercle** et le visser (8 vis M3 × 6). 🔴 Sa jupe doit descendre sans
+   forcer entre K1/PS1 et la cloison ; s'il force, ne pas serrer : chercher ce qui touche.
 
 ## 6. Dongle
 

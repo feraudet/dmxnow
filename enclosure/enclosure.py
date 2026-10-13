@@ -8,7 +8,7 @@
 
 Coordinates: X = PCB x, Y = -PCB y (KiCad Y grows downwards), Z up from the base
 bottom face. The board geometry comes from board.json (hardware/gen/export_board.py).
-Printed parts: base (floor on the bed), cover_230v and lid_lv (top face on the bed),
+Printed parts: base (floor on the bed), lid (top face on the bed),
 clamp_bar x3, sw1_plunger, sw1_collar. Bought parts: see README.md.
 """
 import argparse
@@ -49,7 +49,7 @@ Y_IN_BOT = max(r[3] for r in BOARD["rects"]) + CLR
 
 PART_X = BOARD["iso_slot_x"]          # 230 V / SELV partition, on the PCB isolation slots
 SKIRT = (PART_X + 1.0, PART_X + 2.5)  # cover skirt, LV side of the slot tongues
-SHIPLAP = (SKIRT[1], SKIRT[1] + 3.0)  # 230 V cover overlaps the LV lid here
+LID_GAP = 0.3                         # lid to base fit (FDM), around the partition
 
 # Glands (V-ENC-01): (name, wall, position along the wall (PCB y or x), axis z, hole d,
 # lock-nut across corners). M16x1.5: H05VV-F 3G1.5 (8-9 mm) and LED cables; M12x1.5 for
@@ -284,13 +284,12 @@ def _skirt_bottom(y):
     return z
 
 
-def cover_230v(variant):
-    """🔴 Access cover of the mains terminals (J1, J4, J7, PE junction): screwed, tool
-    needed; lies over the LV lid edge (shiplap) so it comes off on its own."""
-    xo1 = X_IN_L - WALL
-    p = _plate(xo1, SHIPLAP[0], variant)
-    p = p.union(box(SHIPLAP[0], Y_IN_TOP - WALL, SHIPLAP[1], Y_IN_BOT + WALL, TOP + LID / 2, Z_OUT))
-    p = _screws(p, COVER_BOSSES, variant)
+def lid(variant, light_pipe=False):
+    """🔴 Single lid over both zones, screwed (tool needed to reach the mains terminals,
+    ES-05); a skirt over the partition line keeps the 230 V / SELV separation."""
+    xo1, xr = X_IN_L - WALL, X_IN_R[variant] + WALL
+    p = _plate(xo1, xr, variant)
+    p = _screws(p, COVER_BOSSES + LID_BOSSES[variant], variant)
     # skirt above the board on the partition line, stepped over K1 and PS1
     ys = sorted({Y_IN_TOP, Y_IN_BOT} | {v for q in BOARD["parts"] if q["box"][0] < SKIRT[1] and q["box"][2] > SKIRT[0]
                                         for v in (q["box"][1] - 0.5, q["box"][3] + 0.5)})
@@ -300,37 +299,29 @@ def cover_230v(variant):
         if y2 < -CLR:            # no board: meet the full-height partition of the base
             zb = TOP - 3.0
         p = p.union(box(SKIRT[0], y1, SKIRT[1], y2, zb, TOP))
-    # pressers on the PCB support points of the mains zone
+    # clear the full-height partition of the base (band side): the locating rim sat on it
+    # (PLA mockup 2026-10-13, the lid did not close)
+    p = p.cut(box(PART_X - 1.0 - LID_GAP, Y_IN_TOP - 1, PART_X + 1.0 + LID_GAP, -CLR + LID_GAP, TOP - 3.5, TOP + 1e-3))
+    # pressers on the PCB support points
     for s in supports(variant):
-        if s["zone"] == "mains" and s["presser"]:
+        if s["presser"]:
             p = p.union(cyl(s["x"], s["y"], 4.0, PCB_Z1 + 0.2, TOP))
-    p = _engrave(p, "230V~  16A MAX", (xo1 + PART_X) / 2, 38.0, 5.0)
-    p = _engrave(p, "! 230V", (xo1 + PART_X) / 2, 12.0, 7.0)
-    return p
-
-
-def lid_lv(variant, light_pipe=False):
-    xr = X_IN_R[variant] + WALL
-    p = _plate(SHIPLAP[0], xr, variant)
-    p = p.cut(box(SHIPLAP[0] - 1, Y_IN_TOP - WALL - 1, SHIPLAP[1], Y_IN_BOT + WALL + 1, TOP + LID / 2, Z_OUT + 1))
-    p = _screws(p, LID_BOSSES[variant], variant)
     # H1: presser tube around the printed locating pin
     h1 = HOLES["H1"]
     p = p.union(cyl(h1["x"], h1["y"], 6.5, PCB_Z1 + 0.2, TOP)).cut(cyl(h1["x"], h1["y"], 3.6, PCB_Z1, TOP - 0.5))
-    for s in supports(variant):
-        if s["zone"] != "mains" and s["presser"]:
-            p = p.union(cyl(s["x"], s["y"], 4.0, PCB_Z1 + 0.2, TOP))
     # SW1 push-button (A6): guide tube under the lid, 2 mm hole, plunger 2 mm below the surface
     sx, sy = (SW1["box"][0] + SW1["box"][2]) / 2, (SW1["box"][1] + SW1["box"][3]) / 2
     p = p.union(cyl(sx, sy, 6.4, 22.0, TOP)).cut(cyl(sx, sy, 4.3, 21.0, TOP)).cut(cyl(sx, sy, 2.0, TOP - 1, Z_OUT + 1))
     if light_pipe:   # option A7: 3 mm light guide above D4
         lx, ly = (D4["box"][0] + D4["box"][2]) / 2, (D4["box"][1] + D4["box"][3]) / 2
         p = p.union(cyl(lx, ly, 4.4, PCB_Z1 + 3.0, TOP)).cut(cyl(lx, ly, 3.1, PCB_Z1 + 2.0, Z_OUT + 1))
-    if variant == "full":   # vents above the MOSFETs Q2..Q5 (R-08)
+    if variant == "full":   # vents above the MOSFETs Q2..Q5 (R-08), far from the 230 V zone
         for i in range(4):
             x = 114.5 + i * 3.4
             p = p.cut(box(x, 1.0, x + 1.8, 29.0, TOP - 3, Z_OUT + 1))
-    p = _engrave(p, "dmxnow", (SHIPLAP[1] + X_IN_R[variant]) / 2 if variant == "cut" else 75.0, 44.0, 6.0)
+    p = _engrave(p, "230V~  16A MAX", (xo1 + PART_X) / 2, 38.0, 5.0)
+    p = _engrave(p, "! 230V", (xo1 + PART_X) / 2, 12.0, 7.0)
+    p = _engrave(p, "dmxnow", 75.0, 44.0, 6.0)
     p = _engrave(p, "MAINT", sx, sy + 5.5, 3.0)
     if variant == "full":
         p = _engrave(p, "LED 12-24V  16A MAX", 128.0, 44.0, 3.5)
@@ -379,7 +370,11 @@ def check(variant, parts):
             errs.append("%s: open shell" % name)
     pcb = board_solid(variant)
     comps = part_boxes(variant)
-    for name in ("base", "cover_230v", "lid_lv"):
+    for name in ("lid", "lid_light_pipe"):
+        v = _vol(parts[name], parts["base"])
+        if v > 0.05:
+            errs.append("%s intersects the base (%.2f mm3): it cannot close" % (name, v))
+    for name in ("base", "lid", "lid_light_pipe"):
         v = _vol(parts[name], pcb)
         if v > 0.05:
             errs.append("%s intersects the PCB (%.2f mm3)" % (name, v))
@@ -443,8 +438,7 @@ def check(variant, parts):
 
 # --- Build / export ----------------------------------------------------------------
 def build(variant):
-    return {"base": base(variant), "cover_230v": cover_230v(variant), "lid_lv": lid_lv(variant),
-            "lid_lv_light_pipe": lid_lv(variant, light_pipe=True),
+    return {"base": base(variant), "lid": lid(variant), "lid_light_pipe": lid(variant, light_pipe=True),
             "clamp_bar": clamp_bar(), "sw1_plunger": sw1_plunger(), "sw1_collar": sw1_collar()}
 
 

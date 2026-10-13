@@ -13,7 +13,7 @@ def main():
     tray, lid, env = D.tray(), D.lid(), D.parts_envelope()
     R.render([R._actor(tray, R.COLORS["base"]), R._actor(env, R.COLORS["pcb"])],
              os.path.join(D.OUT, "assembly_open.png"), -30, 45)
-    R.render([R._actor(tray, R.COLORS["base"]), R._actor(lid, R.COLORS["lid_lv"])],
+    R.render([R._actor(tray, R.COLORS["base"]), R._actor(lid, R.COLORS["lid"])],
              os.path.join(D.OUT, "assembly_closed.png"), -30, 35)
 
 

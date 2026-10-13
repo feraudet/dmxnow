@@ -436,7 +436,7 @@ contrôle pour la relecture humaine.
 - **Bouton SW1 [ARBITRAGE A6, ajouté le 2026-09-25]**, toujours monté : bouton tactile
   entre IO9 (net BOOT, pull-up R2 existant) et GND, placé en zone basse tension loin de
   l'antenne et de la zone 230 V, actionné depuis l'extérieur par un poussoir imprimé
-  **encastré** dans le couvercle basse tension (accès avec une pointe type trombone, pour
+  **encastré** dans le couvercle (accès avec une pointe type trombone, pour
   éviter les appuis accidentels). Aucune pièce conductrice accessible : le poussoir est en
   plastique et la zone est TBT isolée. Réutiliser IO9 évite de consommer une GPIO et fait
   de SW1 aussi le bouton BOOT pour le flash. Anti-rebond logiciel (20 ms), pas de
@@ -525,9 +525,9 @@ contrôle pour la relecture humaine.
 
 - Modèle CadQuery unique, paramètre `variant = "full" | "cut"`, dimensions intérieures
   dérivées du STEP exporté du PCB + 0,5 mm de jeu.
-- Fond + couvercle principal (côté basse tension, vissé M3 sur inserts à chaud) +
-  couvercle d'accès borniers 230 V séparé, vissé (outil requis), permettant d'actionner
-  les leviers WAGO.
+- Fond + **couvercle unique** vissé M3 sur inserts à chaud (outil requis pour atteindre
+  les borniers 230 V), qui une fois retiré permet d'actionner les leviers WAGO
+  (2026-10-13 ; auparavant un couvercle 230 V et un couvercle basse tension séparés).
 - Cloison intérieure solidaire du fond entre zones 230 V et TBT, alignée sur la fente
   du PCB, hauteur jusqu'au couvercle (recouvrement par une lèvre).
 - Logement pour le WAGO 221-413 (jonction des trois PE, arbitrage A9) dans le compartiment
@@ -542,11 +542,11 @@ contrôle pour la relecture humaine.
 - Rien de métallique devant l'antenne (inserts et vis hors d'une zone de 15 mm autour).
 - Version entière : fentes d'aération au-dessus des MOSFET, ou fenêtre + pad thermique vers
   une paroi (à choisir au livrable boîtier).
-- Poussoir de SW1 (A6) : pièce imprimée captive dans le couvercle basse tension, encastrée
+- Poussoir de SW1 (A6) : pièce imprimée captive dans le couvercle, encastrée
   d'au moins 2 mm sous la surface (orifice Ø 2 mm), loin de l'antenne et de la cloison 230 V.
 - Passants pour colliers de serrage (largeur 5 à 8 mm) sur le fond.
 - Parois ≥ 2,0 mm (2,5 mm sur les faces portant des presse-étoupes), impression sans
-  support : fond et couvercles imprimés face plane sur le plateau, trous de presse-étoupes
+  support : fond et couvercle imprimés face plane sur le plateau, trous de presse-étoupes
   en « goutte d'eau » si horizontaux.
 - **Matériau** : il faut un matériau au moins UL94 V-1 pour une enveloppe contenant des
   circuits secteur (enveloppe coupe-feu au sens d'IEC 62368-1) ; le PETG et l'ABS standard
@@ -559,7 +559,7 @@ contrôle pour la relecture humaine.
   la pièce imprimée doit avoir des parois pleines (100 % de remplissage des parois
   ≥ épaisseur certifiée) ; fiche technique du filament à conserver [V-ENC-02].
 - Option `light_pipe` (A7) : logement de guide de lumière Ø 3 mm au droit de D4, dans le
-  couvercle basse tension.
+  couvercle.
 - Exports : STL et STEP pour chaque pièce et chaque variante (avec et sans `light_pipe`),
   rendu PNG assemblé.
 - **Réalisation (livrable 8.6, 2026-09-26)** : détails et justifications dans
@@ -571,14 +571,17 @@ contrôle pour la relecture humaine.
     pas traverser le plan du PCB ; côté secteur, 34 mm pour l'écrou, l'étrier et le WAGO
     221-413 ; d'où le dépassement d'ENF-05 ;
   - cloison 🔴 en trois parties (paroi du fond, languettes dans les fentes d'isolement,
-    jupe du couvercle 230 V passant à 0,5 mm du PCB et au-dessus de K1 et PS1, qui
-    enjambent la ligne), couvercle 230 V recouvrant le bord du couvercle TBT ;
+    jupe du couvercle passant à 0,5 mm du PCB et au-dessus de K1 et PS1, qui
+    enjambent la ligne) ;
+  - un seul couvercle (2026-10-13) : le rebord de centrage est encoché au-dessus de la
+    cloison, sur laquelle il appuyait (maquette PLA), et `make check` contrôle que le
+    couvercle et le fond ne se touchent pas ;
   - H1 (13,5 mm de l'antenne) sans insert : ergot imprimé + tube presseur ; variante cassée
     sans vis dans le coin supérieur droit ;
   - DMX en **M12** (serrage jusqu'à 7 mm, les câbles DMX dépassant souvent les 6 mm du
     PG7), sorties rubans et alimentation LED en M16 ;
-  - aérations : fentes dans le couvercle TBT au-dessus de Q2 à Q5 et entrées basses sous
-    la partie sécable ; aucune ouverture dans le couvercle 230 V ;
+  - aérations : fentes dans le couvercle au-dessus de Q2 à Q5 et entrées basses sous
+    la partie sécable ; aucune ouverture au-dessus de la zone 230 V ;
   - hauteur intérieure 31 mm (F2 + fusible), PCB à 5 mm du fond.
 
 ---

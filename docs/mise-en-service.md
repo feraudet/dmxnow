@@ -115,7 +115,7 @@ Référence complète : [pi/README.md](../pi/README.md).
 
 Trois façons d'ouvrir la maintenance :
 - `dmxnow maintenance lyre-cour [-t 600]` ;
-- appui **≥ 3 s** sur le poussoir SW1 (à travers le couvercle basse tension) ;
+- appui **≥ 3 s** sur le poussoir SW1 (à travers le couvercle) ;
 - **trois mises sous tension** à moins de 5 s d'écart (si `powercycle_maint` = 1).
 
 Puis : réseau Wi-Fi `dmxnow-<nom>`, mot de passe de maintenance, http://192.168.4.1/.

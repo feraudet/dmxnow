@@ -38,9 +38,8 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 | Pièce | Qté | Orientation | Rôle |
 |-------|-----|-------------|------|
 | `base` | 1 | fond sur le plateau | Fond, parois, cloison 230 V / TBT, supports du PCB, presse-étoupes, sellette de l'étrier, clip du WAGO 221-413, passants de colliers |
-| `cover_230v` | 1 | face lisse sur le plateau | 🔴 Couvercle d'accès aux borniers secteur (J1, J4, J7, jonction PE), vissé ; jupe de cloison au-dessus du PCB ; recouvre le bord du couvercle TBT |
-| `lid_lv` | 1 | face lisse sur le plateau | Couvercle basse tension, vissé ; guide du poussoir SW1 ; aérations au-dessus des MOSFET (`full`) |
-| `lid_lv_light_pipe` | (1) | idem | Variante de `lid_lv` avec le logement du guide de lumière Ø 3 mm au-dessus de D4 (option A7) |
+| `lid` | 1 | face lisse sur le plateau | 🔴 Couvercle unique, vissé (outil requis pour atteindre les borniers secteur) ; jupe de cloison au-dessus du PCB ; guide du poussoir SW1 ; aérations au-dessus des MOSFET (`full`) |
+| `lid_light_pipe` | (1) | idem | Variante de `lid` avec le logement du guide de lumière Ø 3 mm au-dessus de D4 (option A7) |
 | `clamp_bar` | 3 | rainure sur le plateau | Barres d'étrier (arrêt de traction indépendant du presse-étoupe, ES-05) |
 | `sw1_plunger` + `sw1_collar` | 1 + 1 | debout | Poussoir captif de SW1 (A6) : le collier se colle ou s'emmanche sous le tube de guidage |
 
@@ -50,8 +49,8 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 |---------|--------|-------|------|
 | Presse-étoupe M16 × 1,5 plastique + contre-écrou (serrage 4,5 à 10 mm) | 5 | 3 | Secteur ×3 (H05VV-F 3G1,5 ≈ 8 à 9 mm), rubans ×1, alimentation LED ×1 [V-ENC-01] |
 | Presse-étoupe M12 × 1,5 plastique + contre-écrou (serrage jusqu'à 7 mm) | 1 | 1 | Queue DMX (câbles DMX souvent 6 à 6,5 mm, au-delà du PG7) [V-ENC-01] |
-| Insert fileté M3 à chaud, Ø 4,0 × 5,7 mm | 16 | 15 | 8 couvercles, 6 étriers, 1 ou 2 PCB |
-| Vis M3 × 6 tête cylindrique | 8 | 8 | Couvercles (lamage de 1,2 mm) |
+| Insert fileté M3 à chaud, Ø 4,0 × 5,7 mm | 16 | 15 | 8 couvercle, 6 étriers, 1 ou 2 PCB |
+| Vis M3 × 6 tête cylindrique | 8 | 8 | Couvercle (lamage de 1,2 mm) |
 | Vis M3 × 16 | 6 | 6 | Barres d'étrier (pas plus long : la vis toucherait le fond de l'insert avant de serrer) |
 | Vis M3 × 6 + rondelle isolante | 2 | 1 | PCB (H2, H3) |
 | WAGO 221-413 | 1 | 1 | Jonction des trois PE (A9) |
@@ -71,7 +70,7 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 
 ## Montage
 
-1. Inserts à chaud dans les bossages (couvercles), la sellette (étriers) et les plots H2/H3.
+1. Inserts à chaud dans les bossages (couvercle), la sellette (étriers) et les plots H2/H3.
 2. Clipser le WAGO 221-413 dans son logement (chambre de gauche).
 3. Poser le PCB : l'ergot imprimé traverse H1, les languettes de la cloison entrent dans
    les fentes d'isolement ; visser H2 (et H3 sur la carte entière).
@@ -80,7 +79,8 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 5. Câbles secteur : gaine serrée par le presse-étoupe **et** par la barre d'étrier ; PE
    au 221-413 d'abord, puis L et N aux WAGO 2604 ; conducteurs sans tension mécanique.
 6. Poussoir SW1 : glisser le poussoir dans le tube par-dessous, emmancher le collier.
-7. Visser le couvercle TBT, puis le couvercle 230 V (il recouvre le bord du couvercle TBT).
+7. Poser le couvercle : la jupe descend entre K1/PS1 et la cloison sans forcer, l'encoche
+   du rebord de centrage passe au-dessus de la cloison côté bande F1. Visser les 8 vis.
 
 ## Choix de conception (justifications)
 
@@ -92,17 +92,22 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
   la ligne X = 49 mm, que K1 et PS1 enjambent. Elle est réalisée en trois parties :
   (1) paroi du fond, pleine hauteur hors carte (bande de F1) et sous la carte ailleurs ;
   (2) languettes de 0,8 mm qui remplissent les fentes d'isolement du PCB ; (3) jupe du
-  couvercle 230 V au-dessus de la carte, qui descend à 0,5 mm du PCB et passe à 0,5 mm
-  au-dessus de K1 et PS1 (leurs boîtiers assurent l'isolement à cet endroit). Le couvercle
-  230 V recouvre le bord du couvercle TBT (« lèvre »).
+  couvercle au-dessus de la carte, qui descend à 0,5 mm du PCB et passe à 0,5 mm
+  au-dessus de K1 et PS1 (leurs boîtiers assurent l'isolement à cet endroit).
+- **Un seul couvercle** (2026-10-13, auparavant un couvercle 230 V et un couvercle TBT) :
+  ES-05 demande seulement que les borniers secteur soient sous un couvercle vissé ; un
+  couvercle unique le respecte, avec une pièce et des vis en moins. Le rebord de centrage
+  porte une encoche au-dessus de la cloison (il appuyait dessus sur la maquette PLA et
+  empêchait la fermeture) ; `make check` vérifie désormais que couvercle et fond ne se
+  touchent pas.
 - **H1 sans métal** : H1 est à 13,5 mm de la zone d'antenne ; il reçoit un ergot imprimé
   et un tube presseur du couvercle au lieu d'un insert (SPEC : rien de métallique à moins
   de 15 mm de l'antenne). Pour la même raison, la variante `cut` n'a pas de vis dans le
   coin supérieur droit.
-- **Points d'appui** : plots sous le PCB et presseurs des couvercles aux points calculés
+- **Points d'appui** : plots sous le PCB et presseurs du couvercle aux points calculés
   par `export_board.py` (≥ 3 mm des pastilles, ≥ 2,5 mm des composants).
-- **Aérations** (R-08) : fentes dans le couvercle TBT au-dessus de Q2 à Q5 et entrées
-  basses dans la paroi, sous la partie sécable. Aucune ouverture dans le couvercle 230 V.
+- **Aérations** (R-08) : fentes dans le couvercle au-dessus de Q2 à Q5 et entrées
+  basses dans la paroi, sous la partie sécable. Aucune ouverture au-dessus de la zone 230 V.
 - **DMX en M12** plutôt que PG7 : plage de serrage jusqu'à 7 mm (câbles DMX 6 à 6,5 mm).
 
 ## Écarts et points à valider
@@ -121,8 +126,9 @@ Après toute modification du PCB : `cd hardware/gen && python3 export_board.py`,
 - solides valides (`isValid()`) et fermés ;
 - aucune intersection des pièces avec le PCB ni avec l'enveloppe des composants
   (empreinte × hauteur) ;
+- aucune intersection entre le couvercle et le fond (le couvercle se ferme) ;
 - carte + 0,5 mm contenue dans la cavité ;
-- parois ≥ 2,5 mm, fond et couvercles ≥ 2,0 mm ;
+- parois ≥ 2,5 mm, fond et couvercle ≥ 2,0 mm ;
 - contre-écrous des presse-étoupes : hors du PCB, des composants, dans la hauteur ;
   ouverture en goutte d'eau couverte par l'écrou ;
 - aucun métal (inserts, vis) à moins de 15 mm de la zone d'antenne.

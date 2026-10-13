@@ -67,7 +67,7 @@ Si une cote diffère : corriger `DIMS`, relancer `make lib pcb route check fab`.
 | 4.1 | Antenne de U1 en bord de carte, aucune piste, via ni plan dans la zone d'exclusion (règle `antenna_keepout`), rien de métallique au-dessus dans le boîtier. | ☐ |
 | 4.2 | Découplage : C2 (100 nF) contre la broche 3V3 de U1 ; C1 (47 µF) à ~17 mm de piste (0,2 mm de large, ~20 mΩ, ~20 nH : acceptable à 0,45 A crête, à confirmer par une mesure de l'ondulation pendant l'émission Wi-Fi) ; C3 contre U2 ; C9 contre U4. Les pistes +5V/+3V3 routées font 0,2 mm (Freerouting n'applique pas la classe PWR). | ☐ |
 | 4.3 | Pull-ups de démarrage R2 (IO9), R3 (IO8), R4 (IO2), RC d'EN (R1, C4). R15-R18 4,7 kΩ (GPIO6 a une résistance de tirage interne au reset), R22 10 kΩ sur DMX_TX, R23 100 kΩ sur BOARD_SENSE. | ☐ |
-| 4.4 | SW1 accessible par le poussoir du couvercle ; J3 accessible couvercle basse tension ouvert. | ☐ |
+| 4.4 | SW1 accessible par le poussoir du couvercle ; J3 accessible couvercle ouvert. | ☐ |
 | 4.5 | Échauffement de U3 (AP2112K) : cuivre suffisant autour de la broche GND (plan). | ☐ |
 | 4.6 | Routage automatique (Freerouting) : longueur et aspect des pistes USB (D-/D+) acceptables pour la programmation. | ☐ |
 | 4.7 | Plan de masse : la face arrière porte encore ~280 mm de pistes basse tension (PWM4 et RELAY_CTRL surtout) qui la découpent par endroits ; chaque pastille CMS de masse a son via. Juger la qualité du retour de masse sous U1 (radio) et sous le chemin DMX. | ☐ |
