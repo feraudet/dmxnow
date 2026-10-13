@@ -28,6 +28,7 @@ sécable « rubans » 46 × 54 mm). Révision 0.3 (après revue de conception, v
 | `gen/fab.py` | Sorties JLCPCB dans `fab/` |
 | `lib/` | Bibliothèques : `dmxnow.pretty`, `Espressif.*` (espressif/kicad-libraries, CC-BY-SA 4.0) |
 | `REVIEW.md` | Liste de contrôle de la relecture humaine |
+| `revision-suivante.md` | Points à intégrer à la prochaine révision du PCB |
 
 Ne pas éditer les fichiers KiCad à la main : modifier les scripts et régénérer (un
 changement manuel serait écrasé et rendrait la CI rouge).
