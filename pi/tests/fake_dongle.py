@@ -10,8 +10,10 @@ import os
 import struct
 import threading
 import time
+import zlib
 
 from dmxnow import protocol as P
+from dmxnow import show
 
 NODE_MAC = bytes.fromhex("240ac4123456")
 
@@ -30,6 +32,7 @@ class FakeDongle:
         self.configs = []
         self.answer_pings = True
         self.node_config = {"universe": 0, "start_address": 1, "name": "node-123456"}
+        self.show_buf, self.show = bytearray(), None   # stored show (PROTOCOL §10)
         self.settings = {"channel": 6, "phy_rate": 0x0B, "power_dbm": 15, "hold_timeout_ms": 10000,
                          "refresh_hz": 44, "mode": 0}
         self.seq = 0
@@ -158,6 +161,28 @@ class FakeDongle:
             data = P.encode_config(self.node_config)
         elif status == 0 and opcode == P.OP_SET_CONFIG:
             self.node_config.update(P.decode_config(args))
+        elif status == 0 and opcode == P.OP_SHOW_WRITE:   # node side of PROTOCOL §10.2
+            off = struct.unpack_from("<I", args)[0]
+            if off == 0:
+                self.show_buf, self.show = bytearray(), None
+            if off > len(self.show_buf):
+                status = 2
+            else:
+                self.show_buf[off:off + len(args) - 4] = args[4:]
+        elif status == 0 and opcode == P.OP_SHOW_COMMIT:
+            size, crc = struct.unpack_from("<II", args)
+            raw = bytes(self.show_buf[:size])
+            try:
+                self.show = show.Show.decode(raw) if zlib.crc32(raw) == crc else None
+            except ValueError:
+                self.show = None
+            status = 0 if self.show else 2
+        elif status == 0 and opcode == P.OP_SHOW_CLEAR:
+            self.show_buf, self.show = bytearray(), None
+        elif status == 0 and opcode == P.OP_SHOW_INFO:
+            s = self.show
+            data = (struct.pack("<BB16sIIIIHB", 1, 1, s.name.encode(), len(s.encode()), zlib.crc32(s.encode()),
+                                len(s.steps), s.loop_ms, s.resume_s, len(s.channels)) if s else bytes(37))
         ack = P.build_packet(P.Header(type=P.T_ACK, net_id=self.net_id, universe=P.NO_UNIVERSE, seq=cmd_id),
                              bytes([opcode, status]) + data)
         if target in (NODE_MAC, P.BROADCAST):

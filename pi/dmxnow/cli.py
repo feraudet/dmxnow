@@ -5,8 +5,9 @@ import argparse
 import json
 import socket
 import sys
+import zlib
 
-from . import config
+from . import config, show
 from . import protocol as P
 
 INT_KEYS = {k for k, (_, kind) in P.CONFIG_KEYS.items() if kind.startswith("u")}
@@ -54,6 +55,8 @@ def show_nodes(nodes):
             flags.append("SILENT")
         if n.get("maintenance"):
             flags.append("MAINTENANCE")
+        if n.get("show"):
+            flags.append("SHOW")
         print(line + ("  " + ", ".join(flags) if flags else ""))
     short = [n["name"] for n in nodes if n.get("dmx_out_slots") == 512]
     if short:   # arbitration A3: 512 is the most compatible but the slowest
@@ -68,6 +71,92 @@ def show_result(res):
         if "config" in a:
             for k, v in a["config"].items():
                 print(f"    {k} = {v}")
+
+
+def _refused(res: dict) -> str | None:
+    """None when the targeted command was acknowledged OK, else the reason."""
+    if not res.get("ok", False):
+        return res.get("error", "error")
+    if res["result"] != "acked":
+        return res["result"]
+    bad = [a["status"] for a in res["acks"] if a["status"] != "ok"]
+    return bad[0] if bad else None
+
+
+def show_targets(sock: str, targets: list[str]) -> list[str]:
+    if targets != ["all"]:
+        return targets
+    nodes = request(sock, {"cmd": "nodes"})["nodes"]
+    return [n["mac"] for n in nodes if n.get("configured") and not n.get("stale")]
+
+
+def show_deploy(sock: str, path: str, targets: list[str]) -> int:
+    data = open(path, "rb").read()
+    s = show.Show.decode(data)   # refuses a damaged file before touching any node
+    print(s.describe())
+    failed = 0
+    for t in show_targets(sock, targets):
+        parts = list(show.chunks(data))
+        err = None
+        for i, (off, chunk) in enumerate(parts, 1):
+            for _ in range(3):   # a retried chunk rewrites the same bytes: harmless
+                err = _refused(request(sock, {"cmd": "show_write", "target": t, "offset": off, "data": chunk.hex()}))
+                if err is None:
+                    break
+            if err is not None:
+                break
+            print(f"\r{t}: {i}/{len(parts)} chunks", end="", flush=True)
+        if err is None:
+            err = _refused(request(sock, {"cmd": "show_commit", "target": t, "size": len(data),
+                                          "crc32": zlib.crc32(data)}))
+        print(f"\r{t}: {'deployed, playing while no DMX arrives' if err is None else 'FAILED: ' + err}" + " " * 10)
+        failed += err is not None
+    return 1 if failed else 0
+
+
+def show_info(sock: str, targets: list[str]) -> int:
+    rc = 0
+    for t in show_targets(sock, targets):
+        res = request(sock, {"cmd": "show_info", "target": t})
+        err = _refused(res)
+        if err:
+            print(f"{t}: {err}")
+            rc = 1
+            continue
+        i = res["acks"][0]["show"]
+        if not i["loaded"]:
+            print(f"{t}: no show")
+        else:
+            state = "playing" if i["playing"] else "waiting (DMX stream present)"
+            print(f"{t}: {i['name']}, {state}, {i['channels']} channel(s), {i['keyframes']} keyframes, "
+                  f"loop {i['loop_s']:.1f} s, resume after {i['resume_s']} s, {i['size']} bytes, crc32 {i['crc32']}")
+    return rc
+
+
+def show_cmd(a) -> int:
+    if a.action == "inspect":
+        s = show.Show.decode(open(a.file, "rb").read())
+        print(s.describe())
+        for t in range(0, min(s.loop_ms, a.preview_ms), 100):
+            print(f"  {t:6d} ms  {s.render(t)}")
+        return 0
+    try:
+        if a.action == "deploy":
+            return show_deploy(a.socket, a.file, a.targets)
+        if a.action == "info":
+            return show_info(a.socket, a.targets)
+        rc = 0
+        for t in show_targets(a.socket, a.targets):
+            err = _refused(request(a.socket, {"cmd": "show_clear", "target": t}))
+            print(f"{t}: {'show erased' if err is None else 'FAILED: ' + err}")
+            rc |= err is not None
+        return rc
+    except FileNotFoundError as e:
+        raise SystemExit(f"error: {e}")
+    except OSError as e:
+        raise SystemExit(f"cannot reach dmxnowd on {a.socket}: {e}")
+    except ValueError as e:   # damaged or invalid .dxs file
+        raise SystemExit(f"error: {e}")
 
 
 def main(argv=None):
@@ -104,8 +193,22 @@ def main(argv=None):
     p.add_argument("--yes", action="store_true", required=True, help="confirm")
     p = sub.add_parser("dongle-config", help="channel=, power_dbm=, phy_rate=, hold_timeout_ms=, refresh_hz=, mode=")
     p.add_argument("values", nargs="+")
+    p = sub.add_parser("show", help="stored show (conduite) played by the node without DMX")
+    ssub = p.add_subparsers(dest="action", required=True)
+    q = ssub.add_parser("deploy", help="upload a .dxs file and play it")
+    q.add_argument("file")
+    q.add_argument("targets", nargs="+", help="MACs, names, or 'all' (enrolled nodes heard)")
+    q = ssub.add_parser("info", help="show stored on the node")
+    q.add_argument("targets", nargs="+")
+    q = ssub.add_parser("clear", help="erase the stored show")
+    q.add_argument("targets", nargs="+")
+    q = ssub.add_parser("inspect", help="describe a .dxs file (no daemon needed)")
+    q.add_argument("file")
+    q.add_argument("--preview-ms", type=int, default=2000, help="print the values every 100 ms up to this")
     a = ap.parse_args(argv)
 
+    if a.cmd == "show":
+        return show_cmd(a)
     if a.cmd in ("nodes", "status"):
         req = {"cmd": a.cmd}
     elif a.cmd == "identify":

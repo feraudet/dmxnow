@@ -8,7 +8,7 @@ import struct
 
 import pytest
 
-from dmxnow import artnet, cli, config
+from dmxnow import artnet, cli, config, show
 from dmxnow import protocol as P
 from dmxnow.daemon import Daemon
 from dmxnow.dongle import DongleLink
@@ -122,6 +122,42 @@ def test_cli_nodes_identify_get_and_unknown_target(tmp_path, fast_link):
         assert code == 1 and "timeout" in out                            # nobody answers
         with pytest.raises(SystemExit):
             await cli_run(cfg, "identify", "no-such-node")
+        await stop(d, task)
+
+    asyncio.run(scenario())
+    dongle.close()
+
+
+def test_show_deploy_info_and_clear(tmp_path, fast_link):
+    dongle, cfg = make(tmp_path, key=KEY)
+    s = show.Show("feu", [show.rel(1), show.rel(2), show.rel(3), show.rel(4)])
+    for i in range(120):   # > 1 kB: several SHOW_WRITE chunks
+        s.step(100, [200 + i % 50, 60, 0, i % 20])
+    f = tmp_path / "feu.dxs"
+    f.write_bytes(s.encode())
+
+    async def scenario():
+        d, task = await started(cfg)
+        dongle.heartbeat(name="lyre-cour")
+        assert await asyncio.to_thread(dongle.wait, lambda: d.nodes)
+        code, out = await cli_run(cfg, "show", "deploy", str(f), "lyre-cour")
+        assert code == 0 and "deployed" in out, out
+        assert dongle.show is not None and dongle.show.encode() == f.read_bytes()
+        writes = [p for t, p in dongle.frames if t == P.S_COMMAND and p[3 + 6] == P.OP_SHOW_WRITE]
+        assert len(writes) == -(-len(f.read_bytes()) // show.WRITE_CHUNK)
+        assert all(p[2] & P.F_AUTH for p in writes)                       # signed like any command
+        code, out = await cli_run(cfg, "show", "info", "lyre-cour")
+        assert code == 0 and "feu, playing" in out and "120 keyframes" in out, out
+        code, out = await cli_run(cfg, "show", "clear", "*")              # node by node only
+        assert code == 1 and "node by node" in out and dongle.show is not None
+        code, out = await cli_run(cfg, "show", "clear", "lyre-cour")
+        assert code == 0 and dongle.show is None
+        code, out = await cli_run(cfg, "show", "info", "lyre-cour")
+        assert code == 0 and "no show" in out
+        bad = tmp_path / "bad.dxs"
+        bad.write_bytes(f.read_bytes()[:-1])
+        with pytest.raises(SystemExit):                                   # refused before any upload
+            await cli_run(cfg, "show", "deploy", str(bad), "lyre-cour")
         await stop(d, task)
 
     asyncio.run(scenario())

@@ -49,6 +49,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | EF-12  | Mode maintenance (commande ESP-NOW, bouton SW1 accessible boîtier fermé, ou 3 mises sous tension rapprochées si activé) : point d'accès Wi-Fi, page de configuration, mise à jour OTA, retour automatique en exploitation. |
 | EF-13  | CLI Pi : liste des nœuds (nom, MAC, variante, univers, adresse, RSSI, pertes, relais, uptime, version), identification, changement d'univers/adresse/nom, relais, maintenance, configuration du dongle. Page web minimale optionnelle. |
 | EF-14  | Identification d'un nœud monté et fermé sans démontage (PROTOCOL `IDENTIFY`). |
+| EF-15  | Conduite stockée (ajout du 2026-10-13, ADR 0016) : le nœud garde en flash une conduite générée sur un poste et déployée par la CLI (PROTOCOL §10), la joue en boucle dès la mise sous tension sur les rubans et la ligne DMX, rend la main à QLC+ dès qu'un flux DMX de son univers arrive et la reprend après `resume_s` sans flux. Le relais ne suit jamais la conduite. |
 
 ### 2.2 Non fonctionnelles
 
@@ -584,6 +585,40 @@ contrôle pour la relecture humaine.
     la partie sécable ; aucune ouverture au-dessus de la zone 230 V ;
   - hauteur intérieure 31 mm (F2 + fusible), PCB à 5 mm du fond.
 
+### 4.13 Conduites stockées (EF-15, ADR 0016, ajout du 2026-10-13)
+
+- **Besoin** : un nœud qui joue seul un effet (par exemple un feu de cheminée sur un
+  ruban RGBW), sans Pi ni QLC+, dès qu'on le branche.
+- **Format** : images clés en boucle avec fondu linéaire (PROTOCOL §10.1). Pas de
+  langage de script dans le nœud : la conduite est calculée à l'avance sur un poste
+  (`pi/dmxnow/show.py`, scripts de `shows/`), le nœud ne fait qu'interpoler. Un feu de
+  5 minutes à 4 canaux tient en 18 ko.
+- **Stockage** : partition `spiffs` de 128 ko (déjà prévue dans `partitions.csv`, inutilisée
+  jusque-là), lue par une projection de la flash (`esp_partition_mmap`), sans copie en
+  RAM. Pas de changement de la table de partitions, donc pas de reflash USB.
+  `FACTORY_RESET` efface aussi la conduite.
+- **Priorité** :
+  1. `IDENTIFY` (clignotement) ;
+  2. flux DMX de l'univers du nœud (QLC+) : dès la première trame complète, la conduite
+     s'arrête ;
+  3. conduite : à la mise sous tension, puis après `resume_s` secondes sans flux (valeur
+     portée par le fichier, 5 s dans les scripts fournis). Elle repart de l'image 0.
+
+  Tant qu'une conduite joue, `loss_blackout_ms` ne s'applique pas.
+- **Sorties** : la conduite écrit dans la trame du nœud, comme le ferait QLC+ : la ligne
+  DMX (projecteur sur la XLR) et les 4 PWM la suivent. Les canaux absents de la conduite
+  sont à 0. Calcul toutes les 25 ms (40 Hz).
+- **Relais** 🔴 : jamais piloté par la conduite. Il garde son état de mise sous tension
+  (`relay_power_on`) ou son forçage. Si l'alimentation des rubans est branchée sur J4/J7,
+  régler `relay_power_on = 1` (allumé) pour que la conduite s'allume seule.
+- **Déploiement** : `dmxnow show deploy` envoie le fichier par morceaux de 192 octets
+  (`SHOW_WRITE`, commandes ciblées et authentifiées), puis `SHOW_COMMIT` vérifie la taille
+  et le CRC-32. Un fichier abîmé est refusé avant tout envoi (CLI) et à la validation
+  (nœud). 18 ko = 94 morceaux.
+- **Limites** : 32 canaux, 128 ko, une conduite par nœud ; ruban non adressable, donc
+  tout le ruban a la même couleur à un instant donné ; en `pwm_mode` 16 bits, MSB et LSB
+  sont interpolés séparément (viser le mode 8 bits).
+
 ---
 
 ## 5. Budgets de latence et de débit
@@ -733,7 +768,8 @@ Prototype (5 PCB, 2 assemblés en CMS, traversants soudés à la main, hors port
 - Tests natifs verts : CRC (vecteur `0x29B1`), codec en-tête et types, validation et
   rejets, réassemblage (ordre, pertes, doublons, fusion partielle), anti-rebond relais
   (différé, dernier état, priorités), gamma (bornes, monotonie, linéaire à 1,0), TLV,
-  compteur de pertes (bouclage 16 bits), vecteurs communs.
+  compteur de pertes (bouclage 16 bits), vecteurs communs, conduite stockée (CRC-32,
+  validation, rendu identique au Python, retard rattrapé).
 - Recette sur banc : DMX mesuré à l'analyseur logique (timings, cadence), relais,
   PWM (fréquence, résolution, déphasage), maintenance et OTA, perte de flux.
 
@@ -808,6 +844,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-FW-06 | ✅ `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` dans les bibliothèques précompilées Arduino 3.3.12 ; `verifyRollbackLater()` surchargé, image validée au premier paquet radio valide, retour arrière après 60 s | sdkconfig d'Arduino-ESP32 3.3.12 | - |
 | V-FW-07 | Format exact de la trame ESP-NOW v2 (surcoût en octets) | ESP-IDF doc ESP-NOW, *Frame Format* | faible (affecte le calcul d'occupation de ±10 %) |
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
+| V-FW-09 | Conduite stockée sur carte réelle : projection de la partition après écriture (pas de ligne de cache périmée, `remap()` après l'envoi), durée d'effacement d'un secteur de 4 ko (≈ 45 ms attendus, couverte par les retransmissions du dongle), durée d'un déploiement de 18 ko, rendu visuel du feu sur ruban RGBW | Banc, ESP-IDF *SPI Flash API* | faible |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |

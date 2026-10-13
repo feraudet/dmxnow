@@ -14,7 +14,7 @@ import os
 import struct
 import time
 
-from . import artnet, config
+from . import artnet, config, show
 from . import protocol as P
 from .dongle import DongleLink
 
@@ -221,6 +221,26 @@ class Daemon:
             return await self.command(target, P.OP_REBOOT)
         if cmd == "factory_reset":
             return await self.command(target, P.OP_FACTORY_RESET, struct.pack("<I", P.FACTORY_RESET_CONFIRM))
+        # stored show (PROTOCOL §10.2): the CLI sends the chunks one by one, targeted only
+        # (a broadcast is not acknowledged, a lost chunk would go unnoticed)
+        if cmd.startswith("show_") and target == P.BROADCAST:
+            raise ValueError("a show is deployed node by node, not to 'all' at once")
+        if cmd == "show_write":
+            data = bytes.fromhex(req["data"])
+            if not 1 <= len(data) <= show.WRITE_CHUNK:
+                raise ValueError(f"show_write: 1 to {show.WRITE_CHUNK} bytes")
+            return await self.command(target, P.OP_SHOW_WRITE, struct.pack("<I", int(req["offset"])) + data)
+        if cmd == "show_commit":
+            return await self.command(target, P.OP_SHOW_COMMIT, struct.pack("<II", int(req["size"]),
+                                                                            int(req["crc32"])))
+        if cmd == "show_clear":
+            return await self.command(target, P.OP_SHOW_CLEAR)
+        if cmd == "show_info":
+            res = await self.command(target, P.OP_SHOW_INFO)
+            for a in res["acks"]:
+                if a["status"] == "ok":
+                    a["show"] = show.decode_info(bytes.fromhex(a.pop("data")))
+            return res
         raise ValueError(f"unknown command: {cmd}")
 
     # --- control socket ---------------------------------------------------------------------------

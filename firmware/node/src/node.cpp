@@ -17,9 +17,11 @@
 #include "dmxnow/gamma.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
+#include "dmxnow/show.h"
 #include "maintenance.h"
 #include "pwm_out.h"
 #include "radio.h"
+#include "show_store.h"
 #include "store.h"
 
 using namespace dmxnow;
@@ -78,6 +80,12 @@ uint32_t fade_start_ms = 0;
 bool fading = false;
 uint32_t identify_until = 0;
 bool identifying = false;
+
+// stored show (SPEC 4.13): drives the frame while no DMX stream arrives
+constexpr uint32_t kShowFrameMs = 25;   // 40 Hz, under the DMX output cadence
+ShowPlayer show;
+bool show_on = false;
+uint32_t show_next_ms = 0;
 
 // deferred actions
 uint32_t channel_at = 0;
@@ -163,6 +171,39 @@ void configure_outputs() {
     }
 }
 
+// --- stored show ----------------------------------------------------------------------
+// The show writes its channels into an all-zero frame; the relay never follows it (it
+// keeps its power-on or forced state), so a show cannot switch the mains output.
+void start_show(uint32_t now) {
+    if (!show.loaded()) return;
+    show_on = true;
+    show.restart(now);
+    show_next_ms = now;
+    std::memset(frame, 0, sizeof frame);
+    frame_len = kDmxSlots;
+    if (blackout) { blackout = false; dmx_out::set_blackout(false); }
+    schedule_heartbeat();
+}
+
+void stop_show() {
+    if (!show_on) return;
+    show_on = false;
+    schedule_heartbeat();
+}
+
+void render_show(uint32_t now) {
+    if (!show_on || !time_reached(now, show_next_ms)) return;
+    show_next_ms = now + kShowFrameMs;
+    show.render(now, cfg.start_address, frame);
+    dmx_out::set_frame(frame, frame_len);
+    update_pwm();
+}
+
+bool load_show() {
+    const uint8_t* d = show_store::data();
+    return d && show.load(d, show_store::capacity());
+}
+
 // --- radio output -------------------------------------------------------------------
 void send_packet(MsgType type, uint16_t net_id, uint16_t universe, uint16_t seq, const uint8_t* payload,
                  size_t len) {
@@ -192,7 +233,7 @@ void send_heartbeat() {
     hb.uptime_s = uptime_s();
     hb.status = uint8_t((have_stream ? hb_status::kDmx : 0) | (blackout ? hb_status::kBlackout : 0) |
                         (maint::active() ? hb_status::kMaintenance : 0) | (identifying ? hb_status::kIdentify : 0) |
-                        (dongle_known ? hb_status::kDongleKnown : 0));
+                        (dongle_known ? hb_status::kDongleKnown : 0) | (show_on ? hb_status::kShow : 0));
     hb.radio_channel = radio::channel();
     hb.dmx_out_slots = cfg.dmx_out_slots;
     hb.reset_reason = uint8_t(esp_reset_reason());
@@ -299,6 +340,58 @@ void handle_command(const radio::Packet& p, const Header& h) {
                 if (cmd.args_len < 4 || get32(cmd.args) != kFactoryResetConfirm) st = AckStatus::InvalidArg;
                 else { factory_at_reboot = true; reboot_at = now_ms() + kRebootDelayMs; }
                 break;
+            case Opcode::ShowWrite: {
+                if (cmd.args_len < 5 || cmd.args_len - 4 > kShowWriteMax) { st = AckStatus::InvalidArg; break; }
+                uint32_t offset = get32(cmd.args);
+                if (offset == 0) {   // new upload: the old show stops, outputs hold their values
+                    stop_show();
+                    show.unload();
+                }
+                st = show_store::write(offset, cmd.args + 4, cmd.args_len - 4);
+                break;
+            }
+            case Opcode::ShowCommit: {
+                if (cmd.args_len < 8) { st = AckStatus::InvalidArg; break; }
+                show_store::remap();
+                if (!load_show() || show.info().size != get32(cmd.args) || show.info().crc != get32(cmd.args + 4)) {
+                    show.unload();
+                    st = AckStatus::InvalidArg;
+                } else if (!have_stream) {
+                    start_show(now_ms());   // QLC+ silent: plays at once, else after resume_s
+                }
+                break;
+            }
+            case Opcode::ShowClear: {
+                bool was_on = show_on;
+                stop_show();
+                show.unload();
+                if (!show_store::clear()) st = AckStatus::InternalError;
+                if (was_on) {   // outputs back to 0 until DMX arrives
+                    std::memset(frame, 0, sizeof frame);
+                    dmx_out::set_frame(frame, frame_len);
+                    update_pwm();
+                }
+                break;
+            }
+            case Opcode::ShowInfo: {
+                // loaded u8, playing u8, name 16, size u32, crc32 u32, steps u32, loop_ms u32,
+                // resume_s u16, channels u8 (PROTOCOL §10.2)
+                const ShowInfo& in = show.info();
+                bool l = show.loaded();
+                uint8_t* o = ack + 2;
+                o[0] = l;
+                o[1] = show_on;
+                std::memset(o + 2, 0, 16);
+                if (l) std::memcpy(o + 2, in.name, 16);
+                put32(o + 18, l ? in.size : 0);
+                put32(o + 22, l ? in.crc : 0);
+                put32(o + 26, l ? in.steps : 0);
+                put32(o + 30, l ? in.loop_ms : 0);
+                put16(o + 34, l ? in.resume_s : 0);
+                o[36] = l ? in.channels : 0;
+                ack_len += 37;
+                break;
+            }
             default:
                 st = AckStatus::UnknownOpcode;
         }
@@ -321,6 +414,7 @@ void on_dmx(const radio::Packet& p, const Header& h) {
     Reassembler::Result res = reasm.feed(h.seq, h.offset, h.length, h.flags, p.data + kHeaderSize);
     if (res == Reassembler::Result::None) return;
     loss.on_frame(h.seq);
+    stop_show();   // QLC+ takes over; the show resumes after resume_s without stream
     std::memcpy(frame, reasm.frame(), kDmxSlots);
     frame_len = reasm.frame_len();
     stream_ms = now_ms();
@@ -370,13 +464,16 @@ void status_text(char* out, size_t cap) {
              "variante %s, univers %u, adresse %u, trame DMX %u canaux\n"
              "canal radio %u, reseau %u, dongle %s, flux DMX %s\n"
              "trames recues %lu, perdues %lu, rejetees %lu, RSSI %d dBm\n"
-             "relais %s%s, %lu commutations, en marche depuis %lu s",
+             "relais %s%s, %lu commutations, en marche depuis %lu s\n"
+             "conduite %s%s",
              mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], kFw[0], kFw[1], kFw[2],
              variant == Variant::WithStrips ? "rubans" : "projecteur seul", cfg.universe, cfg.start_address,
              cfg.dmx_out_slots, radio::channel(), cfg.net_id, dongle_known ? "connu" : "absent",
              have_stream ? "present" : "absent", (unsigned long)loss.rx_frames(), (unsigned long)loss.lost_frames(),
              (unsigned long)radio::rejected(), rssi_x8 / 8, relay.state() ? "allume" : "eteint",
-             relay.forced() ? " (force)" : "", (unsigned long)relay.switch_count(), (unsigned long)uptime_s());
+             relay.forced() ? " (force)" : "", (unsigned long)relay.switch_count(), (unsigned long)uptime_s(),
+             show.loaded() ? show.info().name : "aucune",
+             show.loaded() ? (show_on ? " (en cours)" : " (en attente, DMX present)") : "");
 }
 
 void enter_maintenance(uint16_t timeout_s) {
@@ -472,6 +569,8 @@ void setup() {
     dmx_out::begin(cfg.dmx_out_slots);
     configure_outputs();
     if (variant == Variant::WithStrips) start_fade();
+    // stored show: plays from power-up, under the PWM fade-in (SPEC 4.13)
+    if (show_store::begin() && load_show()) start_show(now_ms());
 
     const esp_partition_t* running = esp_ota_get_running_partition();
     esp_ota_img_states_t st;
@@ -511,11 +610,14 @@ void loop() {
         have_stream = false;
         schedule_heartbeat();
     }
-    if (cfg.loss_blackout_ms && frame_len && !blackout && now - stream_ms > cfg.loss_blackout_ms) {
+    if (cfg.loss_blackout_ms && frame_len && !blackout && !show_on && now - stream_ms > cfg.loss_blackout_ms) {
         blackout = true;
         dmx_out::set_blackout(true);
         update_pwm();
     }
+    if (show.loaded() && !show_on && !have_stream && now - stream_ms >= uint32_t(show.info().resume_s) * 1000u)
+        start_show(now);
+    render_show(now);
 
     if (identifying && time_reached(now, identify_until)) {
         identifying = false;
@@ -566,7 +668,10 @@ void loop() {
     update_status_led(now);
 
     if (reboot_at && time_reached(now, reboot_at)) {
-        if (factory_at_reboot) store::factory_reset();
+        if (factory_at_reboot) {
+            store::factory_reset();
+            show_store::clear();   // a reset node plays nothing until it gets a new show
+        }
         ESP.restart();
     }
 }

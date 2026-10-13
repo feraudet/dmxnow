@@ -26,6 +26,7 @@ manipulation ; ce document et la liste de contrôle qu'il contient demandent une
 | 3 | [flash.md](flash.md) | Premier chargement du firmware (nœud par J3, dongle par USB-C), mises à jour OTA |
 | 4 | [cablage.md](cablage.md) | Raccordement secteur, DMX, alimentation LED et rubans |
 | 5 | [mise-en-service.md](mise-en-service.md) | Pi, QLC+, enrôlement des nœuds, maintenance, dépannage |
+| 6 | [conduites.md](conduites.md) | Conduite jouée seule par un nœud dès sa mise sous tension (exemple : feu de cheminée) |
 
 Le flash se fait **avant** le câblage secteur : un nœud se programme hors secteur, par
 ses pastilles J3 (règle 2 de securite.md).

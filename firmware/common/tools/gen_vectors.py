@@ -9,6 +9,7 @@ import hmac
 import json
 import os
 import struct
+import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "..", "test_vectors.json")
@@ -66,6 +67,60 @@ def heartbeat_payload(hb):
 
 def tlv(items):
     return b"".join(bytes([k, len(v)]) + v for k, v in items)
+
+
+def show_file(name, channels, steps, resume_s=5, flags=0, crc_fix=0):
+    """Stored show (PROTOCOL §10.1); channels: ("rel", offset) or ("abs", slot)."""
+    body = b"DXS\x01" + name.encode().ljust(16, b"\0")
+    body += struct.pack("<BBHI", len(channels), flags, resume_s, len(steps))
+    for kind, n in channels:
+        body += struct.pack("<H", (0x8000 | n) if kind == "rel" else n)
+    for dur, values in steps:
+        body += struct.pack("<H", dur) + bytes(values)
+    crc = (zlib.crc32(body) + crc_fix) & 0xFFFFFFFF
+    return body + struct.pack("<I", crc)
+
+
+def show_render(channels, steps, start_address, t):
+    """Reference renderer: keyframe i is reached at sum(dur[1..i]), the loop closes with
+    dur[0]; at equal times the last keyframe wins; linear fade, rounded to nearest."""
+    reached = [0]
+    for dur, _ in steps[1:]:
+        reached.append(reached[-1] + dur)
+    loop = reached[-1] + steps[0][0]
+    tm = t % loop
+    i = max(k for k in range(len(steps)) if reached[k] <= tm)
+    nxt = (i + 1) % len(steps)
+    d, el = steps[nxt][0], tm - reached[i]
+    out = {}
+    for c, (kind, n) in enumerate(channels):
+        a, b = steps[i][1][c], steps[nxt][1][c]
+        out[start_address - 1 + n if kind == "rel" else n - 1] = (a * (d - el) + b * el + d // 2) // d if d else b
+    return out
+
+
+def show_vectors():
+    channels = [("rel", 1), ("rel", 2), ("abs", 20)]
+    steps = [(300, [10, 100, 255]), (200, [210, 100, 0]), (0, [50, 50, 50])]
+    start = 6
+    times = [0, 1, 100, 199, 200, 201, 350, 499, 500, 750, 1234, 5000]
+    good = {"name": "fire_like", "hex": show_file("feu", channels, steps).hex(), "start_address": start,
+            "show_name": "feu", "channels": len(channels), "resume_s": 5, "steps": len(steps), "loop_ms": 500,
+            "renders": [{"t": t, "slots": [[k, v] for k, v in sorted(show_render(channels, steps, start, t).items())]}
+                        for t in times]}
+    one = [("abs", 1)]
+    bad = [
+        {"name": "bad_crc", "hex": show_file("x", one, [(100, [1])], crc_fix=1).hex()},
+        {"name": "zero_loop", "hex": show_file("x", one, [(0, [1]), (0, [2])]).hex()},
+        {"name": "slot_zero", "hex": show_file("x", [("abs", 0)], [(100, [1])]).hex()},
+        {"name": "slot_513", "hex": show_file("x", [("abs", 513)], [(100, [1])]).hex()},
+        {"name": "offset_512", "hex": show_file("x", [("rel", 512)], [(100, [1])]).hex()},
+        {"name": "too_many_channels", "hex": show_file("x", [("abs", 1)] * 33, [(100, [1] * 33)]).hex()},
+        {"name": "resume_zero", "hex": show_file("x", one, [(100, [1])], resume_s=0).hex()},
+        {"name": "flags_set", "hex": show_file("x", one, [(100, [1])], flags=1).hex()},
+        {"name": "truncated", "hex": show_file("x", one, [(100, [1]), (100, [2])])[:-1].hex()},
+    ]
+    return {"valid": [good], "invalid": bad}
 
 
 def default_config_tlv(mac):
@@ -170,6 +225,7 @@ def main():
     v["sha256"] = [{"data": d.hex(), "hash": hashlib.sha256(d).hexdigest()}
                    for d in (b"", b"abc", b"a" * 1000)]
     v["config_default_tlv"] = {"mac": node_mac, "tlv": default_config_tlv(node_mac).hex()}
+    v["show"] = show_vectors()
 
     with open(OUT, "w") as f:
         json.dump(v, f, indent=1)

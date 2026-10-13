@@ -45,6 +45,7 @@ pas l'alimentation du projecteur et ne pilotent pas de rubans.
 | **Exposition ou musée scénographié** : projecteurs sur rails, répartis dans plusieurs salles | Chaque projecteur se branche sur la prise la plus proche ; plus de ligne DMX qui court d'une salle à l'autre |
 | **Spectacle ou événement en tournée** : montage et démontage chaque jour | Moins de câbles à tirer et à cacher ; un nœud neuf s'enrôle en une commande |
 | **Décor lumineux** : rubans LED dans un meuble, une vitrine, un élément de décor | Les 4 canaux de rubans suivent QLC+ comme un projecteur (RGBW, gamma, 8 ou 16 bits) |
+| **Effet autonome** : un feu de cheminée dans un décor, qui tourne seul dès qu'on branche | Une conduite stockée dans le nœud, jouée en boucle sans Pi ni QLC+ ; QLC+ reprend la main dès qu'il envoie du DMX ([docs/conduites.md](docs/conduites.md)) |
 | **Fin de séance** : couper tout le parc sans monter à l'échelle | Le relais de chaque nœud suit un canal DMX, ou une commande `dmxnow relay` |
 | **Installation permanente** : lumière automatique dans un lieu ouvert au public | Le Pi et QLC+ tournent seuls ; un nœud éteint puis rallumé retrouve le réseau et son canal radio sans intervention |
 | **Projecteur accroché en hauteur** : maintenance sans décrocher | Mise à jour du firmware par Wi-Fi (OTA) et page de réglage, boîtier fermé |
@@ -109,6 +110,7 @@ La liste complète est dans [spec/SPEC.md](spec/SPEC.md) (points « À valider �
 | `firmware/` | `common/` (protocole, testé sur PC), `node/` (nœud), `dongle/` (dongle USB) |
 | `pi/` | Démon `dmxnowd`, CLI `dmxnow`, service systemd, règle udev, `install.sh` |
 | `enclosure/` | Boîtiers CadQuery paramétriques, STL et STEP |
+| `shows/` | Conduites stockées : scripts de génération (feu de cheminée) et fichiers `.dxs` |
 | `docs/` | Documentation d'utilisation, figures et diagrammes |
 
 ## Sécurité

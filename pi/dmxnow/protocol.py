@@ -24,6 +24,7 @@ F_LAST, F_FRAG, F_AUTH = 0x01, 0x02, 0x04
 
 OP_IDENTIFY, OP_SET_CONFIG, OP_GET_CONFIG, OP_RELAY = 0x01, 0x02, 0x03, 0x04
 OP_MAINTENANCE, OP_REBOOT, OP_FACTORY_RESET = 0x05, 0x06, 0x07
+OP_SHOW_WRITE, OP_SHOW_COMMIT, OP_SHOW_CLEAR, OP_SHOW_INFO = 0x08, 0x09, 0x0A, 0x0B
 FACTORY_RESET_CONFIRM = 0x52455345
 
 ACK_STATUS = {0: "ok", 1: "unknown_opcode", 2: "invalid_arg", 3: "auth_failed", 4: "unsupported",
@@ -219,6 +220,7 @@ def decode_heartbeat(p: bytes) -> dict:
             "relay_switch_count": count, "rssi": rssi, "rx_frames": rx, "lost_frames": lost,
             "rejected_frames": rej, "uptime_s": up, "dmx_stream": bool(status & 1), "blackout": bool(status & 2),
             "maintenance": bool(status & 4), "identify": bool(status & 8), "dongle_known": bool(status & 16),
+            "show": bool(status & 32),
             "radio_channel": ch, "dmx_out_slots": slots, "reset_reason": reason}
 
 

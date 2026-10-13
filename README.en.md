@@ -43,6 +43,7 @@ power nor drive LED strips.
 | **Exhibition or museum**: fixtures on tracks, spread over several rooms | Each fixture plugs into the nearest socket; no DMX line running from room to room |
 | **Touring show or event**: setup and teardown every day | Fewer cables to pull and hide; a new node is enrolled with one command |
 | **Lit set pieces**: LED strips in furniture, a display case, a set element | The 4 strip channels follow QLC+ like a fixture (RGBW, gamma, 8 or 16 bits) |
+| **Standalone effect**: a fireplace in a set, running on its own as soon as it is plugged in | A show stored in the node, looped without Pi or QLC+; QLC+ takes over as soon as it sends DMX ([docs/conduites.md](docs/conduites.md), in French) |
 | **End of the show**: power down the whole rig without a ladder | Each node's relay follows a DMX channel, or a `dmxnow relay` command |
 | **Permanent installation**: automatic lighting in a public venue | The Pi and QLC+ run unattended; a node that was switched off finds the network and its radio channel again by itself |
 | **Fixture hung high up**: maintenance without taking it down | Firmware update over Wi-Fi (OTA) and a settings page, with the enclosure closed |
@@ -109,6 +110,7 @@ the prototype. The full list is in [spec/SPEC.md](spec/SPEC.md) (items marked
 | `firmware/` | `common/` (protocol, tested on PC), `node/`, `dongle/` (USB dongle) |
 | `pi/` | `dmxnowd` daemon, `dmxnow` CLI, systemd service, udev rule, `install.sh` |
 | `enclosure/` | Parametric CadQuery enclosures, STL and STEP |
+| `shows/` | Stored shows: generator scripts (fireplace) and `.dxs` files |
 | `docs/` | User documentation, figures and diagrams |
 
 ## Safety

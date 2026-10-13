@@ -221,7 +221,7 @@ Charge utile (56 octets) :
 | 38     | 4      | `lost_frames`       | Trames perdues (§4.3) |
 | 42     | 4      | `rejected_frames`   | Paquets rejetés (§2.5) |
 | 46     | 4      | `uptime_s`          | Secondes depuis le démarrage |
-| 50     | 1      | `status`            | bit 0 flux DMX présent, bit 1 blackout sur perte actif, bit 2 maintenance, bit 3 identification en cours, bit 4 dongle connu |
+| 50     | 1      | `status`            | bit 0 flux DMX présent, bit 1 blackout sur perte actif, bit 2 maintenance, bit 3 identification en cours, bit 4 dongle connu, bit 5 conduite stockée en cours (§10) |
 | 51     | 1      | `radio_channel`     | Canal Wi-Fi courant |
 | 52     | 2      | `dmx_out_slots`     | Longueur de la trame DMX émise |
 | 54     | 1      | `reset_reason`      | Valeur `esp_reset_reason_t` |
@@ -293,7 +293,8 @@ Mécanisme retenu (ADR 0013) :
 | `0x04` | `RELAY`         | `mode` u8 : 0 = forcer éteint, 1 = forcer allumé, 2 = automatique (suivre le canal DMX) | Voir SPEC §4.5 (priorités). Soumis à l'intervalle minimal entre commutations. |
 | `0x05` | `MAINTENANCE`   | `timeout_s` u16 (0 = défaut 600) | Passe en mode maintenance (§SPEC 4.9). |
 | `0x06` | `REBOOT`        | - | Redémarre après envoi de l'ACK (délai 600 ms, au-delà de la dernière retransmission du dongle à 450 ms : une répétition est servie par l'historique et non exécutée deux fois ; porté de 200 à 600 ms le 2026-09-28). |
-| `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
+| `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`) et la conduite stockée (§10), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
+| `0x08` à `0x0B` | `SHOW_*` | §10.2 | Conduite stockée : écriture, validation, effacement, état. |
 
 ### 6.4 Clés de configuration (TLV)
 
@@ -427,7 +428,55 @@ attendu, ainsi que des cas invalides (mauvais CRC, mauvaise longueur, `net_id` �
 version inconnue). Les tests C++ (`pio test -e native`) et Python (`pytest`) DOIVENT
 consommer ce même fichier.
 
-## 10. Évolution du protocole
+## 10. Conduites stockées (ajout du 2026-10-13, ADR 0016)
+
+Une conduite est une suite d'images clés que le nœud joue en boucle, en fondu linéaire
+d'une image à la suivante, tant qu'aucun flux DMX de son univers n'arrive (SPEC §4.13).
+Elle est générée sur un poste (`pi/dmxnow/show.py`, scripts de `shows/`), puis
+déployée par la CLI : `dmxnow show deploy fichier.dxs <nœud>`.
+
+### 10.1 Format du fichier `.dxs` (petit-boutiste)
+
+| Offset | Taille | Champ | Description |
+|-------:|-------:|-------|-------------|
+| 0  | 4  | `magic`    | `44 58 53 01` (« DXS » + version 1) |
+| 4  | 16 | `name`     | UTF-8, complété par des 0 |
+| 20 | 1  | `channels` | n, 1 à 32 |
+| 21 | 1  | `flags`    | 0 (réservé) |
+| 22 | 2  | `resume_s` | 1 à 3600 : secondes sans flux DMX avant que la conduite reprenne |
+| 24 | 4  | `steps`    | nombre d'images clés, ≥ 1 |
+| 28 | 2 n | `slot[]`  | canal de chaque colonne : bit 15 à 1 = décalage depuis `start_address` (0 à 511 ; 0 = `start_address`) ; bit 15 à 0 = canal absolu de l'univers (1 à 512) |
+| …  | (2 + n) × `steps` | images clés | `duration_ms` u16 puis n valeurs u8 |
+| fin | 4 | `crc32`   | CRC-32 IEEE (celui de zlib) de tout ce qui précède |
+
+- L'image clé i est atteinte `duration_ms[i]` ms après l'image i − 1 (0 = saut). Après
+  la dernière, la conduite revient à l'image 0 en `duration_ms[0]` ms. La boucle dure la
+  somme des durées, qui DOIT être > 0.
+- Entre deux images, valeur = (a × (d − t) + b × t + d / 2) / d, en entiers (arrondi au
+  plus proche). Le nœud calcule une image toutes les 25 ms.
+- Les canaux absents de la conduite restent à 0. Un canal hors de l'univers (décalage
+  trop grand pour `start_address`) est ignoré.
+- **Le relais ne suit jamais la conduite** : il garde son état de mise sous tension
+  (`relay_power_on`) ou son forçage. Une conduite ne peut donc pas commuter le secteur.
+- En `pwm_mode` 16 bits, MSB et LSB sont interpolés séparément : les conduites visent
+  le mode 8 bits (défaut).
+- Taille maximale : 128 ko (partition `spiffs` du nœud, `firmware/node/partitions.csv`).
+
+### 10.2 Opcodes
+
+| Code   | Nom            | Arguments | Effet |
+|--------|----------------|-----------|-------|
+| `0x08` | `SHOW_WRITE`   | `offset` u32, `data` (1 à 192 octets) | Écrit un morceau du fichier. `offset` = 0 commence un envoi : la conduite en cours s'arrête (les sorties gardent leurs valeurs) et l'ancienne est perdue. Chaque morceau DOIT commencer au plus loin à la fin de la zone déjà effacée par cet envoi (secteurs de 4 ko effacés au fil de l'eau), sinon `INVALID_ARG`. Un morceau répété réécrit les mêmes octets, sans effet. |
+| `0x09` | `SHOW_COMMIT`  | `size` u32, `crc32` u32 | Vérifie le fichier écrit (format §10.1, taille et CRC égaux aux arguments) et le charge. Sans flux DMX, il démarre aussitôt ; sinon, après `resume_s` sans flux. Fichier invalide : `INVALID_ARG`, aucune conduite chargée. |
+| `0x0A` | `SHOW_CLEAR`   | - | Efface la conduite. Si elle jouait, les sorties repassent à 0 jusqu'au prochain flux DMX. |
+| `0x0B` | `SHOW_INFO`    | - | L'ACK contient : `loaded` u8, `playing` u8, `name` 16, `size` u32, `crc32` u32, `steps` u32, `loop_ms` u32, `resume_s` u16, `channels` u8 (37 octets, à 0 si aucune conduite). |
+
+Ces commandes sont authentifiées comme les autres (§7). Le Pi les envoie **nœud par
+nœud** (commande ciblée, acquittée) : en broadcast, un morceau perdu passerait inaperçu.
+Le paquet de commande est limité à 250 octets (en-tête 18 + cible 6 + opcode 1 +
+`offset` 4 + données + authentification 12), d'où 192 octets de données par morceau.
+
+## 11. Évolution du protocole
 
 Toute modification incompatible incrémente `version`. Les champs `reserved` et les bits
 de `flags` réservés DOIVENT valoir 0 à l'émission et être ignorés à la réception. Les

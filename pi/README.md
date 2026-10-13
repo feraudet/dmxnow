@@ -54,6 +54,7 @@ un des `universes` de `/etc/dmxnow/dmxnowd.toml`. Transmission « Complète » r
 | `dmxnow maintenance lyre-cour [-t 600]` | Point d'accès `dmxnow-<nom>` + page web + OTA. |
 | `dmxnow reboot lyre-cour` · `dmxnow factory-reset lyre-cour --yes` | |
 | `dmxnow dongle-config channel=11 power_dbm=15` | Réglage radio du dongle à chaud (non écrit dans le fichier). |
+| `dmxnow show deploy feu.dxs node-2442B0\|all` · `show info` · `show clear` · `show inspect feu.dxs` | Conduite stockée dans le nœud, jouée sans DMX ([docs/conduites.md](../docs/conduites.md)). |
 
 Les cibles s'écrivent par MAC, par nom ou `all`. `--json` donne la réponse brute.
 

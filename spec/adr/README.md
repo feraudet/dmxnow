@@ -21,3 +21,4 @@ Les ADR 0001 à 0010 reprennent les décisions de la section 3 du cahier des cha
 | [0013](0013-commandes-broadcast-ack.md) | Commandes en broadcast avec acquittement applicatif | Accepté (validation de la spec, 2026-09-25) |
 | [0014](0014-trames-dmx-evenement.md) | Émission DMX sur événement et longueur de trame configurable | Accepté (arbitrage A3 : défaut 512, 2026-09-25) |
 | [0015](0015-authentification-commandes.md) | Authentification des commandes par HMAC tronqué | Accepté (arbitrage A4, 2026-09-25) |
+| [0016](0016-conduites-stockees.md) | Conduites stockées dans le nœud | Accepté (demande de l'utilisateur, 2026-10-13) |

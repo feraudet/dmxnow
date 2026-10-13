@@ -17,6 +17,7 @@
 #include "dmxnow/gamma.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
+#include "dmxnow/show.h"
 
 using namespace dmxnow;
 
@@ -525,6 +526,73 @@ void test_output_cadence() {
     TEST_ASSERT_EQUAL_UINT32(1288, dmx_frame_us(24));
 }
 
+// --- Stored show (PROTOCOL §10) ---------------------------------------------------------------
+void test_show_crc32_check_value() {
+    TEST_ASSERT_EQUAL_HEX32(0xCBF43926, crc32(reinterpret_cast<const uint8_t*>("123456789"), 9));
+    TEST_ASSERT_EQUAL_HEX32(0xCBF43926, crc32(reinterpret_cast<const uint8_t*>("6789"), 4,
+                                              crc32(reinterpret_cast<const uint8_t*>("12345"), 5)));
+}
+
+void test_show_parse_and_render_like_python() {
+    JsonObject o = V["show"]["valid"][0];
+    std::vector<uint8_t> d = hex(o["hex"]);
+    d.resize(d.size() + 64, 0xFF);   // erased flash after the file: the size comes from the header
+    ShowPlayer p;
+    TEST_ASSERT_TRUE(p.load(d.data(), d.size()));
+    TEST_ASSERT_EQUAL_STRING(o["show_name"] | "", p.info().name);
+    TEST_ASSERT_EQUAL(o["channels"].as<int>(), p.info().channels);
+    TEST_ASSERT_EQUAL(o["resume_s"].as<int>(), p.info().resume_s);
+    TEST_ASSERT_EQUAL(o["steps"].as<int>(), p.info().steps);
+    TEST_ASSERT_EQUAL(o["loop_ms"].as<int>(), p.info().loop_ms);
+    TEST_ASSERT_EQUAL(d.size() - 64, p.info().size);
+    uint16_t start = o["start_address"];
+    const uint32_t t0 = 0xFFFFFF00u;   // millis() wrap during the show
+    p.restart(t0);
+    for (JsonObject r : o["renders"].as<JsonArray>()) {
+        uint8_t frame[kDmxSlots];
+        std::memset(frame, 0xAA, sizeof frame);
+        p.render(t0 + r["t"].as<uint32_t>(), start, frame);
+        int written = 0;
+        for (JsonArray kv : r["slots"].as<JsonArray>()) {
+            char msg[48];
+            snprintf(msg, sizeof msg, "t=%u slot index %d", r["t"].as<unsigned>(), kv[0].as<int>());
+            TEST_ASSERT_EQUAL_UINT8_MESSAGE(kv[1].as<int>(), frame[kv[0].as<int>()], msg);
+            ++written;
+        }
+        int untouched = 0;
+        for (uint8_t b : frame) untouched += b == 0xAA;
+        TEST_ASSERT_GREATER_OR_EQUAL(int(kDmxSlots) - written, untouched);   // other slots kept
+    }
+}
+
+void test_show_invalid_files_rejected() {
+    for (JsonObject o : V["show"]["invalid"].as<JsonArray>()) {
+        std::vector<uint8_t> d = hex(o["hex"]);
+        ShowPlayer p;
+        TEST_ASSERT_FALSE_MESSAGE(p.load(d.data(), d.size()), o["name"] | "");
+        TEST_ASSERT_FALSE(p.loaded());
+    }
+    std::vector<uint8_t> erased(256, 0xFF);   // blank partition
+    TEST_ASSERT_FALSE(show_parse(erased.data(), erased.size(), nullptr));
+}
+
+void test_show_late_render_restarts_and_offsets_outside_universe() {
+    JsonObject o = V["show"]["valid"][0];
+    std::vector<uint8_t> d = hex(o["hex"]);
+    ShowPlayer p;
+    TEST_ASSERT_TRUE(p.load(d.data(), d.size()));
+    uint8_t frame[kDmxSlots] = {};
+    p.restart(0);
+    p.render(100000, 6, frame);   // stalled far more than a loop: back to keyframe 0
+    TEST_ASSERT_EQUAL_UINT8(10, frame[6]);
+    TEST_ASSERT_EQUAL_UINT8(255, frame[19]);
+    std::memset(frame, 0, sizeof frame);
+    p.render(100000, 512, frame);   // start_address 512: offsets 1 and 2 fall outside
+    TEST_ASSERT_EQUAL_UINT8(255, frame[19]);
+    for (int i = 0; i < int(kDmxSlots); ++i)
+        if (i != 19) TEST_ASSERT_EQUAL_UINT8(0, frame[i]);
+}
+
 int main() {
     std::ifstream f(VECTORS_PATH);
     std::stringstream ss;
@@ -556,5 +624,9 @@ int main() {
     RUN_TEST(test_gamma_bounds_monotonic_linear);
     RUN_TEST(test_pwm_resolution);
     RUN_TEST(test_output_cadence);
+    RUN_TEST(test_show_crc32_check_value);
+    RUN_TEST(test_show_parse_and_render_like_python);
+    RUN_TEST(test_show_invalid_files_rejected);
+    RUN_TEST(test_show_late_render_restarts_and_offsets_outside_universe);
     return UNITY_END();
 }

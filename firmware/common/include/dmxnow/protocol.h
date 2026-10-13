@@ -103,7 +103,7 @@ struct Heartbeat {
     uint32_t lost_frames = 0;
     uint32_t rejected_frames = 0;
     uint32_t uptime_s = 0;
-    uint8_t status = 0;               // bit0 DMX, bit1 blackout, bit2 maint, bit3 identify, bit4 dongle known
+    uint8_t status = 0;               // bit0 DMX, bit1 blackout, bit2 maint, bit3 identify, bit4 dongle known, bit5 show
     uint8_t radio_channel = 6;
     uint16_t dmx_out_slots = 512;
     uint8_t reset_reason = 0;
@@ -112,7 +112,8 @@ void encode_heartbeat(const Heartbeat& hb, uint8_t* out);            // 56 bytes
 bool decode_heartbeat(const uint8_t* in, size_t len, Heartbeat* hb);
 
 namespace hb_status {
-constexpr uint8_t kDmx = 0x01, kBlackout = 0x02, kMaintenance = 0x04, kIdentify = 0x08, kDongleKnown = 0x10;
+constexpr uint8_t kDmx = 0x01, kBlackout = 0x02, kMaintenance = 0x04, kIdentify = 0x08, kDongleKnown = 0x10,
+                  kShow = 0x20;   // the stored show drives the outputs
 }
 
 struct Beacon {
@@ -131,7 +132,12 @@ enum class Opcode : uint8_t {
     Maintenance = 0x05,
     Reboot = 0x06,
     FactoryReset = 0x07,
+    ShowWrite = 0x08,     // offset u32, data: stored show upload (PROTOCOL §10.2)
+    ShowCommit = 0x09,    // size u32, crc32 u32: check and play
+    ShowClear = 0x0A,
+    ShowInfo = 0x0B,
 };
+constexpr size_t kShowWriteMax = 192;   // data bytes per SHOW_WRITE (250-byte command packet)
 constexpr uint32_t kFactoryResetConfirm = 0x52455345;   // "RESE"
 
 enum class AckStatus : uint8_t {
