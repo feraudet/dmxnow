@@ -32,3 +32,25 @@ avec un câble USB soudé ou un adaptateur ([docs/flash.md](../docs/flash.md)).
   pendant que J1 est sous tension sans que ce soit voulu).
 - Le boîtier (`enclosure/enclosure.py`) doit suivre : découpe ou accès selon le choix
   ci-dessus.
+
+## Secteur
+
+### Terre (PE) sur la carte
+
+Demandé le 2026-10-13. En v0.3, le PE ne passe pas par la carte : J1, J4 et J7 sont des
+WAGO 2604 à 2 pôles (L, N), et les trois PE sont réunis par un WAGO 221-413 dans le
+compartiment 230 V (arbitrage A9 de `spec/SPEC.md`). Câbler ce WAGO à part est une étape
+de plus, et un oubli possible.
+
+- Passer J1, J4 et J7 en **WAGO 2604 à 3 pôles** (L, N, PE), par exemple 2604-1103.
+- Relier les trois PE par une piste ou un plan **dimensionné pour le courant de défaut**
+  (au moins la section de L et N), sur les deux couches si besoin.
+- Le PE reste dans la zone 230 V et garde les mêmes distances que L et N vis-à-vis de la
+  basse tension (≥ 6 mm, `gen/project.py`). **Aucune liaison** entre le PE et la GND
+  logique, DMX ou LED : l'isolement est assuré par PS1 (risque R-09).
+- C'est ce routage qui avait été jugé infaisable proprement en 2 couches (A9). Options à
+  étudier : PCB 4 couches, carte un peu plus haute dans la zone 230 V, ou borniers
+  décalés pour libérer un couloir PE.
+- Le boîtier (`enclosure/enclosure.py`) et `docs/cablage.md` doivent suivre (plus de
+  WAGO 221-413).
+- 🔴 **Relecture humaine obligatoire** : conducteur de protection d'une carte 230 V.
