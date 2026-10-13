@@ -54,8 +54,11 @@ SHIPLAP = (SKIRT[1], SKIRT[1] + 3.0)  # 230 V cover overlaps the LV lid here
 # Glands (V-ENC-01): (name, wall, position along the wall (PCB y or x), axis z, hole d,
 # lock-nut across corners). M16x1.5: H05VV-F 3G1.5 (8-9 mm) and LED cables; M12x1.5 for
 # the DMX tail (range up to 7 mm: DMX cables are often 6-6.5 mm, too big for PG7).
-M16 = (16.3, 22.0)
-M12 = (12.3, 17.5)
+# hole d: thread + 0.8 mm, FDM horizontal holes print undersized (PLA mockup 2026-10-13:
+# 16.3 mm too tight for the Alkan M16x1.5 thread)
+M16 = (16.8, 22.0)
+M12 = (12.8, 17.5)
+DROP_TOP = 0.2        # teardrop truncated this far above the circle (wider hole, nut still covers it)
 GLANDS = [("mains_in", "L", 0.0, 15.0) + M16, ("out_fixture", "L", 21.5, 15.0) + M16,
           ("out_ledpsu", "L", 43.0, 15.0) + M16,
           ("dmx", "B", 81.0, 21.2) + M12,
@@ -97,7 +100,7 @@ def cyl(x, y, d, z1, z2):
 def _drop(r):
     """Teardrop outline (local 2D, point up), truncated 0.6 mm above the circle: the
     flat top bridges easily and the opening stays under the gland seal and lock nut."""
-    h = r + 0.6
+    h = r + DROP_TOP
     w = r * math.sqrt(2) - h          # half-width of the 45 deg point at height h
     return [(-r / math.sqrt(2), r / math.sqrt(2)), (-w, h), (w, h), (r / math.sqrt(2), r / math.sqrt(2)), (0, 0)]
 
@@ -198,7 +201,7 @@ def base(variant):
             cyl(h["x"], h["y"], INSERT_D, PCB_Z0 - INSERT_L, PCB_Z0 + 1))
     h1 = HOLES["H1"]
     b = b.union(cyl(h1["x"], h1["y"], 7.0, FLOOR - 0.1, PCB_Z0)).union(
-        cyl(h1["x"], h1["y"], h1["d"] - 0.3, PCB_Z0 - 0.1, PCB_Z1 + 1.4))
+        cyl(h1["x"], h1["y"], h1["d"] - 0.6, PCB_Z0 - 0.1, PCB_Z1 + 1.4))   # FDM pins print oversized
     for s in supports(variant):
         b = b.union(cyl(s["x"], s["y"], 6.0, FLOOR - 0.1, PCB_Z0))
 
@@ -419,8 +422,8 @@ def check(variant, parts):
     # gland openings (truncated teardrop) covered by the lock nut (radius at the flats)
     for name, wall, pos, z, d, ac in GLANDS:
         r = d / 2
-        w = r * math.sqrt(2) - (r + 0.6)
-        if math.hypot(w, r + 0.6) > ac / 2 * math.cos(math.pi / 6) - 0.3:
+        w = r * math.sqrt(2) - (r + DROP_TOP)
+        if math.hypot(w, r + DROP_TOP) > ac / 2 * math.cos(math.pi / 6) - 0.3:
             errs.append("gland %s: opening not covered by its lock nut" % name)
     # no metal within 15 mm of the antenna (inserts, screws), edge distance
     ax1, ay1, ax2, ay2 = BOARD["antenna"]
