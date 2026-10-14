@@ -1,0 +1,9 @@
+*.html
+.genere-*
+.publie-*
+erreurs.log
+.bloque-client
+.installe.json
+.echec-generation
+.avertit-client
+.signale-*

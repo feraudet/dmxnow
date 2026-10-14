@@ -1,0 +1,29 @@
+nom: dmxnow
+compte_gh: feraudet
+domaines:
+- Spécifications
+- Matériel
+- Code
+- Tests
+- Documentation
+- Infra
+- Livraison
+- Organisation
+regles:
+- motif: hardware/*
+  domaine: Matériel
+- motif: enclosure/*
+  domaine: Matériel
+- motif: spec/*
+  domaine: Spécifications
+- motif: firmware/*/test/*
+  domaine: Tests
+- motif: pi/tests/*
+  domaine: Tests
+domaines_publics: []
+documents_publics: []
+interdits: []
+deploiements: []
+artifacts:
+  interne: https://claude.ai/artifact/SjCCNCA6M3G8Dyy9u7BXxb
+  client: null
