@@ -23,4 +23,9 @@ void set_auth_counter(uint32_t c);
 uint8_t boot_count();
 void set_boot_count(uint8_t n);
 
+// saved role (SPEC 4.15): 0 node, 1 dongle. Kept out of the NodeConfig blob, whose layout
+// change would erase the configuration of every enrolled node.
+uint8_t role();
+void set_role(uint8_t r);
+
 }  // namespace store

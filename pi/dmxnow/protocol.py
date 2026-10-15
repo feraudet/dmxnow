@@ -28,6 +28,10 @@ OP_SHOW_WRITE, OP_SHOW_COMMIT, OP_SHOW_CLEAR, OP_SHOW_INFO = 0x08, 0x09, 0x0A, 0
 OP_OTA_BEGIN, OP_OTA_WRITE, OP_OTA_END = 0x0C, 0x0D, 0x0E   # firmware over the radio (PROTOCOL §11)
 OTA_SLOT_SIZE = 0x1E0000       # one OTA slot (firmware/node/partitions.csv)
 OTA_IMAGE_MAGIC = 0xE9         # first byte of an ESP32 app image
+OP_SET_ROLE = 0x0F             # role u8: 0 node, 1 dongle (SPEC 4.15)
+ROLES = {"node": 0, "dongle": 1}
+BOARDS = {0: "XIAO dongle", 1: "node board"}
+ROLE_SOURCES = {0: "fixed", 1: "automatic (until power-off)", 2: "saved"}
 FACTORY_RESET_CONFIRM = 0x52455345
 
 ACK_STATUS = {0: "ok", 1: "unknown_opcode", 2: "invalid_arg", 3: "auth_failed", 4: "unsupported",
@@ -35,6 +39,7 @@ ACK_STATUS = {0: "ok", 1: "unknown_opcode", 2: "invalid_arg", 3: "auth_failed", 
 
 # serial link (§8)
 S_UNIVERSE, S_COMMAND, S_DONGLE_CONFIG, S_PING, S_GET_STATUS = 0x01, 0x02, 0x03, 0x04, 0x05
+S_SET_ROLE = 0x06              # role u8: a node board acting as dongle goes back to node
 S_RADIO_RX, S_CMD_RESULT, S_STATUS, S_PONG, S_LOG = 0x81, 0x82, 0x83, 0x84, 0x85
 S_MAX_PAYLOAD = 1020
 CMD_RESULT = {0: "acked", 1: "timeout", 2: "broadcast_done"}
@@ -229,9 +234,13 @@ def decode_heartbeat(p: bytes) -> dict:
 
 def decode_status(p: bytes) -> dict:
     fw, ch, net, rate, mode, active, ok, fail, serr, coal, up = struct.unpack_from("<3sBHBBBIIIII", p)
-    return {"fw_version": ".".join(str(x) for x in fw), "channel": ch, "net_id": net, "phy_rate": rate,
-            "mode": "v1" if mode else "v2", "active_universes": active, "tx_ok": ok, "tx_fail": fail,
-            "serial_errors": serr, "coalesced": coal, "uptime_s": up}
+    st = {"fw_version": ".".join(str(x) for x in fw), "channel": ch, "net_id": net, "phy_rate": rate,
+          "mode": "v1" if mode else "v2", "active_universes": active, "tx_ok": ok, "tx_fail": fail,
+          "serial_errors": serr, "coalesced": coal, "uptime_s": up}
+    if len(p) >= 31:   # added 2026-10-15: board and role source (older dongles: absent)
+        st["board"] = BOARDS.get(p[29], f"unknown ({p[29]})")
+        st["role"] = ROLE_SOURCES.get(p[30], f"unknown ({p[30]})")
+    return st
 
 
 # --- configuration TLV (§6.4) -----------------------------------------------------------------------

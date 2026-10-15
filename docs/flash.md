@@ -1,8 +1,11 @@
 # Flash du firmware
 
-Deux cartes à programmer : le **nœud** (ESP32-C3-MINI-1) et le **dongle** (Seeed XIAO
-ESP32-C3). Les deux se programment par leur USB natif (USB Serial/JTAG de l'ESP32-C3),
-sans adaptateur série.
+Deux firmwares : celui des **cartes nœud** (ESP32-C3-MINI-1), le même pour toutes, et
+celui du **dongle XIAO** (Seeed XIAO ESP32-C3). Les deux se programment par leur USB natif
+(USB Serial/JTAG de l'ESP32-C3), sans adaptateur série.
+
+Une carte nœud peut aussi servir de dongle, sans autre firmware : voir
+[roles.md](roles.md).
 
 ## 1. Outils
 

@@ -51,6 +51,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | EF-14  | Identification d'un nœud monté et fermé sans démontage (PROTOCOL `IDENTIFY`). |
 | EF-15  | Conduite stockée (ajout du 2026-10-13, ADR 0016) : le nœud garde en flash une conduite générée sur un poste et déployée par la CLI (PROTOCOL §10), la joue en boucle dès la mise sous tension sur les rubans et la ligne DMX, rend la main à QLC+ dès qu'un flux DMX de son univers arrive et la reprend après `resume_s` sans flux. Le relais ne suit jamais la conduite. |
 | EF-16  | Mise à jour du firmware par la radio (ajout du 2026-10-15, ADR 0017) : le Pi envoie `firmware.bin` à un nœud par ESP-NOW (`dmxnow ota`, PROTOCOL §11), sans point d'accès Wi-Fi ni présence sur place. Même retour automatique à l'ancienne image qu'avec l'OTA web (§4.9). |
+| EF-17  | Un seul firmware pour toutes les cartes nœud (ajout du 2026-10-15, ADR 0018) : chaque carte est nœud par défaut et peut servir de dongle, branchée en USB au Pi, hors secteur. Elle bascule seule quand le démon lui parle (jusqu'à l'extinction) ou par `dmxnow role` (rôle enregistré). En dongle, elle sort aussi son univers sur sa XLR. La XIAO garde son firmware de dongle. |
 
 ### 2.2 Non fonctionnelles
 
@@ -639,6 +640,32 @@ contrôle pour la relecture humaine.
   sortie DMX et les PWM peuvent hoqueter pendant les écritures de flash : à faire hors
   séance. Refusé pendant le mode maintenance (l'OTA web utilise la même bibliothèque).
 
+### 4.15 Rôle d'une carte : nœud ou dongle (EF-17, ADR 0018, ajout du 2026-10-15)
+
+- **Un firmware** : `firmware/node` tourne sur toutes les cartes nœud. L'application du
+  dongle est une bibliothèque (`firmware/dongle_app`) partagée avec `firmware/dongle`,
+  le firmware de la XIAO, qui reste toujours dongle.
+- **Rôle nœud** (défaut) : comportement habituel. La carte écoute aussi son USB.
+- **Bascule automatique** : un `PING` valide du démon sur l'USB (trame COBS, CRC-16
+  juste) fait de la carte un dongle sur-le-champ, sans redémarrer : relais ouvert, PWM
+  à 0, conduite arrêtée, puis application du dongle. Pas de redémarrage, car l'ouverture
+  du port par un hôte peut réinitialiser l'ESP32-C3 et défaire la bascule. Jusqu'à
+  l'extinction : rebranchée sur le secteur, la carte redevient un nœud.
+- **Rôle enregistré** : `dmxnow role <nœud> dongle` (commande radio `SET_ROLE`,
+  PROTOCOL §6.3) enregistre le rôle en NVS, à part de la configuration du nœud (changer
+  le bloc de configuration effacerait celle des nœuds enrôlés). La carte redémarre en
+  dongle à chaque mise sous tension. Retour : `dmxnow role dongle node` (message série
+  `SET_ROLE`, PROTOCOL §8.3), ou `FACTORY_RESET` (SW1 10 s).
+- **En dongle** : la carte émet par radio les univers du Pi **et** sort sur sa XLR
+  l'univers de sa configuration (`universe`, `dmx_out_slots`). Relais ouvert, PWM à 0.
+  Le `STATUS` du dongle indique la carte et l'origine du rôle (`dmxnow status`).
+- 🔴 **Une carte en rôle dongle est branchée à un ordinateur par l'USB : elle ne doit
+  jamais être raccordée au secteur** (J1 libre), alimentée par l'USB seul (J3-5V). La
+  carte v0.3 ne sait pas détecter le secteur : c'est une règle d'utilisation
+  (docs/securite.md, règle 2 ; relecture humaine obligatoire).
+- **Limite** : sans antenne externe, la portée d'une carte nœud en dongle est celle de
+  l'antenne du module, plus faible que la XIAO avec son dipôle 5 dBi.
+
 ---
 
 ## 5. Budgets de latence et de débit
@@ -866,6 +893,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-FW-09 | Conduite stockée sur carte réelle : projection de la partition après écriture (pas de ligne de cache périmée, `remap()` après l'envoi), durée d'effacement d'un secteur de 4 ko (≈ 45 ms attendus, couverte par les retransmissions du dongle), durée d'un déploiement de 18 ko, rendu visuel du feu sur ruban RGBW | Banc, ESP-IDF *SPI Flash API* | faible |
 | V-FW-10 | OTA par la radio sur carte réelle : durée d'une mise à jour complète, taux de morceaux répétés, comportement de la sortie DMX pendant l'envoi, confirmation de l'image et retour à l'ancienne si le dongle se tait | Banc | moyenne |
+| V-FW-11 | Carte nœud en dongle : bascule automatique au premier PING (vue au banc le 2026-10-15 sur node-2442B0, retour au nœud par `SET_ROLE` aussi), puis à vérifier avec un second nœud : portée avec l'antenne du module, sortie DMX filaire, rôle enregistré par la radio | Banc | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |

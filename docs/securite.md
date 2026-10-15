@@ -25,7 +25,10 @@ fondu) peut rendre la queue DMX ou les rubans dangereux.
    le relais) avant d'ouvrir un couvercle. Le relais ne coupe que la **phase** des sorties :
    le neutre, les borniers d'entrée, F1 et PS1 restent sous tension.
 2. **Jamais de programmation ni de mesure avec le secteur raccordé** (ES-07). Le flash par
-   J3 se fait carte hors secteur, alimentée par **J3-5V** (jamais J3-3V3).
+   J3 se fait carte hors secteur, alimentée par **J3-5V** (jamais J3-3V3). 🔴 Même règle
+   pour une carte nœud qui **sert de dongle** ([roles.md](roles.md)) : branchée en USB au
+   Pi, elle n'est jamais raccordée au secteur (J1, J4, J7 libres). Relecture humaine
+   obligatoire.
 3. **Terre (PE)** : les trois PE (entrée, deux sorties) se rejoignent dans le WAGO 221-413
    du compartiment 230 V. Le PE ne passe pas par la carte et n'est jamais coupé (ES-03).
 4. **Protection amont** : prise protégée par un disjoncteur **≤ 16 A** et un différentiel

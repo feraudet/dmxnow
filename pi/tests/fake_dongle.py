@@ -34,6 +34,8 @@ class FakeDongle:
         self.node_config = {"universe": 0, "start_address": 1, "name": "node-123456"}
         self.show_buf, self.show = bytearray(), None   # stored show (PROTOCOL §10)
         self.ota, self.firmware, self.ota_writes = None, None, 0   # firmware over the radio (§11)
+        self.board, self.role_source = 0, 0   # STATUS: XIAO, fixed role (SPEC 4.15)
+        self.usb_role, self.node_role = None, 0   # SET_ROLE received on USB / by the node
         self.settings = {"channel": 6, "phy_rate": 0x0B, "power_dbm": 15, "hold_timeout_ms": 10000,
                          "refresh_hz": 44, "mode": 0}
         self.seq = 0
@@ -99,6 +101,11 @@ class FakeDongle:
                     self.status()
                 elif ftype == P.S_GET_STATUS:
                     self.status()
+                elif ftype == P.S_SET_ROLE:   # like firmware/dongle_app
+                    if self.board == 0:
+                        self.log("SET_ROLE refused: this board is always a dongle")
+                    else:
+                        self.usb_role = payload[0]
                 elif ftype == P.S_COMMAND and len(payload) >= 10:   # shorter: dropped silently
                     self._command(payload)
 
@@ -111,7 +118,7 @@ class FakeDongle:
         s = self.settings
         self.send(P.S_STATUS, struct.pack("<3sBHBBBIIIII", bytes([1, 0, 0]), s["channel"], self.net_id,
                                           s["phy_rate"], s["mode"], len({u for u, _ in self.universes}),
-                                          0, 0, 0, 0, 1))
+                                          0, 0, 0, 0, 1) + bytes([self.board, self.role_source]))
 
     def _apply_config(self, tlv: bytes) -> bool:
         """firmware/common/src/dongle.cpp apply_dongle_config: all or nothing."""
@@ -204,6 +211,13 @@ class FakeDongle:
             ok = o is not None and size == o["size"] == len(o["buf"]) and crc == o["crc"] == zlib.crc32(o["buf"])
             self.firmware = bytes(o["buf"]) if ok else None
             self.ota, status = None, 0 if ok else 2
+        elif status == 0 and opcode == P.OP_SET_ROLE:
+            if not args or args[0] > 1:
+                status = 2
+            elif self.key is None:                       # like OTA_BEGIN
+                status = 3
+            else:
+                self.node_role = args[0]
         elif status == 0 and opcode == P.OP_SHOW_CLEAR:
             self.show_buf, self.show = bytearray(), None
         elif status == 0 and opcode == P.OP_SHOW_INFO:

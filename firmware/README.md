@@ -4,8 +4,9 @@
 |---------|---------|
 | `common/` | Bibliothèque C++17 sans Arduino : protocole v1 (en-tête, validation, CRC16, COBS), configuration TLV, réassemblage, compteur de pertes, logique du relais, gamma, cadence d'émission, HMAC-SHA256 et anti-rejeu, historique des commandes. Tests natifs. |
 | `common/test_vectors.json` | Vecteurs communs (PROTOCOL §9), produits par `common/tools/gen_vectors.py` avec une implémentation Python indépendante ; consommés par les tests C++ et, plus tard, par ceux du démon Pi. |
-| `node/` | Firmware du nœud, ESP32-C3-MINI-1, Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5 (pioarduino 55.03.312, épinglé). |
-| `dongle/` | Firmware du dongle, Seeed XIAO ESP32-C3 sur l'USB du Pi (même plateforme épinglée). |
+| `node/` | Firmware de **toutes les cartes nœud**, ESP32-C3-MINI-1, Arduino-ESP32 3.3.12 / ESP-IDF 5.5.5 (pioarduino 55.03.312, épinglé). Rôle nœud par défaut, rôle dongle quand le démon lui parle sur l'USB ou quand il est enregistré (SPEC 4.15, [docs/roles.md](../docs/roles.md)). |
+| `dongle_app/` | Application du dongle (liaison USB avec le Pi, émission ESP-NOW), bibliothèque partagée par `node/` et `dongle/`. |
+| `dongle/` | Firmware de la XIAO ESP32-C3 sur l'USB du Pi, toujours dongle (même plateforme épinglée). |
 
 ## Compiler et tester
 
@@ -84,6 +85,7 @@ la radio ou du projecteur.
 | SW1 : ≥ 3 s maintenance, ≥ 10 s remise à zéro | SPEC 4.9, A6 | `node/src/node.cpp` |
 | LED d'état (option) | SPEC 4.9, A7 | `node/src/node.cpp` |
 | Maintenance AP+STA, page web, OTA avec retour arrière | SPEC 4.9 | `node/src/maintenance.cpp` |
+| Rôle nœud ou dongle, bascule au premier PING sur l'USB, `SET_ROLE` | SPEC 4.15 | `common/src/role.cpp`, `node/src/main.cpp`, `node/src/node.cpp` (`become_dongle`, `dongle_setup`), `dongle_app/` |
 
 ## Recette sur banc (SPEC 8.3) : à faire sur les premières cartes
 

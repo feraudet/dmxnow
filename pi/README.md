@@ -55,6 +55,7 @@ un des `universes` de `/etc/dmxnow/dmxnowd.toml`. Transmission « Complète » r
 | `dmxnow reboot lyre-cour` · `dmxnow factory-reset lyre-cour --yes` | |
 | `dmxnow dongle-config channel=11 power_dbm=15` | Réglage radio du dongle à chaud (non écrit dans le fichier). |
 | `dmxnow show deploy feu.dxs node-2442B0\|all` · `show info` · `show clear` · `show inspect feu.dxs` | Conduite stockée dans le nœud, jouée sans DMX ([docs/conduites.md](../docs/conduites.md)). |
+| `dmxnow role node-2442B0 dongle\|node` · `dmxnow role dongle node` | Rôle d'une carte nœud : dongle enregistré (par la radio), ou retour au nœud de la carte branchée en USB ([docs/roles.md](../docs/roles.md)). `dmxnow status` indique la carte (`XIAO dongle` ou `node board`) et l'origine du rôle. |
 | `dmxnow ota firmware.bin node-2442B0\|all [--no-wait]` | Mise à jour du firmware par la radio, nœud par nœud, puis attente de la confirmation de l'image ([docs/flash.md §4](../docs/flash.md)). |
 
 Les cibles s'écrivent par MAC, par nom ou `all`. `--json` donne la réponse brute.

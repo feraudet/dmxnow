@@ -195,7 +195,18 @@ class Daemon:
             self.cfg = new
             self.on_connect()
             return {"sent": self.cfg.dongle_values()}
+        if cmd == "dongle_role":
+            # the board on the USB port (SPEC 4.15): a node board acting as dongle goes back
+            # to node; a XIAO refuses (LOG), its role is fixed
+            role = P.ROLES[req.get("role", "node")]
+            if not self.link.send(P.S_SET_ROLE, bytes([role])):
+                raise ValueError("dongle not connected")
+            return {"sent": {"role": req.get("role", "node")}, "board": self.dongle_status.get("board")}
         target = self.resolve(req.get("target", ""))
+        if cmd == "role":
+            if target == P.BROADCAST:
+                raise ValueError("a role is set node by node, not to 'all' at once")
+            return await self.command(target, P.OP_SET_ROLE, bytes([P.ROLES[req.get("role", "node")]]))
         if cmd == "identify":
             return await self.command(target, P.OP_IDENTIFY, struct.pack("<H", int(req.get("duration", 10))))
         if cmd == "set":

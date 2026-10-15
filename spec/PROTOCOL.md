@@ -296,6 +296,7 @@ Mécanisme retenu (ADR 0013) :
 | `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`) et la conduite stockée (§10), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
 | `0x08` à `0x0B` | `SHOW_*` | §10.2 | Conduite stockée : écriture, validation, effacement, état. |
 | `0x0C` à `0x0E` | `OTA_*` | §11 | Mise à jour du firmware par la radio : début, morceau, fin. |
+| `0x0F` | `SET_ROLE`      | `role` u8 : 0 = nœud, 1 = dongle | Enregistre le rôle de la carte (SPEC §4.15, ajout du 2026-10-15). 1 : redémarre 600 ms après l'ACK, en dongle, à brancher en USB sur le Pi. Nœud sans clé réseau : `AUTH_FAILED`, comme `OTA_BEGIN`. |
 
 ### 6.4 Clés de configuration (TLV)
 
@@ -394,6 +395,7 @@ la longueur est < 4 ou dont le CRC est faux est jetée (compteur `serial_errors`
 | `0x03` | `DONGLE_CONFIG` | TLV : `0x01` canal u8, `0x02` `net_id` u16, `0x03` débit PHY u8 (énumération `wifi_phy_rate_t`), `0x04` puissance dBm u8, `0x05` `hold_timeout_ms` u32, `0x06` rafraîchissement Hz u8 (défaut 44), `0x07` mode radio u8 (0 = v2, 1 = fragmenté v1). Persisté en NVS du dongle. |
 | `0x04` | `PING`          | `token` u32 |
 | `0x05` | `GET_STATUS`    | - |
+| `0x06` | `SET_ROLE`      | `role` u8 (0 = nœud, 1 = dongle). Pour une carte nœud qui sert de dongle (SPEC §4.15) : 0 enregistre le rôle nœud et redémarre en nœud, sans rebasculer en dongle tant qu'elle n'a pas été éteinte. La XIAO refuse (LOG) : son rôle est fixe. Ajout du 2026-10-15. |
 
 ### 8.4 Messages dongle → Pi
 
@@ -401,7 +403,7 @@ la longueur est < 4 ou dont le CRC est faux est jetée (compteur `serial_errors`
 |--------|--------------|--------------|
 | `0x81` | `RADIO_RX`   | `rssi` i8, `src_mac` 6, paquet ESP-NOW brut complet (en-tête inclus). HEARTBEAT et ACK sont ainsi décodés par le Pi avec le même parseur que les firmwares |
 | `0x82` | `CMD_RESULT` | `cmd_id` u16, `target` 6, `result` u8 (0 acquitté, 1 expiré sans ACK, 2 broadcast terminé), `attempts` u8 |
-| `0x83` | `STATUS`     | `fw_version` 3, `channel` u8, `net_id` u16, `phy_rate` u8, `mode` u8, `active_universes` u8, `tx_ok` u32, `tx_fail` u32, `serial_errors` u32, `coalesced` u32, `uptime_s` u32 |
+| `0x83` | `STATUS`     | `fw_version` 3, `channel` u8, `net_id` u16, `phy_rate` u8, `mode` u8, `active_universes` u8, `tx_ok` u32, `tx_fail` u32, `serial_errors` u32, `coalesced` u32, `uptime_s` u32, puis (ajout du 2026-10-15, absents sur un ancien firmware) `board` u8 (0 = XIAO, 1 = carte nœud) et `role_source` u8 (0 = fixe, 1 = automatique jusqu'à l'extinction, 2 = enregistré), SPEC §4.15 |
 | `0x84` | `PONG`       | `token` u32 |
 | `0x85` | `LOG`        | `level` u8 (0 erreur … 3 debug), texte UTF-8 |
 

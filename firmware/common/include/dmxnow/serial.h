@@ -8,7 +8,8 @@ namespace dmxnow {
 
 namespace ser {
 // Pi -> dongle
-constexpr uint8_t kUniverse = 0x01, kCommand = 0x02, kDongleConfig = 0x03, kPing = 0x04, kGetStatus = 0x05;
+constexpr uint8_t kUniverse = 0x01, kCommand = 0x02, kDongleConfig = 0x03, kPing = 0x04, kGetStatus = 0x05,
+                  kSetRole = 0x06;   // role u8: a node board acting as dongle goes back to node
 // dongle -> Pi
 constexpr uint8_t kRadioRx = 0x81, kCmdResult = 0x82, kStatus = 0x83, kPong = 0x84, kLog = 0x85;
 constexpr size_t kMaxPayload = 1020;

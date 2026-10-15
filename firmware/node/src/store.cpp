@@ -53,4 +53,7 @@ void set_auth_counter(uint32_t c) { prefs.putUInt("actr", c); }
 uint8_t boot_count() { return prefs.getUChar("boots", 0); }
 void set_boot_count(uint8_t n) { prefs.putUChar("boots", n); }
 
+uint8_t role() { return prefs.getUChar("role", 0); }
+void set_role(uint8_t r) { prefs.putUChar("role", r); }
+
 }  // namespace store

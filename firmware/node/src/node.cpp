@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Update.h>
+#include <esp_attr.h>
 #include <esp_mac.h>
 #include <esp_ota_ops.h>
 #include <esp_random.h>
@@ -19,7 +20,10 @@
 #include "dmxnow/ota.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
+#include "dmxnow/role.h"
+#include "dmxnow/serial.h"
 #include "dmxnow/show.h"
+#include "dongle_app.h"
 #include "dmxnow/usb_dmx.h"
 #include "maintenance.h"
 #include "pwm_out.h"
@@ -55,6 +59,34 @@ RelayLogic relay;
 UsbDmxParser usb_dmx;   // DMX frames on the USB port (Enttec Pro label 6), no radio
 uint32_t usb_frames = 0, usb_frames_shown = 0, usb_shown_ms = 0;
 OtaSession ota;         // firmware over the radio (PROTOCOL §11)
+
+// role (SPEC 4.15): survives esp_restart(), random after a power-on (magic values)
+RTC_NOINIT_ATTR uint32_t rtc_role;
+BootRole boot;
+SerialDecoder pi_link;  // node role: a PING from the Pi daemon on USB -> become dongle
+bool dongle_mode = false;
+
+// dongle role on this board (SPEC 4.15): wired DMX of the node's universe on the XLR,
+// relay open, PWM off. serial_started: switching at runtime, Serial already up.
+void start_dongle(RoleSource source, bool serial_started) {
+    // a new image running as dongle is confirmed at once: it talks to the Pi over USB
+    esp_ota_mark_app_valid_cancel_rollback();
+    dongle_app::Hooks h;
+    h.board = 1;
+    h.role_source = uint8_t(source);
+    h.serial_started = serial_started;
+    h.on_universe = [](uint16_t id, const uint8_t* data, uint16_t len) {
+        if (id == cfg.universe) dmx_out::set_frame(data, len);
+    };
+    h.on_set_role = [](uint8_t r) {
+        store::set_role(r);
+        rtc_role = kRtcNodeThisBoot;   // node now, even if the daemon keeps talking on USB
+        esp_restart();
+    };
+    dongle_app::setup(h);
+    dongle_mode = true;
+}
+
 
 bool ota_sink(const uint8_t* d, size_t n, void*) { return Update.write(const_cast<uint8_t*>(d), n) == n; }
 Reassembler reasm;
@@ -197,6 +229,19 @@ void stop_show() {
     if (!show_on) return;
     show_on = false;
     schedule_heartbeat();
+}
+
+// node role, the Pi daemon spoke on USB: become its dongle now, without restarting (a
+// restart could be undone by the port opening, which resets the chip)
+void become_dongle() {
+    Serial.println("dmxnow: Pi daemon on USB, this board is now a dongle until power-off");
+    stop_show();
+    identifying = false;
+    digitalWrite(board::kRelay, LOW);
+    pwm_out::all_off();
+    std::memset(frame, 0, sizeof frame);   // XLR silent until the Pi sends the universe
+    dmx_out::set_frame(frame, frame_len);
+    start_dongle(RoleSource::Automatic, true);
 }
 
 void render_show(uint32_t now) {
@@ -433,6 +478,13 @@ void handle_command(const radio::Packet& p, const Header& h) {
                 ota.abort();
                 break;
             }
+            case Opcode::SetRole: {   // SPEC 4.15: dongle role saved, restart
+                if (cmd.args_len < 1 || cmd.args[0] > 1) { st = AckStatus::InvalidArg; break; }
+                if (!cfg.has_net_key) { st = AckStatus::AuthFailed; break; }   // see OTA_BEGIN
+                store::set_role(cmd.args[0]);
+                if (cmd.args[0] == uint8_t(Role::Dongle)) reboot_at = now_ms() + kRebootDelayMs;
+                break;
+            }
             default:
                 st = AckStatus::UnknownOpcode;
         }
@@ -597,8 +649,12 @@ void setup() {
     variant = digitalRead(board::kBoardSense) == LOW ? Variant::WithStrips : Variant::FixtureOnly;
     pinMode(board::kButton, INPUT_PULLUP);
 
-    Serial.setRxBufferSize(2048);   // DMX on USB: a 518-byte frame must fit (default 256)
+    // the dongle buffers (firmware/dongle_app): the board can become a dongle without
+    // restarting Serial (SPEC 4.15); a 518-byte USB DMX frame fits as well
+    Serial.setRxBufferSize(8192);
+    Serial.setTxBufferSize(4096);
     Serial.begin(115200);
+    Serial.setTxTimeoutMs(0);   // never block when nobody reads the USB port
     esp_read_mac(mac, ESP_MAC_WIFI_STA);
     store::begin();
     cfg = default_config(mac);
@@ -649,15 +705,52 @@ void setup() {
     Serial.printf("dmxnow: name %s, maintenance password %s\n", cfg.name, cfg.maint_password);
 }
 
+// --- role (SPEC 4.15) ---------------------------------------------------------------------
+bool boot_as_dongle() {
+    store::begin();
+    boot = boot_role(store::role(), rtc_role);
+    rtc_role = 0;   // used once: a crash or a power-on comes back as node (or saved role)
+    return boot.role == Role::Dongle;
+}
+
+void dongle_setup() {
+    // outputs safe first, as in the node role: PWM off, relay open
+    pwm_out::early_off();
+    pinMode(board::kRelay, OUTPUT);
+    digitalWrite(board::kRelay, LOW);
+    pinMode(board::kButton, INPUT_PULLUP);
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+    cfg = default_config(mac);
+    store::load_config(&cfg);
+    // wired DMX: the node's universe also goes out on the XLR (choice of 2026-10-15)
+    dmx_out::begin(cfg.dmx_out_slots);
+    start_dongle(boot.source, false);
+}
+
+void dongle_loop() { dongle_app::loop(); }
+
 void loop() {
+    if (dongle_mode) {   // switched at runtime (become_dongle)
+        dongle_app::loop();
+        return;
+    }
     static radio::Packet pkt;   // 1.5 kB: not on the loop task stack
     if (radio::receive(&pkt, 2)) on_packet(pkt);
     // DMX on the USB port (bench, node off mains): same path as a radio frame
-    for (int n = Serial.available(); n > 0; --n)
-        if (usb_dmx.feed(uint8_t(Serial.read()))) {
+    for (int n = Serial.available(); n > 0; --n) {
+        uint8_t b = uint8_t(Serial.read());
+        if (usb_dmx.feed(b)) {
             apply_frame(usb_dmx.slots(), usb_dmx.slot_count());
             ++usb_frames;
         }
+        // the Pi daemon speaks the dongle protocol: this board becomes its dongle until the
+        // next power-on (SPEC 4.15). A frame needs a valid COBS + CRC-16: no false start.
+        SerialDecoder::Frame f;
+        if (boot.auto_switch && pi_link.push(b, &f) && f.type == ser::kPing && !maint::active()) {
+            become_dongle();
+            return;
+        }
+    }
     uint32_t now = now_ms();
     if (usb_frames != usb_frames_shown && now - usb_shown_ms >= 2000) {
         Serial.printf("dmxnow: usb dmx %lu frames\n", (unsigned long)usb_frames);

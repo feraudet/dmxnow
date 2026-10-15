@@ -23,3 +23,4 @@ Les ADR 0001 à 0010 reprennent les décisions de la section 3 du cahier des cha
 | [0015](0015-authentification-commandes.md) | Authentification des commandes par HMAC tronqué | Accepté (arbitrage A4, 2026-09-25) |
 | [0016](0016-conduites-stockees.md) | Conduites stockées dans le nœud | Accepté (demande de l'utilisateur, 2026-10-13) |
 | [0017](0017-ota-par-radio.md) | Mise à jour du firmware par la radio | Accepté (demande de l'utilisateur, 2026-10-15) |
+| [0018](0018-firmware-unique-roles.md) | Un seul firmware pour les cartes nœud, rôle nœud ou dongle | Accepté (demande de l'utilisateur, 2026-10-15) |

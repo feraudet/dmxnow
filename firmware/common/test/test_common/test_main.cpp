@@ -18,6 +18,7 @@
 #include "dmxnow/ota.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
+#include "dmxnow/role.h"
 #include "dmxnow/show.h"
 #include "dmxnow/usb_dmx.h"
 
@@ -595,6 +596,25 @@ void test_show_late_render_restarts_and_offsets_outside_universe() {
         if (i != 19) TEST_ASSERT_EQUAL_UINT8(0, frame[i]);
 }
 
+// Role of a node board (SPEC §4.15) --------------------------------------------------------
+void test_boot_role() {
+    // power-on: RTC memory is random, saved role node -> node, may switch on USB
+    BootRole b = boot_role(0, 0x12345678);
+    TEST_ASSERT_EQUAL(int(Role::Node), int(b.role));
+    TEST_ASSERT_TRUE(b.auto_switch);
+    TEST_ASSERT_EQUAL(int(Role::Node), int(boot_role(7, 0).role));   // unknown value: node
+    // saved dongle role (dmxnow role ... dongle)
+    b = boot_role(1, 0);
+    TEST_ASSERT_EQUAL(int(Role::Dongle), int(b.role));
+    TEST_ASSERT_EQUAL(int(RoleSource::Saved), int(b.source));
+    TEST_ASSERT_FALSE(b.auto_switch);
+    // explicit return to node (dmxnow role dongle node): node, no auto switch this boot
+    b = boot_role(1, kRtcNodeThisBoot);
+    TEST_ASSERT_EQUAL(int(Role::Node), int(b.role));
+    TEST_ASSERT_FALSE(b.auto_switch);
+    TEST_ASSERT_FALSE(boot_role(0, kRtcNodeThisBoot).auto_switch);
+}
+
 // Firmware update over the radio (PROTOCOL §11) --------------------------------------------
 static bool ota_sink(const uint8_t* d, size_t n, void* ctx) {
     auto* out = static_cast<std::vector<uint8_t>*>(ctx);
@@ -752,6 +772,7 @@ int main() {
     RUN_TEST(test_show_parse_and_render_like_python);
     RUN_TEST(test_show_invalid_files_rejected);
     RUN_TEST(test_show_late_render_restarts_and_offsets_outside_universe);
+    RUN_TEST(test_boot_role);
     RUN_TEST(test_ota_in_order_with_retries);
     RUN_TEST(test_ota_refusals);
     RUN_TEST(test_usb_dmx_frames);

@@ -248,6 +248,30 @@ def ota_cmd(a) -> int:
         raise SystemExit(f"error: {e}")
 
 
+def role_cmd(a) -> int:
+    """dmxnow role <node> dongle|node (radio), or dmxnow role dongle node (USB board)."""
+    try:
+        if a.target == "dongle":
+            res = request(a.socket, {"cmd": "dongle_role", "role": a.role})
+            if not res.get("ok"):
+                print(f"dongle: FAILED: {res.get('error')}")
+                return 1
+            if res.get("board") == "XIAO dongle":
+                print("dongle: this is a XIAO, its role is fixed (always a dongle)")
+                return 1
+            print(f"dongle: role {a.role} sent; the board restarts"
+                  + (" as a node: unplug it from the Pi, or stop dmxnowd" if a.role == "node" else ""))
+            return 0
+        err = _refused(request(a.socket, {"cmd": "role", "target": a.target, "role": a.role}))
+        if err is None:
+            msg = ("dongle role saved, restarting: plug it into the Pi over USB (J3-5V, never on mains)"
+                   if a.role == "dongle" else "node role saved")
+        print(f"{a.target}: {msg if err is None else 'FAILED: ' + err}")
+        return 0 if err is None else 1
+    except OSError as e:
+        raise SystemExit(f"cannot reach dmxnowd on {a.socket}: {e}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="dmxnow", description="dmxnow nodes and dongle control")
     ap.add_argument("--socket", default=config.Config().control_socket)
@@ -298,12 +322,17 @@ def main(argv=None):
     p.add_argument("file", help="firmware/node/.pio/build/node/firmware.bin")
     p.add_argument("targets", nargs="+", help="MACs, names, or 'all' (enrolled nodes heard)")
     p.add_argument("--no-wait", action="store_true", help="do not wait for the new image to be confirmed")
+    p = sub.add_parser("role", help="node board role: node or dongle (same firmware)")
+    p.add_argument("target", help="MAC or name of a node (by radio), or 'dongle' (the board on USB)")
+    p.add_argument("role", choices=sorted(P.ROLES))
     a = ap.parse_args(argv)
 
     if a.cmd == "show":
         return show_cmd(a)
     if a.cmd == "ota":
         return ota_cmd(a)
+    if a.cmd == "role":
+        return role_cmd(a)
     if a.cmd in ("nodes", "status"):
         req = {"cmd": a.cmd}
     elif a.cmd == "identify":

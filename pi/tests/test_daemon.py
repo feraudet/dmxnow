@@ -213,6 +213,36 @@ def test_ota_refused_without_network_key(tmp_path, fast_link):
     dongle.close()
 
 
+def test_role_by_radio_and_on_usb(tmp_path, fast_link):
+    dongle, cfg = make(tmp_path, key=KEY)
+
+    async def scenario():
+        d, task = await started(cfg)
+        dongle.heartbeat(name="lyre-cour")
+        assert await asyncio.to_thread(dongle.wait, lambda: d.nodes)
+        # a node told by radio to become a dongle (saved role)
+        code, out = await cli_run(cfg, "role", "lyre-cour", "dongle")
+        assert code == 0 and "dongle role saved" in out and dongle.node_role == 1, out
+        code, out = await cli_run(cfg, "role", "all", "dongle")
+        assert code == 1 and "node by node" in out
+        # the board on USB is a XIAO: role fixed
+        assert await asyncio.to_thread(dongle.wait, lambda: d.dongle_status.get("board"))
+        code, out = await cli_run(cfg, "role", "dongle", "node")
+        assert code == 1 and "XIAO" in out
+        # a node board acting as dongle: STATUS says so, SET_ROLE goes out on USB
+        dongle.board, dongle.role_source = 1, 1
+        dongle.status()
+        assert await asyncio.to_thread(dongle.wait, lambda: d.dongle_status.get("board") == "node board")
+        assert d.dongle_status["role"].startswith("automatic")
+        code, out = await cli_run(cfg, "role", "dongle", "node")
+        assert code == 0 and "unplug" in out, out
+        assert await asyncio.to_thread(dongle.wait, lambda: dongle.usb_role == 0)
+        await stop(d, task)
+
+    asyncio.run(scenario())
+    dongle.close()
+
+
 def test_signed_commands_and_enrolment(tmp_path, fast_link):
     dongle, cfg = make(tmp_path, key=KEY)
 
