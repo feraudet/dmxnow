@@ -13,7 +13,7 @@ Détails techniques : [SPEC §4.13](../spec/SPEC.md), [PROTOCOL §10](../spec/PR
 |-----------|---------------------------|
 | Mise sous tension, pas de DMX | La conduite, depuis le début |
 | QLC+ envoie l'univers du nœud | QLC+, dès la première trame |
-| QLC+ se tait depuis `resume_s` secondes (5 s par défaut) | La conduite, depuis le début |
+| QLC+ se tait depuis `resume_s` secondes (5 s par défaut) | La conduite, depuis le début. Compter 12 à 15 s en tout : le dongle répète encore le dernier univers pendant `hold_timeout` (10 s) |
 | `dmxnow identify` | Le clignotement d'identification, puis retour à la situation d'avant |
 
 La conduite pilote les **4 sorties rubans** et, si elle les contient, des **canaux de la
