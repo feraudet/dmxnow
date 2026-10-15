@@ -183,6 +183,8 @@ class FakeDongle:
             ok = 0 < size <= P.OTA_SLOT_SIZE
             self.ota = {"size": size, "crc": crc, "buf": bytearray()} if ok else None
             status = 0 if ok else 2
+            if self.key is None:                         # node without a network key
+                self.ota, status = None, 3
         elif status == 0 and opcode == P.OP_OTA_WRITE:
             off, chunk = struct.unpack_from("<I", args)[0], args[4:]
             o = self.ota

@@ -25,6 +25,13 @@ Trois solutions ont été comparées le 2026-10-15 :
   perdu ne fait pas écrire deux fois le même morceau, et l'émetteur sait où reprendre.
 - Écriture par la bibliothèque `Update`, comme l'OTA web : même slot, même contrôle de
   l'image par ESP-IDF, même confirmation au premier paquet radio valide.
+- **Réservé aux nœuds enrôlés avec une clé réseau** : sans clé, les commandes ne sont pas
+  authentifiées (PROTOCOL §7) et n'importe qui à portée radio pourrait installer un
+  firmware. `OTA_BEGIN` répond alors `AUTH_FAILED` (défaut relevé par la revue de
+  sécurité du commit 6ff487e, corrigé le 2026-10-15). Risque restant : un nœud neuf, sans
+  clé, accepte l'enrôlement de n'importe qui (choix d'origine, A4), donc aussi d'un
+  attaquant qui l'enrôlerait avant le Pi puis le flasherait. Enrôler les nœuds dès leur
+  mise en place.
 - La CLI refuse avant tout envoi ce qui n'est pas une image d'application, et attend
   la confirmation de la nouvelle image (65 s) avant de passer au nœud suivant.
 

@@ -195,6 +195,24 @@ def test_ota_over_the_radio(tmp_path, fast_link):
     dongle.close()
 
 
+def test_ota_refused_without_network_key(tmp_path, fast_link):
+    dongle, cfg = make(tmp_path)   # no key: commands are not authenticated
+    fw = tmp_path / "firmware.bin"
+    fw.write_bytes(bytes([P.OTA_IMAGE_MAGIC]) + bytes(500))
+
+    async def scenario():
+        d, task = await started(cfg)
+        dongle.heartbeat(name="lyre-cour")
+        assert await asyncio.to_thread(dongle.wait, lambda: d.nodes)
+        code, out = await cli_run(cfg, "ota", str(fw), "lyre-cour", "--no-wait")
+        assert code == 1 and "auth_failed" in out, out
+        assert dongle.ota_writes == 0 and dongle.firmware is None
+        await stop(d, task)
+
+    asyncio.run(scenario())
+    dongle.close()
+
+
 def test_signed_commands_and_enrolment(tmp_path, fast_link):
     dongle, cfg = make(tmp_path, key=KEY)
 

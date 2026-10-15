@@ -488,7 +488,7 @@ valide, sinon le nœud revient à l'ancienne au bout de 60 s.
 
 | Code   | Nom         | Arguments | Effet |
 |--------|-------------|-----------|-------|
-| `0x0C` | `OTA_BEGIN` | `size` u32, `crc32` u32 | Commence un envoi (en abandonne un en cours). `size` = 0 ou plus grand que le slot : `INVALID_ARG`. Nœud en maintenance (OTA par la page web) : `UNSUPPORTED`. |
+| `0x0C` | `OTA_BEGIN` | `size` u32, `crc32` u32 | Commence un envoi (en abandonne un en cours). **Nœud sans clé réseau : `AUTH_FAILED`** (ses commandes ne sont pas authentifiées, §7 : sans cette règle, n'importe qui à portée radio pourrait y installer un firmware). `size` = 0 ou plus grand que le slot : `INVALID_ARG`. Nœud en maintenance (OTA par la page web) : `UNSUPPORTED`. |
 | `0x0D` | `OTA_WRITE` | `offset` u32, `data` (1 à 192 octets) | Écrit un morceau. Les morceaux DOIVENT arriver dans l'ordre : `offset` égal à la fin de ce qui est déjà écrit. Un morceau déjà écrit (ACK perdu, répétition) est acquitté sans être réécrit ; un trou est refusé (`INVALID_ARG`). Le premier octet DOIT être `0xE9` (en-tête d'image ESP32), sinon l'envoi s'arrête. **L'ACK contient toujours `next_offset` u32**, même en cas de refus : l'émetteur reprend à cet offset. |
 | `0x0E` | `OTA_END`   | `size` u32, `crc32` u32 | Vérifie que tout est reçu, que le CRC-32 (zlib) des octets écrits égale celui de `OTA_BEGIN` et que l'image est valide (contrôle d'ESP-IDF), bascule le démarrage sur le nouveau slot et redémarre 600 ms après l'ACK, comme `REBOOT`. Sinon `INVALID_ARG` (envoi incomplet, CRC faux) ou `INTERNAL_ERROR` (image refusée) : l'ancien firmware reste en place. |
 

@@ -403,6 +403,9 @@ void handle_command(const radio::Packet& p, const Header& h) {
             // firmware over the radio (PROTOCOL §11): chunks in order into the next OTA slot
             case Opcode::OtaBegin: {
                 if (cmd.args_len < 8) { st = AckStatus::InvalidArg; break; }
+                // without a network key, commands are not authenticated: anyone in radio
+                // range could install a firmware. Radio OTA is for enrolled nodes only.
+                if (!cfg.has_net_key) { st = AckStatus::AuthFailed; break; }
                 if (maint::active()) { st = AckStatus::Unsupported; break; }   // web OTA uses Update
                 if (Update.isRunning()) Update.abort();
                 const esp_partition_t* next = esp_ota_get_next_update_partition(nullptr);
