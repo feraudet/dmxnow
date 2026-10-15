@@ -25,6 +25,9 @@ F_LAST, F_FRAG, F_AUTH = 0x01, 0x02, 0x04
 OP_IDENTIFY, OP_SET_CONFIG, OP_GET_CONFIG, OP_RELAY = 0x01, 0x02, 0x03, 0x04
 OP_MAINTENANCE, OP_REBOOT, OP_FACTORY_RESET = 0x05, 0x06, 0x07
 OP_SHOW_WRITE, OP_SHOW_COMMIT, OP_SHOW_CLEAR, OP_SHOW_INFO = 0x08, 0x09, 0x0A, 0x0B
+OP_OTA_BEGIN, OP_OTA_WRITE, OP_OTA_END = 0x0C, 0x0D, 0x0E   # firmware over the radio (PROTOCOL §11)
+OTA_SLOT_SIZE = 0x1E0000       # one OTA slot (firmware/node/partitions.csv)
+OTA_IMAGE_MAGIC = 0xE9         # first byte of an ESP32 app image
 FACTORY_RESET_CONFIRM = 0x52455345
 
 ACK_STATUS = {0: "ok", 1: "unknown_opcode", 2: "invalid_arg", 3: "auth_failed", 4: "unsupported",

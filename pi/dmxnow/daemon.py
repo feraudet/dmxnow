@@ -225,6 +225,25 @@ class Daemon:
         # (a broadcast is not acknowledged, a lost chunk would go unnoticed)
         if cmd.startswith("show_") and target == P.BROADCAST:
             raise ValueError("a show is deployed node by node, not to 'all' at once")
+        # firmware over the radio (PROTOCOL §11): same rule, chunks in order
+        if cmd.startswith("ota_") and target == P.BROADCAST:
+            raise ValueError("a firmware is sent node by node, not to 'all' at once")
+        if cmd == "ota_begin":
+            return await self.command(target, P.OP_OTA_BEGIN, struct.pack("<II", int(req["size"]),
+                                                                          int(req["crc32"])))
+        if cmd == "ota_write":
+            data = bytes.fromhex(req["data"])
+            if not 1 <= len(data) <= show.WRITE_CHUNK:
+                raise ValueError(f"ota_write: 1 to {show.WRITE_CHUNK} bytes")
+            res = await self.command(target, P.OP_OTA_WRITE, struct.pack("<I", int(req["offset"])) + data)
+            for a in res["acks"]:
+                raw = bytes.fromhex(a.pop("data"))
+                if len(raw) >= 4:
+                    a["next_offset"] = struct.unpack_from("<I", raw)[0]
+            return res
+        if cmd == "ota_end":
+            return await self.command(target, P.OP_OTA_END, struct.pack("<II", int(req["size"]),
+                                                                        int(req["crc32"])))
         if cmd == "show_write":
             data = bytes.fromhex(req["data"])
             if not 1 <= len(data) <= show.WRITE_CHUNK:

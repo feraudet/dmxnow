@@ -33,6 +33,7 @@ class FakeDongle:
         self.answer_pings = True
         self.node_config = {"universe": 0, "start_address": 1, "name": "node-123456"}
         self.show_buf, self.show = bytearray(), None   # stored show (PROTOCOL §10)
+        self.ota, self.firmware, self.ota_writes = None, None, 0   # firmware over the radio (§11)
         self.settings = {"channel": 6, "phy_rate": 0x0B, "power_dbm": 15, "hold_timeout_ms": 10000,
                          "refresh_hz": 44, "mode": 0}
         self.seq = 0
@@ -177,6 +178,30 @@ class FakeDongle:
             except ValueError:
                 self.show = None
             status = 0 if self.show else 2
+        elif status == 0 and opcode == P.OP_OTA_BEGIN:   # node side of PROTOCOL §11
+            size, crc = struct.unpack_from("<II", args)
+            ok = 0 < size <= P.OTA_SLOT_SIZE
+            self.ota = {"size": size, "crc": crc, "buf": bytearray()} if ok else None
+            status = 0 if ok else 2
+        elif status == 0 and opcode == P.OP_OTA_WRITE:
+            off, chunk = struct.unpack_from("<I", args)[0], args[4:]
+            o = self.ota
+            if o is None or off + len(chunk) > o["size"]:
+                status = 2
+            elif off + len(chunk) <= len(o["buf"]):
+                pass                                     # repeated chunk
+            elif off != len(o["buf"]) or (off == 0 and chunk[0] != P.OTA_IMAGE_MAGIC):
+                status = 2
+            else:
+                o["buf"] += chunk
+            self.ota_writes += 1
+            data = struct.pack("<I", len(o["buf"]) if o else 0)
+        elif status == 0 and opcode == P.OP_OTA_END:
+            size, crc = struct.unpack_from("<II", args)
+            o = self.ota
+            ok = o is not None and size == o["size"] == len(o["buf"]) and crc == o["crc"] == zlib.crc32(o["buf"])
+            self.firmware = bytes(o["buf"]) if ok else None
+            self.ota, status = None, 0 if ok else 2
         elif status == 0 and opcode == P.OP_SHOW_CLEAR:
             self.show_buf, self.show = bytearray(), None
         elif status == 0 and opcode == P.OP_SHOW_INFO:

@@ -90,8 +90,30 @@ hors secteur) : voir [firmware/README.md](../firmware/README.md), « DMX par l'U
 
 ## 4. Mises à jour du nœud par OTA
 
-Une fois le nœud installé, il ne se reprogramme plus par J3 (il est sous secteur) : on
-passe par la page de maintenance, **boîtier fermé**.
+Une fois le nœud installé, il ne se reprogramme plus par J3 (il est sous secteur). Deux
+voies, **boîtier fermé** :
+
+### 4.1 Par la radio, depuis le Pi (recommandé)
+
+```
+pio run -e node
+dmxnow ota firmware/node/.pio/build/node/firmware.bin node-2442B0
+dmxnow ota firmware/node/.pio/build/node/firmware.bin all      # tous les nœuds enrôlés entendus
+```
+
+- Le Pi envoie le firmware par la radio, en morceaux de 192 octets, nœud par nœud
+  (PROTOCOL §11). Compter quelques minutes par nœud : à faire **hors séance**, la sortie
+  DMX peut hoqueter pendant l'envoi.
+- La CLI refuse `firmware.factory.bin` et tout fichier qui n'est pas une image
+  d'application, avant d'envoyer quoi que ce soit.
+- Après l'envoi, le nœud redémarre sur la nouvelle image. La CLI attend 65 s pour
+  vérifier qu'elle est confirmée (point 4 ci-dessous) : « updated, new image confirmed ».
+- Un envoi coupé (nœud débranché, radio perdue) laisse l'ancien firmware en place : il
+  suffit de relancer la commande.
+
+### 4.2 Par la page de maintenance
+
+Pour un nœud que la radio n'atteint pas.
 
 1. Construire `firmware.bin` (`pio run -e node`) et le copier sur un téléphone ou un
    portable.

@@ -5,6 +5,7 @@ import argparse
 import json
 import socket
 import sys
+import time
 import zlib
 
 from . import config, show
@@ -159,6 +160,94 @@ def show_cmd(a) -> int:
         raise SystemExit(f"error: {e}")
 
 
+def check_firmware(data: bytes) -> None:
+    """Refuses what is not a node application image (PROTOCOL §11)."""
+    if not data or data[0] != P.OTA_IMAGE_MAGIC:
+        raise ValueError("not an ESP32 application image (use firmware.bin)")
+    if len(data) > 0x8002 and data[0x8000:0x8002] == b"\xaa\x50":
+        raise ValueError("this is firmware.factory.bin (bootloader + partitions): use firmware.bin")
+    if len(data) > P.OTA_SLOT_SIZE:
+        raise ValueError(f"{len(data)} bytes: larger than an OTA slot ({P.OTA_SLOT_SIZE})")
+
+
+def _node(sock: str, target: str) -> dict | None:
+    for n in request(sock, {"cmd": "nodes"})["nodes"]:
+        if target.lower() in (n["mac"].lower(), str(n.get("name", "")).lower()):
+            return n
+    return None
+
+
+def ota_wait(sock: str, target: str, rollback_s: int = 60) -> str | None:
+    """After OTA_END: the node reboots on the new image, which is confirmed at its first
+    valid radio packet, else it goes back to the old one after rollback_s. None = confirmed."""
+    deadline = time.monotonic() + 30
+    while True:   # 1. the reboot: a heartbeat with a small uptime
+        time.sleep(1)
+        n = _node(sock, target)
+        if n and n["uptime_s"] < 20 and n["age_s"] < 3:
+            break
+        if time.monotonic() > deadline:
+            return "no heartbeat after the reboot"
+    print(f"\r{target}: rebooted on the new image, waiting {rollback_s + 5} s for the confirmation", end="", flush=True)
+    boot = time.monotonic() - n["age_s"] - n["uptime_s"]
+    while time.monotonic() - boot < rollback_s + 5:   # 2. no rollback: uptime keeps growing
+        time.sleep(2)
+        n = _node(sock, target)
+        if n and time.monotonic() - n["age_s"] - n["uptime_s"] > boot + 5:
+            return "the node rebooted again: image refused, back to the old firmware"
+    return None
+
+
+def ota_deploy(sock: str, path: str, targets: list[str], wait: bool = True) -> int:
+    data = open(path, "rb").read()
+    check_firmware(data)   # before touching any node
+    crc = zlib.crc32(data)
+    total = -(-len(data) // show.WRITE_CHUNK)
+    print(f"{path}: {len(data)} bytes, crc32 {crc:08x}, {total} chunks")
+    failed = 0
+    for t in show_targets(sock, targets):
+        err = _refused(request(sock, {"cmd": "ota_begin", "target": t, "size": len(data), "crc32": crc}))
+        off, tries, start = 0, 0, time.monotonic()
+        while err is None and off < len(data):
+            chunk = data[off:off + show.WRITE_CHUNK]
+            res = request(sock, {"cmd": "ota_write", "target": t, "offset": off, "data": chunk.hex()})
+            e = _refused(res)
+            nxt = res["acks"][0].get("next_offset") if res.get("ok") and res.get("acks") else None
+            if e is None:
+                off, tries = (nxt if nxt is not None else off + len(chunk)), 0
+            else:
+                tries += 1
+                if e == "invalid_arg" and nxt is not None and nxt != off:
+                    off = nxt   # the node expects another offset: resume there
+                if tries >= 5:
+                    err = e
+            done = off // show.WRITE_CHUNK
+            if done % 20 == 0 or off >= len(data):
+                el = time.monotonic() - start
+                eta = el / max(off, 1) * (len(data) - off)
+                print(f"\r{t}: {100 * off // len(data)} % ({done}/{total}), {el:.0f} s, about {eta:.0f} s left",
+                      end="", flush=True)
+        if err is None:
+            err = _refused(request(sock, {"cmd": "ota_end", "target": t, "size": len(data), "crc32": crc}))
+        if err is None and wait:
+            err = ota_wait(sock, t)
+        msg = ("updated" + (", new image confirmed" if wait else ", rebooting")) if err is None else "FAILED: " + err
+        print(f"\r{t}: {msg}" + " " * 30)
+        failed += err is not None
+    return 1 if failed else 0
+
+
+def ota_cmd(a) -> int:
+    try:
+        return ota_deploy(a.socket, a.file, a.targets, wait=not a.no_wait)
+    except FileNotFoundError as e:
+        raise SystemExit(f"error: {e}")
+    except OSError as e:
+        raise SystemExit(f"cannot reach dmxnowd on {a.socket}: {e}")
+    except ValueError as e:   # not a firmware.bin
+        raise SystemExit(f"error: {e}")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="dmxnow", description="dmxnow nodes and dongle control")
     ap.add_argument("--socket", default=config.Config().control_socket)
@@ -205,10 +294,16 @@ def main(argv=None):
     q = ssub.add_parser("inspect", help="describe a .dxs file (no daemon needed)")
     q.add_argument("file")
     q.add_argument("--preview-ms", type=int, default=2000, help="print the values every 100 ms up to this")
+    p = sub.add_parser("ota", help="update the node firmware over the radio (firmware.bin)")
+    p.add_argument("file", help="firmware/node/.pio/build/node/firmware.bin")
+    p.add_argument("targets", nargs="+", help="MACs, names, or 'all' (enrolled nodes heard)")
+    p.add_argument("--no-wait", action="store_true", help="do not wait for the new image to be confirmed")
     a = ap.parse_args(argv)
 
     if a.cmd == "show":
         return show_cmd(a)
+    if a.cmd == "ota":
+        return ota_cmd(a)
     if a.cmd in ("nodes", "status"):
         req = {"cmd": a.cmd}
     elif a.cmd == "identify":

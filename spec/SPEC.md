@@ -50,6 +50,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | EF-13  | CLI Pi : liste des nœuds (nom, MAC, variante, univers, adresse, RSSI, pertes, relais, uptime, version), identification, changement d'univers/adresse/nom, relais, maintenance, configuration du dongle. Page web minimale optionnelle. |
 | EF-14  | Identification d'un nœud monté et fermé sans démontage (PROTOCOL `IDENTIFY`). |
 | EF-15  | Conduite stockée (ajout du 2026-10-13, ADR 0016) : le nœud garde en flash une conduite générée sur un poste et déployée par la CLI (PROTOCOL §10), la joue en boucle dès la mise sous tension sur les rubans et la ligne DMX, rend la main à QLC+ dès qu'un flux DMX de son univers arrive et la reprend après `resume_s` sans flux. Le relais ne suit jamais la conduite. |
+| EF-16  | Mise à jour du firmware par la radio (ajout du 2026-10-15, ADR 0017) : le Pi envoie `firmware.bin` à un nœud par ESP-NOW (`dmxnow ota`, PROTOCOL §11), sans point d'accès Wi-Fi ni présence sur place. Même retour automatique à l'ancienne image qu'avec l'OTA web (§4.9). |
 
 ### 2.2 Non fonctionnelles
 
@@ -619,6 +620,25 @@ contrôle pour la relecture humaine.
   tout le ruban a la même couleur à un instant donné ; en `pwm_mode` 16 bits, MSB et LSB
   sont interpolés séparément (viser le mode 8 bits).
 
+### 4.14 Mise à jour du firmware par la radio (EF-16, ADR 0017, ajout du 2026-10-15)
+
+- **Usage** : `dmxnow ota firmware/node/.pio/build/node/firmware.bin <nœud>|all`, depuis
+  le Pi, démon lancé. Les nœuds sont mis à jour l'un après l'autre.
+- **Transport** : trois opcodes (`OTA_BEGIN`, `OTA_WRITE`, `OTA_END`, PROTOCOL §11),
+  morceaux de 192 octets dans l'ordre, chacun acquitté, authentifiés comme toutes les
+  commandes. L'ACK de chaque morceau donne l'offset attendu : un envoi interrompu
+  reprend au bon endroit, un morceau répété n'est pas écrit deux fois.
+- **Côté nœud** : logique pure dans `firmware/common` (`OtaSession`, testée sur poste),
+  écriture par la bibliothèque `Update` d'Arduino dans le slot OTA libre, comme l'OTA web.
+  `OTA_END` vérifie la taille, le CRC-32 et l'image, bascule le démarrage et redémarre.
+- **Sécurité** : l'image n'est confirmée qu'au premier paquet radio valide après le
+  redémarrage, sinon retour à l'ancienne au bout de 60 s (§4.9). La CLI attend ce délai
+  et signale un retour. Refus avant tout envoi d'un fichier qui n'est pas une image
+  d'application (`firmware.factory.bin`, mauvais fichier, trop gros).
+- **Limites** : quelques minutes par nœud (environ 5 800 morceaux pour 1,1 Mo) ; la
+  sortie DMX et les PWM peuvent hoqueter pendant les écritures de flash : à faire hors
+  séance. Refusé pendant le mode maintenance (l'OTA web utilise la même bibliothèque).
+
 ---
 
 ## 5. Budgets de latence et de débit
@@ -845,6 +865,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-FW-07 | Format exact de la trame ESP-NOW v2 (surcoût en octets) | ESP-IDF doc ESP-NOW, *Frame Format* | faible (affecte le calcul d'occupation de ±10 %) |
 | V-FW-08 | QLC+ : sortie Art-Net vers 127.0.0.1 possible, cadence (50 Hz), mode d'émission « complet / partiel », réception des ArtPollReply sur loopback | Documentation QLC+ (plugin Art-Net) ; essai | moyenne |
 | V-FW-09 | Conduite stockée sur carte réelle : projection de la partition après écriture (pas de ligne de cache périmée, `remap()` après l'envoi), durée d'effacement d'un secteur de 4 ko (≈ 45 ms attendus, couverte par les retransmissions du dongle), durée d'un déploiement de 18 ko, rendu visuel du feu sur ruban RGBW | Banc, ESP-IDF *SPI Flash API* | faible |
+| V-FW-10 | OTA par la radio sur carte réelle : durée d'une mise à jour complète, taux de morceaux répétés, comportement de la sortie DMX pendant l'envoi, confirmation de l'image et retour à l'ancienne si le dongle se tait | Banc | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
 | V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |

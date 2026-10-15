@@ -15,6 +15,7 @@
 #include "dmxnow/crc16.h"
 #include "dmxnow/dmx.h"
 #include "dmxnow/gamma.h"
+#include "dmxnow/ota.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
 #include "dmxnow/show.h"
@@ -594,6 +595,70 @@ void test_show_late_render_restarts_and_offsets_outside_universe() {
         if (i != 19) TEST_ASSERT_EQUAL_UINT8(0, frame[i]);
 }
 
+// Firmware update over the radio (PROTOCOL §11) --------------------------------------------
+static bool ota_sink(const uint8_t* d, size_t n, void* ctx) {
+    auto* out = static_cast<std::vector<uint8_t>*>(ctx);
+    out->insert(out->end(), d, d + n);
+    return true;
+}
+
+static bool ota_sink_fails(const uint8_t*, size_t, void*) { return false; }
+
+static std::vector<uint8_t> ota_image(size_t n) {
+    std::vector<uint8_t> img(n);
+    for (size_t i = 0; i < n; ++i) img[i] = uint8_t(i * 7 + 3);
+    img[0] = kOtaImageMagic;
+    return img;
+}
+
+void test_ota_in_order_with_retries() {
+    auto img = ota_image(1000);
+    uint32_t crc = crc32(img.data(), img.size());
+    std::vector<uint8_t> written;
+    OtaSession s;
+    TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.begin(1000, crc, 4096)));
+    for (uint32_t off = 0; off < 1000; off += kOtaWriteMax) {
+        size_t n = std::min<size_t>(kOtaWriteMax, 1000 - off);
+        TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.write(off, img.data() + off, n, ota_sink, &written)));
+        // the same chunk again (ACK lost): acknowledged, not written twice
+        TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.write(off, img.data() + off, n, ota_sink, &written)));
+        TEST_ASSERT_EQUAL_UINT32(off + n, s.next_offset());
+    }
+    TEST_ASSERT_TRUE(written == img);
+    TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.end(1000, crc)));
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.end(1000, crc ^ 1)));
+}
+
+void test_ota_refusals() {
+    auto img = ota_image(400);
+    uint32_t crc = crc32(img.data(), img.size());
+    std::vector<uint8_t> w;
+    OtaSession s;
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.write(0, img.data(), 10, ota_sink, &w)));   // no begin
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.begin(0, crc, 4096)));
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.begin(5000, crc, 4096)));   // larger than the slot
+    TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.begin(400, crc, 4096)));
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.write(10, img.data() + 10, 10, ota_sink, &w)));   // gap
+    TEST_ASSERT_EQUAL_UINT32(0, s.next_offset());
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.write(390, img.data(), 20, ota_sink, &w)));   // past the end
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.end(400, crc)));   // incomplete
+    std::vector<uint8_t> bad = img;
+    bad[0] = 0x00;   // not an ESP32 image: the upload stops
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.write(0, bad.data(), 100, ota_sink, &w)));
+    TEST_ASSERT_FALSE(s.active());
+    TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.begin(400, crc, 4096)));
+    TEST_ASSERT_EQUAL(int(AckStatus::InternalError), int(s.write(0, img.data(), 100, ota_sink_fails, nullptr)));
+    TEST_ASSERT_FALSE(s.active());
+    // a chunk that differs from what was announced: all written, but end() refuses
+    TEST_ASSERT_EQUAL(int(AckStatus::Ok), int(s.begin(400, crc, 4096)));
+    bad = img;
+    bad[200] ^= 0xFF;
+    w.clear();
+    for (uint32_t off = 0; off < 400; off += 100) s.write(off, bad.data() + off, 100, ota_sink, &w);
+    TEST_ASSERT_EQUAL_UINT32(400, s.next_offset());
+    TEST_ASSERT_EQUAL(int(AckStatus::InvalidArg), int(s.end(400, crc)));
+}
+
 // USB DMX input (Enttec Pro label 6) ------------------------------------------------------
 static bool usb_feed(UsbDmxParser& p, const std::vector<uint8_t>& bytes, int* frames = nullptr) {
     bool last = false;
@@ -687,6 +752,8 @@ int main() {
     RUN_TEST(test_show_parse_and_render_like_python);
     RUN_TEST(test_show_invalid_files_rejected);
     RUN_TEST(test_show_late_render_restarts_and_offsets_outside_universe);
+    RUN_TEST(test_ota_in_order_with_retries);
+    RUN_TEST(test_ota_refusals);
     RUN_TEST(test_usb_dmx_frames);
     RUN_TEST(test_usb_dmx_rejects_and_resyncs);
     return UNITY_END();

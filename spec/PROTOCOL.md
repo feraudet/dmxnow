@@ -295,6 +295,7 @@ Mécanisme retenu (ADR 0013) :
 | `0x06` | `REBOOT`        | - | Redémarre après envoi de l'ACK (délai 600 ms, au-delà de la dernière retransmission du dongle à 450 ms : une répétition est servie par l'historique et non exécutée deux fois ; porté de 200 à 600 ms le 2026-09-28). |
 | `0x07` | `FACTORY_RESET` | `confirm` u32 = `0x52455345` (« RESE ») | Efface la configuration NVS (conserve `relay_switch_count`) et la conduite stockée (§10), redémarre. Aussi déclenchable localement par un appui ≥ 10 s sur SW1 (SPEC §4.9). |
 | `0x08` à `0x0B` | `SHOW_*` | §10.2 | Conduite stockée : écriture, validation, effacement, état. |
+| `0x0C` à `0x0E` | `OTA_*` | §11 | Mise à jour du firmware par la radio : début, morceau, fin. |
 
 ### 6.4 Clés de configuration (TLV)
 
@@ -476,7 +477,30 @@ nœud** (commande ciblée, acquittée) : en broadcast, un morceau perdu passerai
 Le paquet de commande est limité à 250 octets (en-tête 18 + cible 6 + opcode 1 +
 `offset` 4 + données + authentification 12), d'où 192 octets de données par morceau.
 
-## 11. Évolution du protocole
+## 11. Mise à jour du firmware par la radio (ajout du 2026-10-15, ADR 0017)
+
+Le Pi envoie le fichier `firmware.bin` du nœud (image d'application ESP32, jamais
+`firmware.factory.bin`) par morceaux, comme une conduite :
+`dmxnow ota firmware.bin <nœud>`. Le nœud l'écrit dans le slot OTA qui ne tourne pas
+(`ota_0` ou `ota_1`, 1,9 Mo chacun), puis redémarre dessus. Le mécanisme de retour de
+SPEC §4.9 s'applique : la nouvelle image n'est confirmée qu'au premier paquet radio
+valide, sinon le nœud revient à l'ancienne au bout de 60 s.
+
+| Code   | Nom         | Arguments | Effet |
+|--------|-------------|-----------|-------|
+| `0x0C` | `OTA_BEGIN` | `size` u32, `crc32` u32 | Commence un envoi (en abandonne un en cours). `size` = 0 ou plus grand que le slot : `INVALID_ARG`. Nœud en maintenance (OTA par la page web) : `UNSUPPORTED`. |
+| `0x0D` | `OTA_WRITE` | `offset` u32, `data` (1 à 192 octets) | Écrit un morceau. Les morceaux DOIVENT arriver dans l'ordre : `offset` égal à la fin de ce qui est déjà écrit. Un morceau déjà écrit (ACK perdu, répétition) est acquitté sans être réécrit ; un trou est refusé (`INVALID_ARG`). Le premier octet DOIT être `0xE9` (en-tête d'image ESP32), sinon l'envoi s'arrête. **L'ACK contient toujours `next_offset` u32**, même en cas de refus : l'émetteur reprend à cet offset. |
+| `0x0E` | `OTA_END`   | `size` u32, `crc32` u32 | Vérifie que tout est reçu, que le CRC-32 (zlib) des octets écrits égale celui de `OTA_BEGIN` et que l'image est valide (contrôle d'ESP-IDF), bascule le démarrage sur le nouveau slot et redémarre 600 ms après l'ACK, comme `REBOOT`. Sinon `INVALID_ARG` (envoi incomplet, CRC faux) ou `INTERNAL_ERROR` (image refusée) : l'ancien firmware reste en place. |
+
+- Commandes authentifiées comme les autres (§7) et envoyées **nœud par nœud**.
+- Une image de 1,1 Mo fait environ 5 800 morceaux. Chaque morceau attend son ACK : la
+  durée dépend de la radio, de l'ordre de quelques minutes par nœud.
+- Pendant l'envoi, le nœud efface et écrit sa flash par secteurs de 4 ko : la sortie DMX
+  et les PWM peuvent hoqueter. À faire **hors séance**.
+- La CLI attend ensuite le heartbeat du redémarrage, puis 65 s sans nouveau redémarrage :
+  l'image est alors confirmée (pas de retour à l'ancienne).
+
+## 12. Évolution du protocole
 
 Toute modification incompatible incrémente `version`. Les champs `reserved` et les bits
 de `flags` réservés DOIVENT valoir 0 à l'émission et être ignorés à la réception. Les

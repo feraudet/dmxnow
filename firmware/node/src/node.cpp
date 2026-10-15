@@ -1,6 +1,7 @@
 #include "node.h"
 
 #include <Arduino.h>
+#include <Update.h>
 #include <esp_mac.h>
 #include <esp_ota_ops.h>
 #include <esp_random.h>
@@ -15,10 +16,11 @@
 #include "dmxnow/config.h"
 #include "dmxnow/dmx.h"
 #include "dmxnow/gamma.h"
+#include "dmxnow/ota.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
-#include "dmxnow/usb_dmx.h"
 #include "dmxnow/show.h"
+#include "dmxnow/usb_dmx.h"
 #include "maintenance.h"
 #include "pwm_out.h"
 #include "radio.h"
@@ -52,6 +54,9 @@ uint8_t mac[6];
 RelayLogic relay;
 UsbDmxParser usb_dmx;   // DMX frames on the USB port (Enttec Pro label 6), no radio
 uint32_t usb_frames = 0, usb_frames_shown = 0, usb_shown_ms = 0;
+OtaSession ota;         // firmware over the radio (PROTOCOL §11)
+
+bool ota_sink(const uint8_t* d, size_t n, void*) { return Update.write(const_cast<uint8_t*>(d), n) == n; }
 Reassembler reasm;
 LossCounter loss;
 GammaTable gamma;
@@ -395,13 +400,43 @@ void handle_command(const radio::Packet& p, const Header& h) {
                 ack_len += 37;
                 break;
             }
+            // firmware over the radio (PROTOCOL §11): chunks in order into the next OTA slot
+            case Opcode::OtaBegin: {
+                if (cmd.args_len < 8) { st = AckStatus::InvalidArg; break; }
+                if (maint::active()) { st = AckStatus::Unsupported; break; }   // web OTA uses Update
+                if (Update.isRunning()) Update.abort();
+                const esp_partition_t* next = esp_ota_get_next_update_partition(nullptr);
+                st = ota.begin(get32(cmd.args), get32(cmd.args + 4), next ? next->size : 0);
+                if (st == AckStatus::Ok && !Update.begin(get32(cmd.args))) {
+                    ota.abort();
+                    st = AckStatus::InternalError;
+                }
+                break;
+            }
+            case Opcode::OtaWrite: {
+                if (cmd.args_len < 5) { st = AckStatus::InvalidArg; break; }
+                st = ota.write(get32(cmd.args), cmd.args + 4, cmd.args_len - 4, ota_sink, nullptr);
+                if (!ota.active() && Update.isRunning()) Update.abort();
+                put32(ack + 2, ota.next_offset());   // also on a refusal: where to resume
+                ack_len += 4;
+                break;
+            }
+            case Opcode::OtaEnd: {
+                if (cmd.args_len < 8) { st = AckStatus::InvalidArg; break; }
+                st = ota.end(get32(cmd.args), get32(cmd.args + 4));
+                if (st == AckStatus::Ok && !Update.end(true)) st = AckStatus::InternalError;   // image check
+                if (st == AckStatus::Ok) reboot_at = now_ms() + kRebootDelayMs;   // confirmed at first packet
+                else if (Update.isRunning()) Update.abort();
+                ota.abort();
+                break;
+            }
             default:
                 st = AckStatus::UnknownOpcode;
         }
     }
     ack[0] = cmd.opcode;
     ack[1] = uint8_t(st);
-    if (st != AckStatus::Ok) ack_len = 2;
+    if (st != AckStatus::Ok && cmd.opcode != uint8_t(Opcode::OtaWrite)) ack_len = 2;
     // an authentication failure is not remembered: a forged packet carrying the next
     // cmd_id would otherwise block the genuine command (answered from the history)
     if (st != AckStatus::AuthFailed) history.remember(h.seq, ack, ack_len);

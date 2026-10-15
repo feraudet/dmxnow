@@ -136,6 +136,9 @@ enum class Opcode : uint8_t {
     ShowCommit = 0x09,    // size u32, crc32 u32: check and play
     ShowClear = 0x0A,
     ShowInfo = 0x0B,
+    OtaBegin = 0x0C,      // size u32, crc32 u32: new firmware upload (PROTOCOL §11)
+    OtaWrite = 0x0D,      // offset u32, data; ACK: next expected offset u32
+    OtaEnd = 0x0E,        // size u32, crc32 u32: check, boot slot switched, reboot
 };
 constexpr size_t kShowWriteMax = 192;   // data bytes per SHOW_WRITE (250-byte command packet)
 constexpr uint32_t kFactoryResetConfirm = 0x52455345;   // "RESE"

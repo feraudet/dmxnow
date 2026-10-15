@@ -164,6 +164,37 @@ def test_show_deploy_info_and_clear(tmp_path, fast_link):
     dongle.close()
 
 
+def test_ota_over_the_radio(tmp_path, fast_link):
+    dongle, cfg = make(tmp_path, key=KEY)
+    image = bytes([P.OTA_IMAGE_MAGIC]) + bytes((i * 7) & 0xFF for i in range(2999))   # 16 chunks
+    fw = tmp_path / "firmware.bin"
+    fw.write_bytes(image)
+
+    async def scenario():
+        d, task = await started(cfg)
+        dongle.heartbeat(name="lyre-cour")
+        assert await asyncio.to_thread(dongle.wait, lambda: d.nodes)
+        code, out = await cli_run(cfg, "ota", str(fw), "lyre-cour", "--no-wait")
+        assert code == 0 and "updated" in out, out
+        assert dongle.firmware == image
+        writes = [p for t, p in dongle.frames if t == P.S_COMMAND and p[3 + 6] == P.OP_OTA_WRITE]
+        assert len(writes) == -(-len(image) // show.WRITE_CHUNK)
+        assert all(p[2] & P.F_AUTH for p in writes)                        # signed like any command
+        code, out = await cli_run(cfg, "ota", str(fw), "*", "--no-wait")   # node by node only
+        assert code == 1 and "node by node" in out
+        factory = bytes([P.OTA_IMAGE_MAGIC]) + bytes(0x8000 - 1) + b"\xaa\x50" + image   # bootloader first
+        for bad in (b"\x00" + image[1:], factory,
+                    bytes([P.OTA_IMAGE_MAGIC]) * (P.OTA_SLOT_SIZE + 1)):
+            f = tmp_path / "bad.bin"
+            f.write_bytes(bad)
+            with pytest.raises(SystemExit):                                # refused before any upload
+                await cli_run(cfg, "ota", str(f), "lyre-cour", "--no-wait")
+        await stop(d, task)
+
+    asyncio.run(scenario())
+    dongle.close()
+
+
 def test_signed_commands_and_enrolment(tmp_path, fast_link):
     dongle, cfg = make(tmp_path, key=KEY)
 

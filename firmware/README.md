@@ -28,7 +28,8 @@ désactiver la vérification.
   le secteur branché (REVIEW 7.6).
 - Maintenir SW1 pendant la mise sous tension : chargeur ROM (mode téléchargement).
 - `pio run -e node -t upload`, ou `firmware.factory.bin` à l'adresse 0x0 avec esptool.
-- Ensuite : mises à jour par OTA depuis la page de maintenance. La nouvelle image est
+- Ensuite : mises à jour par la radio depuis le Pi (`dmxnow ota firmware.bin <nœud>`,
+  PROTOCOL §11, `common/src/ota.cpp`), ou par OTA depuis la page de maintenance. La nouvelle image est
   **confirmée au premier paquet radio valide** ; sans paquet dans les 60 s, le chargeur
   revient à l'ancienne. Faire les OTA à portée du dongle.
 
