@@ -25,7 +25,7 @@ HEIGHTS = {
     "PS1": (15.0, "Mean Well IRM-03 datasheet: 37*24*15 mm (PCB mounting style)"),
     "C7": (17.5, "Nichicon UHW 10x16: L=16 + tolerance/seat (to confirm on the part)"),
     "F1": (11.5, "KiCad 3D model Schurter 0031.8201 open holder: 11.5"),
-    "F2": (21.0, "Littelfuse FLR 178.6165: holder 17.5 + ATO fuse above it (to confirm)"),
+    "F2": (27.0, "Littelfuse FLR 178.6165 + ATO fuse: 27 measured on the board (2026-10-15)"),
     "RV1": (16.0, "10D disc 12.5 max + formed leads (to confirm)"),
     "J1": (16.7, "WAGO 2604 datasheet: 16.7 lever closed, 25.7 open"),
     "J4": (16.7, "WAGO 2604"), "J7": (16.7, "WAGO 2604"), "J5": (16.7, "WAGO 2604"),

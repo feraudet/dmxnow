@@ -9,7 +9,7 @@
 Coordinates: X = PCB x, Y = -PCB y (KiCad Y grows downwards), Z up from the base
 bottom face. The board geometry comes from board.json (hardware/gen/export_board.py).
 Printed parts: base (floor on the bed), lid (top face on the bed),
-clamp_bar x3, sw1_plunger, sw1_collar. Bought parts: see README.md.
+sw1_plunger, sw1_collar. Bought parts: see README.md.
 """
 import argparse
 import json
@@ -32,16 +32,16 @@ STANDOFF = 5.0        # floor top to PCB bottom (THT leads <= 3.4 mm below the b
 PCB_T = BOARD["thickness"]
 PCB_Z0 = FLOOR + STANDOFF
 PCB_Z1 = PCB_Z0 + PCB_T
-TOP = 31.0            # inside height (lid underside): tallest part F2 + fuse (21 mm) + 1.4
+TOP = 37.0            # inside height (lid underside): tallest part F2 + fuse (27 mm, measured 2026-10-15) + 1.4
 Z_OUT = TOP + LID
 
 # cable chambers (PCB x): glands' lock nuts must stay clear of the board plane
 NUT_T = 6.0           # lock nut + wall-side seal
-CLAMP_W = 8.0         # strain-relief saddle and bar (ES-05: clamp independent of the gland)
+FREE_L = 8.0          # free room behind the mains glands (the clamp saddle was removed 2026-10-15: in the way)
 PE_ZONE = 20.0        # conductor fan-out + WAGO 221-413 (PE junction, A9)
 WAGO_FRONT_L = min(p["box"][0] for p in BOARD["parts"] if p["ref"] in ("J1", "J4", "J7"))
 WAGO_FRONT_R = max(p["box"][2] for p in BOARD["parts"] if p["ref"] in ("J5", "J6", "J8"))
-X_IN_L = WAGO_FRONT_L - CLR - PE_ZONE - CLAMP_W - NUT_T
+X_IN_L = WAGO_FRONT_L - CLR - PE_ZONE - FREE_L - NUT_T
 X_IN_R = {"full": WAGO_FRONT_R + CLR + 8.0 + NUT_T,          # LV side: no clamp, 8 mm to bend
           "cut": BOARD["cut_edge_x"] + 1.0}                    # snapped tab stubs + clearance
 Y_IN_TOP = min(r[1] for r in BOARD["rects"]) - CLR               # PCB y (top edge, band)
@@ -63,7 +63,6 @@ GLANDS = [("mains_in", "L", 0.0, 15.0) + M16, ("out_fixture", "L", 21.5, 15.0) +
           ("out_ledpsu", "L", 43.0, 15.0) + M16,
           ("dmx", "B", 81.0, 21.2) + M12,
           ("led_strips", "R", 16.0, 15.0) + M16, ("led_supply", "R", 43.0, 15.0) + M16]
-CABLE_D = 8.6         # H05VV-F 3G1.5, for the clamp saddle
 
 INSERT_D, INSERT_L = 4.0, 5.7     # M3 heat-set insert hole
 SCREW_D = 3.4
@@ -216,17 +215,9 @@ def base(variant):
         else:
             b = b.cut(teardrop_y(pos, z, d, Y_IN_BOT - 1, yo2 + 1))
 
-    # strain relief saddle for the three mains cables (ES-05), inserts for the bars
-    sx1 = X_IN_L + NUT_T
-    sz = 15.0 - CABLE_D / 2 - 0.3
-    b = b.union(box(sx1, Y_IN_TOP, sx1 + CLAMP_W, Y_IN_BOT, FLOOR - 0.1, sz))
-    for name, wall, pos, z, d, _ in GLANDS[:3]:
-        b = b.cut(teardrop_x(pos, z, CABLE_D + 0.6, sx1 - 1, sx1 + CLAMP_W + 1))
-        for dy in (-8.0, 8.0):
-            b = b.cut(cyl(sx1 + CLAMP_W / 2, pos + dy, INSERT_D, sz - INSERT_L - 0.3, sz + 1))
-
     # WAGO 221-413 (PE junction, 18.7 x 18.6 x 8.3) clip in the fan-out zone
-    wx1, wx2 = sx1 + CLAMP_W + 0.8, sx1 + CLAMP_W + 0.8 + 18.6
+    wx1 = X_IN_L + NUT_T + FREE_L + 0.8
+    wx2 = wx1 + 18.6
     wy = GLANDS[1][2]
     for sgn in (-1, 1):
         ye = wy + sgn * (18.7 / 2 + 0.3)
@@ -329,15 +320,6 @@ def lid(variant, light_pipe=False):
 
 
 # --- Small parts -----------------------------------------------------------------
-def clamp_bar():
-    """Strain relief bar, one per mains cable; two M3 x 16 screws into the saddle."""
-    b = box(0, -10.0, CLAMP_W, 10.0, 0, 5.0)
-    b = b.cut(teardrop_x(0.0, -CABLE_D / 2 + 1.2, CABLE_D + 0.6, -1, CLAMP_W + 1))
-    for dy in (-8.0, 8.0):
-        b = b.cut(cyl(CLAMP_W / 2, dy, SCREW_D, -1, 6))
-    return b
-
-
 def sw1_plunger():
     """Captive plunger: pin 1.8 mm in the 2 mm hole, body in the 4.3 mm tube."""
     top = TOP - 0.3
@@ -439,7 +421,7 @@ def check(variant, parts):
 # --- Build / export ----------------------------------------------------------------
 def build(variant):
     return {"base": base(variant), "lid": lid(variant), "lid_light_pipe": lid(variant, light_pipe=True),
-            "clamp_bar": clamp_bar(), "sw1_plunger": sw1_plunger(), "sw1_collar": sw1_collar()}
+            "sw1_plunger": sw1_plunger(), "sw1_collar": sw1_collar()}
 
 
 def print_pose(name, s):
@@ -456,7 +438,7 @@ def export(variant, parts):
     d = os.path.join(OUT, variant)
     os.makedirs(d, exist_ok=True)
     for name, s in parts.items():
-        if variant == "cut" and name in ("clamp_bar", "sw1_plunger", "sw1_collar"):
+        if variant == "cut" and name in ("sw1_plunger", "sw1_collar"):
             continue   # identical to the full variant
         cq.exporters.export(s, os.path.join(d, name + ".step"))
         cq.exporters.export(print_pose(name, s), os.path.join(d, name + ".stl"),

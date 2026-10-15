@@ -42,8 +42,10 @@ fondu) peut rendre la queue DMX ou les rubans dangereux.
 7. **Boîtier** : imprimé en matériau **UL94 V-0** (ABS-FR ou PC-ABS-FR), parois pleines.
    PLA, PETG et ABS standard sont interdits pour le boîtier du nœud (le boîtier du dongle,
    sans secteur, peut être en PETG).
-8. **Câbles** : chaque câble secteur passe par son presse-étoupe **et** sa barre d'étrier
-   serrée ; aucun conducteur ne doit pouvoir être tiré jusqu'aux borniers.
+8. **Câbles** : chaque câble secteur passe par son presse-étoupe, serré sur la gaine ;
+   aucun conducteur ne doit pouvoir être tiré jusqu'aux borniers. Le presse-étoupe est
+   le seul arrêt de traction (étrier supprimé le 2026-10-15) : le choisir à joint serrant,
+   adapté au diamètre du câble.
 9. **Environnement** : intérieur, sec. Le boîtier n'est pas étanche (aérations).
 
 ## 3. Essais du premier prototype (personne équipée et qualifiée)
@@ -79,8 +81,8 @@ cases sont cochées.
 - [ ] Les trois PE dans le **WAGO 221-413**, leviers fermés, aucun PE sur la carte.
 - [ ] **Continuité du PE** mesurée entre la broche de terre de la fiche d'entrée et celle
       de chaque sortie (quelques centaines de mΩ au plus).
-- [ ] Chaque câble serré par son presse-étoupe **et** sa barre d'étrier ; essai de
-      traction à la main sans mouvement des conducteurs.
+- [ ] Chaque câble serré par son presse-étoupe ; essai de traction à la main (et de
+      torsion) sans mouvement des conducteurs.
 **Basse tension** (couvercle ouvert)
 - [ ] Queue DMX soudée sur J2 (GND, B−, A+), sortie par son presse-étoupe.
 - [ ] Carte entière : alimentation LED **certifiée TBTS à sortie isolée**, raccordée à

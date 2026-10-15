@@ -30,8 +30,8 @@ n'est pas nécessaire ; s'il est utilisé, sa longueur doit correspondre au dén
 - Ordre de câblage : dénuder la gaine juste assez pour que les conducteurs arrivent aux
   borniers sans tension ; **PE d'abord** au 221-413, puis L et N. Le PE doit être le plus
   long : si le câble est arraché, il se débranche en dernier.
-- Chaque câble : presse-étoupe serré **et** barre d'étrier (2 vis M3 × 16) serrée sur la
-  gaine. Essai de traction à la main : les conducteurs ne bougent pas.
+- Chaque câble : presse-étoupe serré à fond sur la gaine (c'est le seul arrêt de
+  traction). Essai de traction à la main : les conducteurs ne bougent pas.
 - Charges : **16 A au total** (J4 + J7) ; en pratique **un projecteur par nœud**
   (courant d'appel des alimentations à découpage, V-SYS-01). Si J7 n'est pas utilisé, le
   laisser vide, levier fermé, et fermer son presse-étoupe par un bouchon.

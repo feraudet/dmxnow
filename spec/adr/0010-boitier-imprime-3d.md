@@ -40,3 +40,14 @@ Modèle CadQuery unique générant les deux variantes, en matériau ignifugé (A
 
 - Boîtier du commerce : pas de cloison ni de passages adaptés.
 - PETG/ABS standard : classés HB, insuffisants pour une enveloppe contenant du secteur.
+
+## Amendement (2026-10-15, carte réelle)
+
+- F2 avec son fusible ATO mesure 27 mm au-dessus du PCB (21 mm estimés) : le couvercle ne
+  fermait pas. Hauteur intérieure portée de 31 à 37 mm, boîtier de 34 à 40 mm de haut
+  (ENF-05 tenu en hauteur, ≤ 45 mm).
+- Étrier serre-câble supprimé (sellette, barres, 6 inserts, 6 vis) : il gênait le
+  câblage, demande de l'utilisateur. L'arrêt de traction des câbles secteur (ES-05) est
+  fait par le presse-étoupe seul, serré sur la gaine. La place (8 mm) reste libre pour
+  plier les câbles. 🔴 Relecture humaine obligatoire : presse-étoupe à joint serrant
+  adapté au câble, essai de traction et de torsion à la main.

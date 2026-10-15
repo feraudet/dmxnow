@@ -61,7 +61,7 @@ sur un même réseau, codes de départ DMX non nuls.
 | ENF-02 | Rafraîchissement DMX ≥ 44 Hz, pas de trou > 100 ms en conditions nominales. | Mesure, compteur `lost_frames`. |
 | ENF-03 | Taux de perte radio < 1 % à 20 m en vue directe, 4 univers actifs. | Mesure heartbeat. |
 | ENF-04 | Coût matière ≤ 50 € par nœud en série de 20 (hors alimentation LED, hors XLR si fournie). | BOM chiffrée §6. |
-| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. **Non tenu, accepté par l'utilisateur le 2026-09-27** : 208 × 72 × 34 mm (entière), 145 × 72 × 34 mm (cassée), hors oreilles et bossages ; longueur : chambres de presse-étoupes et étriers imposés par ES-05, largeur : bande de F1 (§4.12, « Réalisation »). | STEP. |
+| ENF-05 | Boîtier ≤ 150 × 65 × 45 mm (carte entière), ≤ 110 × 65 × 45 mm (cassée). Objectif, à confirmer après placement. **Non tenu, accepté par l'utilisateur le 2026-09-27** : 208 × 72 × 40 mm (entière), 145 × 72 × 40 mm (cassée), hors oreilles et bossages ; longueur : chambres de presse-étoupes, largeur : bande de F1 (§4.12, « Réalisation »). | STEP. |
 | ENF-06 | Nœud configurable, identifiable et mis à jour sans ouverture du boîtier. | Recette. |
 | ENF-07 | Reproductibilité : tout est généré par scripts versionnés ; CI verte. | CI. |
 
@@ -537,8 +537,8 @@ contrôle pour la relecture humaine.
   230 V, maintenu par un clip imprimé, accessible par le couvercle des borniers.
 - Entrées de câbles :
   - secteur entrée, sortie projecteur, sortie alimentation LED : presse-étoupes M16 ou PG9
-    selon le diamètre des cordons H05VV-F 3G1,5 (≈ 8 à 9 mm) [V-ENC-01] **plus** étrier
-    de serrage imprimé vissé (arrêt de traction indépendant du presse-étoupe) ;
+    selon le diamètre des cordons H05VV-F 3G1,5 (≈ 8 à 9 mm) [V-ENC-01], qui font aussi
+    arrêt de traction (étrier imprimé supprimé le 2026-10-15, il gênait le câblage, ADR 0010) ;
   - queue DMX : PG7 (plage 3 à 6,5 mm) ; les câbles DMX 120 Ω font souvent 6 à 6,5 mm :
     à vérifier, sinon M12 [V-ENC-01] ;
   - version entière : entrée 12/24 V et sortie rubans, presse-étoupes PG7/PG9.
@@ -571,7 +571,7 @@ contrôle pour la relecture humaine.
     `enclosure/board.json`, contrôlé en CI) plutôt qu'un STEP : plusieurs empreintes du
     projet n'ont pas de modèle 3D ; hauteurs relevées sur les fiches [V-ENC-03] ;
   - **chambres de câblage** aux deux extrémités : le contre-écrou d'un M16 (22 mm) ne peut
-    pas traverser le plan du PCB ; côté secteur, 34 mm pour l'écrou, l'étrier et le WAGO
+    pas traverser le plan du PCB ; côté secteur, 34 mm pour l'écrou, le pliage des câbles et le WAGO
     221-413 ; d'où le dépassement d'ENF-05 ;
   - cloison 🔴 en trois parties (paroi du fond, languettes dans les fentes d'isolement,
     jupe du couvercle passant à 0,5 mm du PCB et au-dessus de K1 et PS1, qui
@@ -585,7 +585,7 @@ contrôle pour la relecture humaine.
     PG7), sorties rubans et alimentation LED en M16 ;
   - aérations : fentes dans le couvercle au-dessus de Q2 à Q5 et entrées basses sous
     la partie sécable ; aucune ouverture au-dessus de la zone 230 V ;
-  - hauteur intérieure 31 mm (F2 + fusible), PCB à 5 mm du fond.
+  - hauteur intérieure 37 mm (F2 + fusible : 27 mm mesurés le 2026-10-15), PCB à 5 mm du fond.
 
 ### 4.13 Conduites stockées (EF-15, ADR 0016, ajout du 2026-10-13)
 
@@ -896,7 +896,7 @@ secteur branché (le +5V de PS1 serait mis en parallèle).
 | V-FW-11 | Carte nœud en dongle : bascule automatique au premier PING (vue au banc le 2026-10-15 sur node-2442B0, retour au nœud par `SET_ROLE` aussi), puis à vérifier avec un second nœud : portée avec l'antenne du module, sortie DMX filaire, rôle enregistré par la radio | Banc | moyenne |
 | V-ENC-01 | Diamètres des cordons secteur et DMX retenus ; plages de serrage des presse-étoupes | Fiches câbles et presse-étoupes | moyenne |
 | V-ENC-02 | Filament ignifugé retenu : classement UL94 et épaisseur associée, conditions d'impression | Fiche technique du filament | 🔴 critique |
-| V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 21 mm (porte-fusible 17,5 mm, fiche Littelfuse), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
+| V-ENC-03 | Hauteurs au-dessus du PCB retenues pour le boîtier : F2 avec fusible ATO 27 mm (mesuré le 2026-10-15), C7 17,5 mm, RV1 16 mm ; contre-écrous M16 22 mm sur angles / 6 mm, M12 17,5 mm | Mesure sur les pièces reçues | moyenne |
 | V-ENC-04 | Boîtier du dongle : épaisseur du PCB du XIAO (1,2 mm prévu), dépassement de l'USB-C (1,0 mm), hauteur des composants (3,4 mm) ; embase RP-SMA du câble KW-1518 : filetage 1/4"-36 (trou 6,6 mm), corps intérieur Ø 9,4 × 9 mm | Mesure sur les pièces reçues | faible |
 | V-SYS-01 | Parc indiqué par l'utilisateur (2026-09-26) : lyres, COB et projecteurs de **200 W max** par appareil (≈ 0,9 A en régime établi). Courant d'appel à froid d'une alimentation 200 W typiquement 20 à 60 A crête, sous les 100 A du G5RL-1A-E-HR ; deux appareils sur J4 + J4b peuvent approcher ou dépasser 100 A : un appareil par nœud recommandé tant que l'appel n'est pas vérifié | Fiches des alimentations, mesure | faible |
 | V-SYS-02 | ✅ XLR **3 broches** sur tout le parc (confirmé par l'utilisateur le 2026-09-27) : queue en NC3FXX femelle (1 masse, 2 Data −, 3 Data +) ; XLR 5 broches seulement par adaptateur si un appareil l'impose | Toi | - |

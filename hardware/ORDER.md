@@ -96,8 +96,8 @@ millimètre près.
 | WAGO 221-413 | 5 | Jonction des PE (A9) |
 | Presse-étoupe plastique M16 × 1,5 (serrage 4,5-10 mm) + contre-écrou | 25 | Carte entière : 5 par boîtier |
 | Presse-étoupe plastique M12 × 1,5 (serrage jusqu'à 7 mm) + contre-écrou | 5 | Queue DMX |
-| Inserts M3 à chaud Ø 4,0 × 5,7 | 80 | 16 par boîtier |
-| Vis M3 × 6 / M3 × 16 | 50 / 30 | Couvercles + PCB / étriers |
+| Inserts M3 à chaud Ø 4,0 × 5,7 | 50 | 10 par boîtier |
+| Vis M3 × 6 | 50 | Couvercles + PCB |
 | Filament **ABS-FR ou PC-ABS-FR UL94 V-0** | 1 kg | ~750 g utiles ; garder la fiche technique [V-ENC-02] 🔴 |
 | Câble DMX 120 Ω + Neutrik NC3FXX | 5 m + 5 | Queues de 1 m |
 | Câble secteur H05VV-F 3G1,5 + fiches | selon installation | Hors estimation |

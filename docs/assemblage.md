@@ -87,7 +87,6 @@ d'impression. Détail, cotes et achats : [enclosure/README.md](../enclosure/READ
 |-------|-----|
 | `base` | 1 |
 | `lid` (couvercle unique ; `lid_light_pipe` si la LED D4 est montée) | 1 |
-| `clamp_bar` (barre d'étrier) | 3 |
 | `sw1_plunger` + `sw1_collar` | 1 + 1 |
 
 - 🔴 Matériau **ABS-FR ou PC-ABS-FR UL94 V-0**. PLA, PETG et ABS standard sont interdits
@@ -101,8 +100,7 @@ d'impression. Détail, cotes et achats : [enclosure/README.md](../enclosure/READ
 
 Achats (presse-étoupes, inserts, vis, WAGO 221-413) : [enclosure/README.md §Achats](../enclosure/README.md).
 
-1. **Inserts à chaud** M3 (Ø 4,0 × 5,7 mm) dans les bossages du couvercle, la sellette
-   des étriers et les plots H2 (et H3 sur la carte entière). Insert droit, affleurant.
+1. **Inserts à chaud** M3 (Ø 4,0 × 5,7 mm) dans les bossages du couvercle et les plots H2 (et H3 sur la carte entière). Insert droit, affleurant.
 2. **WAGO 221-413** clipsé dans son logement, chambre de gauche (côté 230 V).
 3. **Presse-étoupes** : M16 ×3 côté secteur, M16 ×2 côté rubans (carte entière), M12 pour
    le DMX. Contre-écrous à l'intérieur, **méplat contre méplat** (les trois écrous secteur

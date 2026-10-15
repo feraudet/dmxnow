@@ -261,8 +261,8 @@
     125.6,
     53.75
    ],
-   "height": 21.0,
-   "source": "Littelfuse FLR 178.6165: holder 17.5 + ATO fuse above it (to confirm)",
+   "height": 27.0,
+   "source": "Littelfuse FLR 178.6165 + ATO fuse: 27 measured on the board (2026-10-15)",
    "strip": true
   },
   {
