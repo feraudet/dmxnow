@@ -1,0 +1,21 @@
+flowchart TB
+    classDef hv fill:#C0392B,stroke:#7B241C,color:#FFFFFF
+    classDef node fill:#2C3E50,stroke:#1A252F,color:#FFFFFF
+    classDef lv fill:#3498DB,stroke:#1F618D,color:#FFFFFF
+    classDef strip fill:#1ABC9C,stroke:#117A65,color:#FFFFFF
+    J7["🔴 Nœud J7 (230 V)<br/>coupée par le relais"]:::hv
+    PSU["🔴 Alimentation LED 24 V<br/>certifiée, sortie TBTS"]:::hv
+    XLR["Nœud : queue DMX<br/>XLR-3 femelle"]:::node
+    SP["SP201E<br/>adresse 41, WS2811<br/>alimentation + / −"]:::lv
+    END["bouchon 120 Ω<br/>sur DMX OUT du SP201E"]:::lv
+    R["ruban : fil rouge +24 V"]:::strip
+    G["ruban : fil vert DATA (DIN)"]:::strip
+    W["ruban : fil blanc GND"]:::strip
+    J7 -- "câble 3G1,5 : L, N, PE" --> PSU
+    XLR -- "câble DMX : broches 1, 2, 3" --> SP
+    SP --> END
+    PSU -- "+24 V et 0 V" --> SP
+    PSU -- "+24 V, en direct" --> R
+    PSU -- "0 V, en direct" --> W
+    SP -- "sortie DATA" --> G
+    SP -- "sortie GND" --> W

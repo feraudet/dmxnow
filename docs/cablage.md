@@ -94,6 +94,32 @@ selon la longueur réelle des câbles et la chute de tension admise].
 - Les deux câbles (alimentation, rubans) passent par les presse-étoupes M16 de la partie
   rubans.
 
+## 4 bis. Ruban adressable à 3 fils (WS2811), par un décodeur SP201E
+
+La carte ne pilote pas un ruban adressable : un décodeur DMX vers pixels (SP201E) le
+fait, branché sur la **sortie DMX** du nœud. Les sorties rubans J6 et J8 ne servent pas.
+
+![Raccorder un ruban WS2811 24 V par un SP201E](diagrams/ruban-adressable.png)
+
+- **DMX** : la XLR du nœud sur l'entrée DMX du SP201E. Bouchon 120 Ω sur sa sortie
+  DMX s'il est le dernier appareil de la ligne.
+- **Alimentation** : la même alimentation 24 V que les rubans (sur J7, coupée par le
+  relais). Le SP201E (5 à 24 V) n'alimente pas le ruban : le +24 V et le 0 V du ruban
+  vont **directement** à l'alimentation, le SP201E ne donne que DATA et la masse
+  commune. Pour 10 m, réinjecter aussi le +24 V et le 0 V à l'autre bout.
+- **Ruban** : brancher l'entrée (flèche du ruban vers l'aval, DIN). Couleurs usuelles
+  d'un WS2811 24 V : rouge +24 V, vert DATA, blanc GND. Vérifier sur le marquage du ruban,
+  pas à la couleur. La sortie CLK du SP201E ne sert pas (ruban à 1 fil de données).
+- **Courant** : un WS2811 24 V de 10 m tire jusqu'à 6 A en blanc. Avec le ruban RGBW
+  sur la même alimentation, additionner les deux et vérifier le calibre de
+  l'alimentation.
+- **Réglages du SP201E** : mode DMX, puce WS2811, ordre des couleurs (souvent BRG ou
+  GRB : essayer jusqu'à voir le rouge sur le canal rouge), adresse de départ par ses
+  boutons, par exemple **41** (après les canaux du nœud). Un pixel prend 3 canaux :
+  100 pixels occupent 41 à 340.
+- **Nœud** : la ligne DMX ne sort que `dmx_out_slots` canaux. Les porter au moins à la
+  fin du ruban : `dmxnow set node-2442B0 dmx_out_slots=340`.
+
 ## 5. Affectation DMX (rappel)
 
 À partir de `start_address` (réglé à l'enrôlement, [mise-en-service.md](mise-en-service.md)) :
