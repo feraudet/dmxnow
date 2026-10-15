@@ -1,0 +1,26 @@
+flowchart TB
+    classDef hv fill:#C0392B,stroke:#7B241C,color:#FFFFFF
+    classDef node fill:#2C3E50,stroke:#1A252F,color:#FFFFFF
+    classDef lv fill:#3498DB,stroke:#1F618D,color:#FFFFFF
+    classDef strip fill:#1ABC9C,stroke:#117A65,color:#FFFFFF
+    J7["🔴 Nœud J7 (230 V)<br/>sortie L, N coupée par le relais"]:::hv
+    PSU["🔴 Alimentation LED 24 V<br/>certifiée, sortie TBTS"]:::hv
+    J5["Nœud J5<br/>entrée 24 V : + et −"]:::node
+    CARTE["Carte : F2 20 A<br/>4 MOSFET (côté −)"]:::node
+    J6["Nœud J6 : V+ · 1"]:::node
+    J8["Nœud J8 : 2 · 3 · 4"]:::node
+    P["fil +24 V<br/>(souvent noir)"]:::lv
+    R["fil R"]:::strip
+    G["fil G"]:::strip
+    B["fil B"]:::strip
+    W["fil W"]:::strip
+    J7 -- "câble 3G1,5 : L, N, PE" --> PSU
+    PSU -- "V+ → +<br/>V− → −" --> J5
+    J5 --> CARTE
+    CARTE --> J6
+    CARTE --> J8
+    J6 -- "V+" --> P
+    J6 -- "1" --> R
+    J8 -- "2" --> G
+    J8 -- "3" --> B
+    J8 -- "4" --> W

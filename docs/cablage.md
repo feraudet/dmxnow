@@ -67,6 +67,13 @@ branche directement sur l'entrée DMX du projecteur.
 
 ## 4. Rubans LED (carte entière) : TBTS
 
+![Raccorder un ruban RGBW 24 V au nœud](diagrams/ruban-rgbw.png)
+
+Exemple d'un ruban RGBW 24 V à anode commune (5 fils) : le fil +24 V du ruban sur
+`V+` de J6, R sur `1`, G sur `2`, B sur `3`, W sur `4`. Le fil commun est souvent noir
+ou marqué « 24V » / « + » sur le ruban : le vérifier sur le marquage du ruban, pas à la
+couleur. Avec ce câblage, `start_address` + 1 à + 4 donnent R, G, B, W (§5).
+
 | Bornier | Sérigraphie | Raccorder |
 |---------|-------------|-----------|
 | **J5** | `+` / `−` | Sortie de l'alimentation LED 12 ou 24 V : **+ sur « + », − sur « − »** |
