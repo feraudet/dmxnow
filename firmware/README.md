@@ -12,7 +12,7 @@
 
 ```
 pip install platformio
-cd firmware/common && pio test -e native        # 36 tests (nœud + dongle), -Wall -Wextra -Werror
+cd firmware/common && pio test -e native        # 45 tests (nœud + dongle), -Wall -Wextra -Werror
 cd firmware/node && pio run -e node             # firmware.bin (OTA) et firmware.factory.bin
 cd firmware/dongle && pio run -e dongle         # XIAO ESP32-C3
 python3 firmware/common/tools/gen_vectors.py    # après toute évolution du protocole

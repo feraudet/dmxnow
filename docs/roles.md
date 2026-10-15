@@ -65,3 +65,26 @@ placer en hauteur, dégagée.
 - `dmxnow role <nœud> dongle` est refusé (`auth_failed`) à un nœud sans clé réseau,
   comme la mise à jour par la radio.
 - La XIAO refuse `dmxnow role dongle node` : elle est toujours un dongle.
+
+## 5. Pourquoi c'est fait ainsi
+
+- **La bascule automatique se fait sans redémarrage.** Quand un ordinateur ouvre le port
+  USB, l'ESP32-C3 peut redémarrer. Une bascule qui passerait par un redémarrage serait
+  donc perdue au premier redémarrage de ce type. La carte arrête son rôle de nœud (conduite
+  arrêtée, relais ouvert, rubans à 0, XLR à 0) et démarre le dongle sur place.
+- **Le rôle est enregistré à part de la configuration du nœud** (clé NVS `role`). Ajouter
+  un champ à la configuration aurait effacé l'enrôlement et la clé réseau de tous les
+  nœuds à la mise à jour suivante.
+- **Le rôle se change par la radio seulement sur un nœud qui a une clé réseau.** Sans
+  clé, n'importe qui à portée radio pourrait le transformer en dongle.
+
+Détails : [ADR 0018](../spec/adr/0018-firmware-unique-roles.md).
+
+## 6. Essais
+
+| Essai | Date | Résultat |
+|-------|------|----------|
+| Bascule automatique au premier message du démon, node-2442B0 en USB, hors secteur | 2026-10-15 | OK : `dmxnow status` donne `node board`, `automatic (until power-off)`, canal 1, émissions sans erreur |
+| Retour au nœud par `dmxnow role dongle node` | 2026-10-15 | OK : la carte redémarre en nœud et ne répond plus au démon, qui rouvre pourtant le port toutes les 3 s |
+| Second nœud piloté par une carte nœud en dongle : portée, sortie XLR, rôle enregistré par la radio | à faire | V-FW-11, demande une deuxième carte avec ce firmware |
+| Mise à jour par la radio (`dmxnow ota`) | à faire | V-FW-10 |

@@ -76,7 +76,7 @@ avertissement au-delà de 15).
 
 ```
 pip install -e '.[test]'
-pytest                       # 46 tests : protocole contre les vecteurs communs, Art-Net,
+pytest                       # 69 tests : protocole contre les vecteurs communs, Art-Net,
                              # démon contre un dongle simulé (pseudo-terminal), reconnexion,
                              # CLI, authentification, enrôlement
 ci/test_install.sh           # install.sh dans Debian Bookworm + systemd (docker)
