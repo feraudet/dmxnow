@@ -17,6 +17,7 @@
 #include "dmxnow/gamma.h"
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
+#include "dmxnow/usb_dmx.h"
 #include "dmxnow/show.h"
 #include "maintenance.h"
 #include "pwm_out.h"
@@ -49,6 +50,8 @@ Footprint fp;
 uint8_t mac[6];
 
 RelayLogic relay;
+UsbDmxParser usb_dmx;   // DMX frames on the USB port (Enttec Pro label 6), no radio
+uint32_t usb_frames = 0, usb_frames_shown = 0, usb_shown_ms = 0;
 Reassembler reasm;
 LossCounter loss;
 GammaTable gamma;
@@ -406,6 +409,8 @@ void handle_command(const radio::Packet& p, const Header& h) {
 }
 
 // --- packets --------------------------------------------------------------------------
+void apply_frame(const uint8_t* slots, uint16_t len);
+
 void on_dmx(const radio::Packet& p, const Header& h) {
     if (h.universe != cfg.universe) return;
     int8_t r = p.rssi;
@@ -414,9 +419,16 @@ void on_dmx(const radio::Packet& p, const Header& h) {
     Reassembler::Result res = reasm.feed(h.seq, h.offset, h.length, h.flags, p.data + kHeaderSize);
     if (res == Reassembler::Result::None) return;
     loss.on_frame(h.seq);
+    apply_frame(reasm.frame(), reasm.frame_len());
+}
+
+// A DMX frame of the node's universe, from the radio or from the USB port: it drives the
+// outputs exactly the same way.
+void apply_frame(const uint8_t* slots, uint16_t len) {
     stop_show();   // QLC+ takes over; the show resumes after resume_s without stream
-    std::memcpy(frame, reasm.frame(), kDmxSlots);
-    frame_len = reasm.frame_len();
+    std::memset(frame, 0, kDmxSlots);
+    std::memcpy(frame, slots, len);
+    frame_len = len;
     stream_ms = now_ms();
     if (!have_stream) schedule_heartbeat();
     have_stream = true;
@@ -547,6 +559,7 @@ void setup() {
     variant = digitalRead(board::kBoardSense) == LOW ? Variant::WithStrips : Variant::FixtureOnly;
     pinMode(board::kButton, INPUT_PULLUP);
 
+    Serial.setRxBufferSize(2048);   // DMX on USB: a 518-byte frame must fit (default 256)
     Serial.begin(115200);
     esp_read_mac(mac, ESP_MAC_WIFI_STA);
     store::begin();
@@ -601,7 +614,18 @@ void setup() {
 void loop() {
     static radio::Packet pkt;   // 1.5 kB: not on the loop task stack
     if (radio::receive(&pkt, 2)) on_packet(pkt);
+    // DMX on the USB port (bench, node off mains): same path as a radio frame
+    for (int n = Serial.available(); n > 0; --n)
+        if (usb_dmx.feed(uint8_t(Serial.read()))) {
+            apply_frame(usb_dmx.slots(), usb_dmx.slot_count());
+            ++usb_frames;
+        }
     uint32_t now = now_ms();
+    if (usb_frames != usb_frames_shown && now - usb_shown_ms >= 2000) {
+        Serial.printf("dmxnow: usb dmx %lu frames\n", (unsigned long)usb_frames);
+        usb_frames_shown = usb_frames;
+        usb_shown_ms = now;
+    }
 
     if (relay.update(now)) apply_relay_gpio();
 

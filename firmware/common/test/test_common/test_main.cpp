@@ -18,6 +18,7 @@
 #include "dmxnow/protocol.h"
 #include "dmxnow/relay.h"
 #include "dmxnow/show.h"
+#include "dmxnow/usb_dmx.h"
 
 using namespace dmxnow;
 
@@ -593,6 +594,64 @@ void test_show_late_render_restarts_and_offsets_outside_universe() {
         if (i != 19) TEST_ASSERT_EQUAL_UINT8(0, frame[i]);
 }
 
+// USB DMX input (Enttec Pro label 6) ------------------------------------------------------
+static bool usb_feed(UsbDmxParser& p, const std::vector<uint8_t>& bytes, int* frames = nullptr) {
+    bool last = false;
+    for (uint8_t b : bytes) {
+        last = p.feed(b);
+        if (last && frames) ++*frames;
+    }
+    return last;
+}
+
+static std::vector<uint8_t> usb_frame(uint8_t label, std::vector<uint8_t> payload, uint8_t end = 0xE7) {
+    std::vector<uint8_t> f = {0x7E, label, uint8_t(payload.size() & 0xFF), uint8_t(payload.size() >> 8)};
+    f.insert(f.end(), payload.begin(), payload.end());
+    f.push_back(end);
+    return f;
+}
+
+void test_usb_dmx_frames() {
+    UsbDmxParser p;
+    TEST_ASSERT_TRUE(usb_feed(p, usb_frame(6, {0, 10, 20, 30})));
+    TEST_ASSERT_EQUAL_UINT16(3, p.slot_count());
+    TEST_ASSERT_EQUAL_UINT8(10, p.slots()[0]);
+    TEST_ASSERT_EQUAL_UINT8(30, p.slots()[2]);
+    // full universe, preceded by garbage and by a frame of another label (skipped)
+    std::vector<uint8_t> full(513, 0);
+    for (int i = 1; i <= 512; ++i) full[i] = uint8_t(i);
+    std::vector<uint8_t> s = {0x00, 0xE7, 0x42};
+    auto other = usb_frame(10, {1, 2, 3});
+    auto f = usb_frame(6, full);
+    s.insert(s.end(), other.begin(), other.end());
+    s.insert(s.end(), f.begin(), f.end());
+    int frames = 0;
+    usb_feed(p, s, &frames);
+    TEST_ASSERT_EQUAL(1, frames);
+    TEST_ASSERT_EQUAL_UINT16(512, p.slot_count());
+    TEST_ASSERT_EQUAL_UINT8(255, p.slots()[254]);   // slot 255
+    TEST_ASSERT_EQUAL_UINT8(0, p.slots()[255]);     // slot 256 = 256 & 0xFF
+    TEST_ASSERT_EQUAL_UINT8(0, p.slots()[511]);     // slot 512 = 512 & 0xFF
+    TEST_ASSERT_EQUAL_UINT8(1, p.slots()[256]);     // slot 257
+    // back-to-back frames
+    auto a = usb_frame(6, {0, 1}), b = usb_frame(6, {0, 2});
+    a.insert(a.end(), b.begin(), b.end());
+    frames = 0;
+    usb_feed(p, a, &frames);
+    TEST_ASSERT_EQUAL(2, frames);
+    TEST_ASSERT_EQUAL_UINT8(2, p.slots()[0]);
+}
+
+void test_usb_dmx_rejects_and_resyncs() {
+    UsbDmxParser p;
+    TEST_ASSERT_FALSE(usb_feed(p, usb_frame(6, {0, 1, 2}, 0x00)));   // bad end byte
+    TEST_ASSERT_FALSE(usb_feed(p, usb_frame(6, {0xCC, 1, 2})));      // start code not 0
+    TEST_ASSERT_FALSE(usb_feed(p, usb_frame(6, {})));                // no start code
+    TEST_ASSERT_FALSE(usb_feed(p, {0x7E, 6, 0x02, 0x02}));           // 514 bytes: oversize
+    TEST_ASSERT_TRUE(usb_feed(p, usb_frame(6, {0, 7})));             // resynchronised
+    TEST_ASSERT_EQUAL_UINT8(7, p.slots()[0]);
+}
+
 int main() {
     std::ifstream f(VECTORS_PATH);
     std::stringstream ss;
@@ -628,5 +687,7 @@ int main() {
     RUN_TEST(test_show_parse_and_render_like_python);
     RUN_TEST(test_show_invalid_files_rejected);
     RUN_TEST(test_show_late_render_restarts_and_offsets_outside_universe);
+    RUN_TEST(test_usb_dmx_frames);
+    RUN_TEST(test_usb_dmx_rejects_and_resyncs);
     return UNITY_END();
 }

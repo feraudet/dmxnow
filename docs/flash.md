@@ -71,6 +71,10 @@ Procédure :
 Si le port n'apparaît pas : vérifier D+/D− (inversés = pas d'énumération), l'alimentation
 5V, et refaire l'étape 1 en maintenant bien SW1 pendant le branchement.
 
+Tant que le nœud est branché par J3, il peut aussi recevoir du DMX par l'USB, sans radio,
+pour essayer un projecteur sur sa XLR (le projecteur alimenté à part, le nœud toujours
+hors secteur) : voir [firmware/README.md](../firmware/README.md), « DMX par l'USB ».
+
 ## 3. Dongle
 
 1. Brancher le XIAO en USB-C sur le PC. La première fois, s'il n'est pas reconnu en

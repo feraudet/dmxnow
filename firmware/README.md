@@ -32,6 +32,23 @@ désactiver la vérification.
   **confirmée au premier paquet radio valide** ; sans paquet dans les 60 s, le chargeur
   revient à l'ancienne. Faire les OTA à portée du dongle.
 
+## DMX par l'USB, sans radio (banc)
+
+Le nœud lit aussi des trames DMX sur son USB (pastilles J3), au format « Output Only Send
+DMX Packet » de l'Enttec DMX USB Pro : `7E 06 <longueur LSB> <longueur MSB> 00 <canaux…>
+E7`. Elles pilotent la sortie DMX, le relais et les rubans exactement comme une trame
+radio de son univers (`common/src/usb_dmx.cpp`, `apply_frame` dans `node/src/node.cpp`).
+Sert à tester un projecteur sans la radio, par exemple pour savoir si un défaut vient de
+la radio ou du projecteur.
+
+- 🔴 Nœud **hors secteur**, alimenté par **J3-5V** : le projecteur s'alimente à part.
+- `python node/tools/usb_dmx_send.py /dev/cu.usbmodemXXXX 19=255 12=128 --seconds 10`
+  (pyserial) : canaux réglés, les autres à 0, répétés à 30 Hz, noir à la fin.
+- Le port doit être ouvert avec DTR à 1, sinon le pilote USB de l'ESP32-C3 peut ignorer
+  ce qui arrive. L'ouverture du port redémarre le nœud : attendre 1 s avant d'envoyer.
+- La console affiche `dmxnow: usb dmx N frames` toutes les 2 s tant que des trames
+  arrivent.
+
 ## Mise en service (nœud neuf)
 
 1. Un nœud neuf a `net_id` = 0 : il n'accepte ni DMX ni rien d'autre que des COMMAND et
