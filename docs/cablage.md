@@ -113,10 +113,19 @@ fait, branché sur la **sortie DMX** du nœud. Les sorties rubans J6 et J8 ne se
 - **Courant** : un WS2811 24 V de 10 m tire jusqu'à 6 A en blanc. Avec le ruban RGBW
   sur la même alimentation, additionner les deux et vérifier le calibre de
   l'alimentation.
-- **Réglages du SP201E** : mode DMX, puce WS2811, ordre des couleurs (souvent BRG ou
-  GRB : essayer jusqu'à voir le rouge sur le canal rouge), adresse de départ par ses
-  boutons, par exemple **41** (après les canaux du nœud). Un pixel prend 3 canaux :
-  100 pixels occupent 41 à 340.
+- **Réglages du SP201E** (bouton M pour passer d'un menu à l'autre, gauche et droite
+  pour la valeur) :
+
+  | Écran | Sens | Réglage |
+  |-------|------|---------|
+  | `c0041` | canal DMX de départ | **41** (après les canaux du nœud) |
+  | `L2811` | type de puce | **WS2811** (livré en `L8806`) |
+  | `P---` | mode | **DMX** (livré en `P--01`, un effet intégré) |
+  | `S--05` | vitesse des effets intégrés | sans effet en DMX |
+
+- Un pixel prend 3 canaux : 100 pixels occupent 41 à 340. Sur le ruban BTF WS2811 24 V
+  de 10 m, un pixel est un segment de 6 LED (10 cm), et l'ordre des couleurs est
+  **R, B, G** (vu au banc le 2026-10-15) : canal 41 rouge, 42 bleu, 43 vert.
 - **Nœud** : la ligne DMX ne sort que `dmx_out_slots` canaux. Les porter au moins à la
   fin du ruban : `dmxnow set node-2442B0 dmx_out_slots=340`.
 
