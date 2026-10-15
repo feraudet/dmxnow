@@ -33,6 +33,61 @@ avec un câble USB soudé ou un adaptateur ([docs/flash.md](../docs/flash.md)).
 - Le boîtier (`enclosure/enclosure.py`) doit suivre : découpe ou accès selon le choix
   ci-dessus.
 
+## Rubans LED
+
+### Tous les types de rubans : 5 sorties PWM et une sortie pixels
+
+Demandé le 2026-10-15. En v0.3, la partie rubans n'a que 4 sorties PWM (RGBW, ou moins de
+couleurs) : elle ne pilote ni les rubans RGB+CCT à 5 canaux, ni les rubans adressables
+(un essai d'un ruban WS2811 à 3 fils par la XLR a été écarté : le SP3485 en 3,3 V sort
+environ 3 V, trop juste pour un WS2812B en 5 V).
+
+Types de rubans visés :
+
+| Famille | Exemples | Ce qu'il faut sur la carte |
+|---------|----------|----------------------------|
+| Analogique, 1 à 5 canaux | blanc seul, CCT, RGB, RGBW, RGB+CCT (RGBWW) | 5 sorties PWM à + commun (une de plus qu'en v0.3) |
+| Adressable, 1 fil | WS2811, WS2812B, WS2813, WS2815, SK6812 (RGBW), WS2814 (RGBW), TM1814, UCS1903 | une sortie DATA en 5 V |
+| Adressable, 2 fils | APA102, SK9822, WS2801 | une sortie DATA et une sortie CLOCK en 5 V |
+
+Proposition :
+
+- **Cinquième sortie PWM** : un MOSFET Q6 de plus (AOD2610E, comme Q2 à Q5) et un WAGO
+  2604-1102 de plus. Commande sur **IO20** (libre en v0.3, U0RXD inutilisé), avec une
+  résistance de rappel à la masse comme R15 à R18, pour que la sortie reste éteinte au
+  démarrage. L'ESP32-C3 a 6 canaux LEDC : 5 sorties PWM restent possibles.
+- **Sortie pixels** : DATA sur **IO2**, CLOCK sur **IO8**. Ces deux broches sont tirées au
+  +3V3 au démarrage (strapping, R3) : elles restent hautes et fixes, sans front, donc le
+  ruban ne reçoit rien de faux avant que le firmware démarre. Ne pas prendre IO21 : la ROM
+  y écrit son message de démarrage (U0TXD), qui partirait dans le ruban.
+- **Tampons 5 V** : les 4 portes du 74AHCT125 (U4) servent déjà aux PWM. Passer à un
+  74AHCT244 (8 portes) ou ajouter un 74AHCT125 : 3 portes de plus (PWM5, DATA, CLOCK).
+  Résistance de 33 Ω en série sur DATA et CLOCK, au plus près du connecteur, et une
+  protection ESD sur les deux lignes.
+- **Connecteur pixels** : WAGO 2604 à 3 pôles (DATA, CLOCK, GND_LED). Il ne porte pas le +
+  du ruban : un ruban adressable de 10 m en 24 V tire environ 6 A, il est alimenté
+  directement par son alimentation, dont le − rejoint GND_LED.
+- **Firmware** :
+  - un réglage `strip_type` : analogique 1 à 5 canaux, ou adressable (type de puce,
+    nombre de pixels, ordre des couleurs, regroupement de pixels) ;
+  - les pixels prennent leurs canaux dans l'univers du nœud, après ceux des sorties
+    PWM : 3 ou 4 canaux par pixel, au plus 170 pixels RGB ou 128 RGBW par univers ;
+  - 1 fil par le périphérique RMT, 2 fils par le SPI (GPSPI2, broches choisies par la
+    matrice GPIO) ;
+  - les conduites stockées sont limitées à 32 canaux : étendre le format, ou calculer
+    l'effet dans le nœud, pour un feu le long du ruban.
+
+Points à vérifier :
+
+- La place sur la partie rubans (46 mm de large) pour 2 WAGO de plus, et le boîtier de la
+  carte entière (`enclosure/enclosure.py`) : un presse-étoupe de plus, ou des câbles
+  regroupés.
+- Les rubans 5 V : vérifier que la partie rubans fonctionne avec VLED = 5 V (seuil de
+  commande des AOD2610E, D3 et C7 sans effet).
+- Le courant total sur J5 et la section des pistes avec 5 sorties PWM chargées.
+- `spec/SPEC.md` et `docs/cablage.md` doivent suivre (nouvelle exigence, nouveaux
+  borniers), avec une ADR pour le choix des broches.
+
 ## Secteur
 
 ### Terre (PE) sur la carte
