@@ -150,6 +150,8 @@ Un `factory-reset` (ou un appui de 10 s sur SW1) efface aussi la conduite.
 Vus sur node-2442B0 ([SPEC V-FW-09](../spec/SPEC.md)) :
 
 - [x] la conduite démarre seule à la mise sous tension, lue depuis la flash (2026-10-15) ;
+  avec `relay_power_on=1`, le nœud ferme aussi son relais et le feu tourne sur le ruban
+  alimenté par J7, sans Pi ni démon (coupure secteur de 5 s, 2026-10-16) ;
 - [x] le DMX reprend la main à sa première trame ; la conduite revient 12 à 15 s après
   son arrêt (2026-10-15) ;
 - [x] le déploiement passe sans erreur, jusqu'à 36 ko, sans redémarrage du nœud
