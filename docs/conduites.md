@@ -119,6 +119,9 @@ PYTHONPATH=pi python3 shows/ruban_pixels.py --addr 1 --pixels 60 --order RGB   #
 - 🔴 L'alimentation du ruban et du SP201E est sur J7 : pour que la conduite s'allume seule
   à la mise sous tension, `dmxnow set node-2442B0 relay_power_on=1`.
 - Taille : 1 à 36 ko, soit 6 à 190 morceaux de 192 octets au déploiement.
+- Vu au banc le 2026-10-16 : `01-arc-en-ciel` joué seul par le nœud, fluide sur tout le
+  ruban. Le nœud redémarre à la fin du déploiement (contournement d'un défaut de
+  relecture de la flash, SPEC V-FW-09) : c'est normal, la conduite démarre ensuite.
 - Aperçu de la planche : `PYTHONPATH=pi enclosure/.venv/bin/python shows/preview_pixels.py
   shows/pixels/*.dxs -o docs/figures/conduites-pixels.png`.
 

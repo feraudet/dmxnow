@@ -408,7 +408,11 @@ void handle_command(const radio::Packet& p, const Header& h) {
                 show_store::remap();
                 if (!load_show() || show.info().size != get32(cmd.args) || show.info().crc != get32(cmd.args + 4)) {
                     show.unload();
-                    st = AckStatus::InvalidArg;
+                    // the file is right in the flash but the mapping read refused it
+                    // (seen on the bench, 2026-10-16, cause unknown): reboot, the boot
+                    // path loads it from a fresh mapping
+                    if (show_store::verify(get32(cmd.args), get32(cmd.args + 4))) reboot_at = now_ms() + kRebootDelayMs;
+                    else st = AckStatus::InvalidArg;
                 } else if (!have_stream) {
                     start_show(now_ms());   // QLC+ silent: plays at once, else after resume_s
                 }
