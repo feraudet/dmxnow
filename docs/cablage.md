@@ -126,6 +126,9 @@ fait, branché sur la **sortie DMX** du nœud. Les sorties rubans J6 et J8 ne se
 - Un pixel prend 3 canaux : 100 pixels occupent 41 à 340. Sur le ruban BTF WS2811 24 V
   de 10 m, un pixel est un segment de 6 LED (10 cm), et l'ordre des couleurs est
   **R, B, G** (vu au banc le 2026-10-15) : canal 41 rouge, 42 bleu, 43 vert.
+- Vu au banc le 2026-10-16 : un pixel rouge tous les 10 donne bien 10 segments rouges
+  sur les 10 m (100 pixels), et un arc-en-ciel envoyé à 30 Hz défile sans à-coups
+  jusqu'au bout du ruban.
 - **Nœud** : la ligne DMX ne sort que `dmx_out_slots` canaux. Les porter au moins à la
   fin du ruban : `dmxnow set node-2442B0 dmx_out_slots=340`.
 
