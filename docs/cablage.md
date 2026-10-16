@@ -65,6 +65,28 @@ branche directement sur l'entrée DMX du projecteur.
 - Souder hors boîtier, gaine thermorétractable sur chaque soudure, puis passer le câble
   dans le presse-étoupe avant de souder (la fiche XLR ne passe pas dedans).
 
+### Exemple vu au banc : Eurolite LED IP PAR-64 COB 3000K 100W Zoom
+
+Vu le 2026-10-16 sur node-2442B0, avec le SP201E sur la même ligne :
+
+- DMX en chaîne : XLR du nœud → DMX IN du projecteur (XLR-3 mâle, embase IP65) → DMX
+  OUT → SP201E → bouchon 120 Ω. Une XLR standard se branche sur les embases IP.
+- Projecteur réglé à l'**adresse 1**, mode **4 canaux** (1 à 4 : libres, le nœud est en
+  30 et le SP201E en 41).
+- 🔴 Alimentation 120 W : ici sur une prise murale (le relais du nœud ne le coupe pas).
+  Pour qu'il suive le relais, le brancher sur J4 par une rallonge 3G1,5 terminée par
+  une prise femelle, sans couper son cordon (relecture humaine obligatoire).
+
+| Canal | Fonction | Valeurs (notice, vérifiées au banc) |
+|-------|----------|-------------------------------------|
+| 1 | Gradateur | 0 à 255 |
+| 2 | Stroboscope | 0-15 allumé, 16-30 éteint, 31-90 stroboscope de plus en plus rapide (en boucle), 106-165 fréquence croissante, 181-240 aléatoire, les autres plages allumé |
+| 3 | Zoom motorisé | 0 à 255 (7° à 53°) |
+| 4 | Courbe de gradation | 0-15 celle du menu `SCur`, 16-75 linéaire, 76-135 log, 136-195 exponentielle, 196-255 en S |
+
+Menu du projecteur à connaître : `LoST` (sans DMX) vaut `blac` (éteint) par défaut ;
+`FrEq` vaut 1200 Hz, à monter à 4000 Hz ou plus si la scène est filmée.
+
 ## 4. Rubans LED (carte entière) : TBTS
 
 ![Raccorder un ruban RGBW 24 V au nœud](diagrams/ruban-rgbw.png)
