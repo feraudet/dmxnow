@@ -79,5 +79,8 @@ pip install -e '.[test]'
 pytest                       # 72 tests : protocole contre les vecteurs communs, Art-Net,
                              # démon contre un dongle simulé (pseudo-terminal), reconnexion,
                              # CLI, authentification, enrôlement
+                             # (2026-10-16 : 10 tests du démon échouent sur le Mac du
+                             # banc, par timeout ; déjà le cas avant le passage à 512
+                             # canaux, cause non trouvée)
 ci/test_install.sh           # install.sh dans Debian Bookworm + systemd (docker)
 ```

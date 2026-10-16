@@ -142,7 +142,7 @@ fait, branché sur la **sortie DMX** du nœud. Les sorties rubans J6 et J8 ne se
   |-------|------|---------|
   | `c0041` | canal DMX de départ | **41** (après les canaux du nœud) |
   | `L2811` | type de puce | **WS2811** (livré en `L8806`) |
-  | `P---` | mode | **DMX** (livré en `P--01`, un effet intégré) |
+  | `P--01` | effet intégré | laissé tel quel : il joue sans DMX, le DMX reprend la main dès qu'il arrive (vu au banc) |
   | `S--05` | vitesse des effets intégrés | sans effet en DMX |
 
 - Un pixel prend 3 canaux : 100 pixels occupent 41 à 340. Sur le ruban BTF WS2811 24 V

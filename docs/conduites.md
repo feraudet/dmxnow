@@ -147,11 +147,13 @@ Un `factory-reset` (ou un appui de 10 s sur SW1) efface aussi la conduite.
 
 ## 4. Points à vérifier au banc
 
-Écrits et testés sur poste, pas encore essayés sur une vraie carte
-([SPEC V-FW-09](../spec/SPEC.md)) :
+Vus sur node-2442B0 ([SPEC V-FW-09](../spec/SPEC.md)) :
 
-- [ ] la conduite démarre seule à la mise sous tension, après le fondu d'allumage ;
-- [ ] QLC+ reprend la main à sa première trame, la conduite revient 5 s après son arrêt ;
-- [ ] le déploiement de 18 ko passe sans erreur (environ 94 morceaux) ;
-- [ ] rendu du feu sur le ruban réel (couleur, vitesse du scintillement) ;
-- [ ] `dmxnow show clear` puis redémarrage : plus de conduite.
+- [x] la conduite démarre seule à la mise sous tension, lue depuis la flash (2026-10-15) ;
+- [x] le DMX reprend la main à sa première trame ; la conduite revient 12 à 15 s après
+  son arrêt (2026-10-15) ;
+- [x] le déploiement passe sans erreur, jusqu'à 36 ko, sans redémarrage du nœud
+  (2026-10-16, après la correction du CRC de `SHOW_COMMIT`) ;
+- [x] rendu du feu sur le ruban RGBW (2026-10-15) et des 20 conduites sur le ruban
+  WS2811 (2026-10-16) ;
+- [ ] `dmxnow show clear` puis redémarrage : plus de conduite (pas encore essayé).

@@ -113,6 +113,11 @@ dmxnow ota firmware/node/.pio/build/node/firmware.bin all      # tous les nœuds
   vérifier qu'elle est confirmée (point 4 ci-dessous) : « updated, new image confirmed ».
 - Un envoi coupé (nœud débranché, radio perdue) laisse l'ancien firmware en place : il
   suffit de relancer la commande.
+- Vu au banc le 2026-10-16 sur node-2442B0, quatre fois : 1,1 Mo en 5 820 morceaux,
+  environ 6 min, image confirmée à chaque fois.
+- La colonne `fw` de `dmxnow nodes` affiche 1.0.0 pour tous les builds (la version n'est
+  pas incrémentée) : elle ne prouve pas que la mise à jour a eu lieu. La preuve est le
+  message « updated, new image confirmed » et l'uptime revenu à zéro.
 
 ### 4.2 Par la page de maintenance
 
