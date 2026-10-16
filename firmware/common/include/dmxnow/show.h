@@ -22,7 +22,8 @@ struct ShowInfo {
     uint16_t resume_s = 0;
     uint32_t steps = 0;
     uint32_t size = 0;       // whole file, CRC included
-    uint32_t crc = 0;
+    uint32_t crc = 0;        // CRC-32 stored at the end of the file (of all that precedes it)
+    uint32_t file_crc = 0;   // CRC-32 of the whole file, stored CRC included: SHOW_COMMIT's crc32
     uint32_t loop_ms = 0;    // sum of the step durations
 };
 

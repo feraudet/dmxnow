@@ -17,9 +17,6 @@ size_t capacity();
 // is erased); afterwards each chunk must start at or before the erased end.
 dmxnow::AckStatus write(uint32_t offset, const uint8_t* d, size_t n);
 void remap();                   // after an upload: fresh mapping, no stale cache line
-// CRC-32 of the first size bytes, read from the flash without the mapping (2026-10-16:
-// on the bench, the mapping read after an upload refused files that load at boot)
-bool verify(uint32_t size, uint32_t crc);
 bool clear();                   // erases the first sector: no valid show any more
 
 }  // namespace show_store

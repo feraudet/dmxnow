@@ -3,8 +3,6 @@
 #include <esp_partition.h>
 #include <spi_flash_mmap.h>
 
-#include "dmxnow/show.h"
-
 namespace show_store {
 
 namespace {
@@ -56,18 +54,6 @@ dmxnow::AckStatus write(uint32_t offset, const uint8_t* d, size_t n) {
 void remap() {
     unmap();
     map();
-}
-
-bool verify(uint32_t size, uint32_t crc) {
-    if (!part || size == 0 || size > part->size) return false;
-    uint8_t buf[256];
-    uint32_t c = 0;
-    for (uint32_t off = 0; off < size; off += sizeof buf) {
-        size_t n = size - off < sizeof buf ? size - off : sizeof buf;
-        if (esp_partition_read(part, off, buf, n) != ESP_OK) return false;
-        c = dmxnow::crc32(buf, n, c);
-    }
-    return c == crc;
 }
 
 bool clear() {

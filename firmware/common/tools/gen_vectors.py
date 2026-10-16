@@ -102,7 +102,8 @@ def show_render(channels, steps, start_address, t):
 
 def show_vectors():
     def valid(name, show_name, channels, steps, start, times):
-        return {"name": name, "hex": show_file(show_name, channels, steps).hex(), "start_address": start,
+        f = show_file(show_name, channels, steps)
+        return {"name": name, "hex": f.hex(), "file_crc32": zlib.crc32(f), "start_address": start,
                 "show_name": show_name, "channels": len(channels), "resume_s": 5, "steps": len(steps),
                 "loop_ms": sum(d for d, _ in steps),
                 "renders": [{"t": t, "slots": [[k, v] for k, v in sorted(show_render(channels, steps, start, t).items())]}

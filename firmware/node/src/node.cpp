@@ -406,13 +406,10 @@ void handle_command(const radio::Packet& p, const Header& h) {
             case Opcode::ShowCommit: {
                 if (cmd.args_len < 8) { st = AckStatus::InvalidArg; break; }
                 show_store::remap();
-                if (!load_show() || show.info().size != get32(cmd.args) || show.info().crc != get32(cmd.args + 4)) {
+                // crc32 = zlib.crc32 of the whole file, its stored CRC included (PROTOCOL §10.2)
+                if (!load_show() || show.info().size != get32(cmd.args) || show.info().file_crc != get32(cmd.args + 4)) {
                     show.unload();
-                    // the file is right in the flash but the mapping read refused it
-                    // (seen on the bench, 2026-10-16, cause unknown): reboot, the boot
-                    // path loads it from a fresh mapping
-                    if (show_store::verify(get32(cmd.args), get32(cmd.args + 4))) reboot_at = now_ms() + kRebootDelayMs;
-                    else st = AckStatus::InvalidArg;
+                    st = AckStatus::InvalidArg;
                 } else if (!have_stream) {
                     start_show(now_ms());   // QLC+ silent: plays at once, else after resume_s
                 }

@@ -55,6 +55,7 @@ bool show_parse(const uint8_t* d, size_t cap, ShowInfo* info) {
         info->steps = steps;
         info->size = uint32_t(size);
         info->crc = get32(d + size - 4);
+        info->file_crc = crc32(d + size - 4, 4, info->crc);   // chains like zlib.crc32(whole file)
         info->loop_ms = loop_ms;
     }
     return true;

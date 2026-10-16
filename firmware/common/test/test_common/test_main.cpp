@@ -548,6 +548,8 @@ void test_show_parse_and_render_like_python() {
         TEST_ASSERT_EQUAL(o["steps"].as<int>(), p.info().steps);
         TEST_ASSERT_EQUAL(o["loop_ms"].as<int>(), p.info().loop_ms);
         TEST_ASSERT_EQUAL(d.size() - 64, p.info().size);
+        // SHOW_COMMIT carries zlib.crc32 of the whole file, trailing CRC included (CLI)
+        TEST_ASSERT_EQUAL_HEX32(o["file_crc32"].as<uint32_t>(), p.info().file_crc);
         uint16_t start = o["start_address"];
         const uint32_t t0 = 0xFFFFFF00u;   // millis() wrap during the show
         p.restart(t0);
