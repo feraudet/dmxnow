@@ -84,6 +84,10 @@ Vu le 2026-10-16 sur node-2442B0, avec le SP201E sur la même ligne :
 | 3 | Zoom motorisé | 0 à 255 (7° à 53°) |
 | 4 | Courbe de gradation | 0-15 celle du menu `SCur`, 16-75 linéaire, 76-135 log, 136-195 exponentielle, 196-255 en S |
 
+Conduite d'essai : `shows/spot_zoom.py` (`shows/spot-zoom.dxs`, 64 octets), de 0 à plein
+feu en ouvrant le zoom en 8 s, puis retour, en boucle de 20 s. Vue conforme au banc le
+2026-10-16, jouée seule par le nœud.
+
 Menu du projecteur à connaître : `LoST` (sans DMX) vaut `blac` (éteint) par défaut ;
 `FrEq` vaut 1200 Hz, à monter à 4000 Hz ou plus si la scène est filmée.
 
