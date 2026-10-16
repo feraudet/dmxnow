@@ -444,8 +444,7 @@ déployée par la CLI : `dmxnow show deploy fichier.dxs <nœud>`.
 |-------:|-------:|-------|-------------|
 | 0  | 4  | `magic`    | `44 58 53 01` (« DXS » + version 1) |
 | 4  | 16 | `name`     | UTF-8, complété par des 0 |
-| 20 | 1  | `channels` | n, 1 à 32 |
-| 21 | 1  | `flags`    | 0 (réservé) |
+| 20 | 2  | `channels` | n, 1 à 512 (u16 depuis le 2026-10-16 ; avant, `channels` u8 de 1 à 32 suivi de `flags` à 0 : les anciens fichiers se lisent pareil) |
 | 22 | 2  | `resume_s` | 1 à 3600 : secondes sans flux DMX avant que la conduite reprenne |
 | 24 | 4  | `steps`    | nombre d'images clés, ≥ 1 |
 | 28 | 2 n | `slot[]`  | canal de chaque colonne : bit 15 à 1 = décalage depuis `start_address` (0 à 511 ; 0 = `start_address`) ; bit 15 à 0 = canal absolu de l'univers (1 à 512) |
@@ -472,7 +471,7 @@ déployée par la CLI : `dmxnow show deploy fichier.dxs <nœud>`.
 | `0x08` | `SHOW_WRITE`   | `offset` u32, `data` (1 à 192 octets) | Écrit un morceau du fichier. `offset` = 0 commence un envoi : la conduite en cours s'arrête (les sorties gardent leurs valeurs) et l'ancienne est perdue. Chaque morceau DOIT commencer au plus loin à la fin de la zone déjà effacée par cet envoi (secteurs de 4 ko effacés au fil de l'eau), sinon `INVALID_ARG`. Un morceau répété réécrit les mêmes octets, sans effet. |
 | `0x09` | `SHOW_COMMIT`  | `size` u32, `crc32` u32 | Vérifie le fichier écrit (format §10.1, taille et CRC égaux aux arguments) et le charge. Sans flux DMX, il démarre aussitôt ; sinon, après `resume_s` sans flux. Fichier invalide : `INVALID_ARG`, aucune conduite chargée. |
 | `0x0A` | `SHOW_CLEAR`   | - | Efface la conduite. Si elle jouait, les sorties repassent à 0 jusqu'au prochain flux DMX. |
-| `0x0B` | `SHOW_INFO`    | - | L'ACK contient : `loaded` u8, `playing` u8, `name` 16, `size` u32, `crc32` u32, `steps` u32, `loop_ms` u32, `resume_s` u16, `channels` u8 (37 octets, à 0 si aucune conduite). |
+| `0x0B` | `SHOW_INFO`    | - | L'ACK contient : `loaded` u8, `playing` u8, `name` 16, `size` u32, `crc32` u32, `steps` u32, `loop_ms` u32, `resume_s` u16, `channels` u16 (38 octets, à 0 si aucune conduite). Un firmware d'avant le 2026-10-16 répond `channels` u8 (37 octets) ; le Pi lit les deux. |
 
 Ces commandes sont authentifiées comme les autres (§7). Le Pi les envoie **nœud par
 nœud** (commande ciblée, acquittée) : en broadcast, un morceau perdu passerait inaperçu.

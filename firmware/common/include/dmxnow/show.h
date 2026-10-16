@@ -9,7 +9,7 @@ namespace dmxnow {
 
 constexpr uint8_t kShowMagic[4] = {'D', 'X', 'S', 1};
 constexpr size_t kShowHeaderSize = 28;
-constexpr uint8_t kShowMaxChannels = 32;
+constexpr uint16_t kShowMaxChannels = 512;   // a whole universe (100-pixel strip: 300)
 constexpr uint16_t kShowRelative = 0x8000;   // channel bit 15: offset from start_address
 
 // CRC-32 (IEEE 802.3, zlib.crc32): poly 0xEDB88320 reflected, init and final XOR 0xFFFFFFFF.
@@ -18,7 +18,7 @@ uint32_t crc32(const uint8_t* data, size_t len, uint32_t crc = 0);
 
 struct ShowInfo {
     char name[17] = {};
-    uint8_t channels = 0;
+    uint16_t channels = 0;
     uint16_t resume_s = 0;
     uint32_t steps = 0;
     uint32_t size = 0;       // whole file, CRC included

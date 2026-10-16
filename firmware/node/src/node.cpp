@@ -428,7 +428,7 @@ void handle_command(const radio::Packet& p, const Header& h) {
             }
             case Opcode::ShowInfo: {
                 // loaded u8, playing u8, name 16, size u32, crc32 u32, steps u32, loop_ms u32,
-                // resume_s u16, channels u8 (PROTOCOL §10.2)
+                // resume_s u16, channels u16 (PROTOCOL §10.2)
                 const ShowInfo& in = show.info();
                 bool l = show.loaded();
                 uint8_t* o = ack + 2;
@@ -441,8 +441,8 @@ void handle_command(const radio::Packet& p, const Header& h) {
                 put32(o + 26, l ? in.steps : 0);
                 put32(o + 30, l ? in.loop_ms : 0);
                 put16(o + 34, l ? in.resume_s : 0);
-                o[36] = l ? in.channels : 0;
-                ack_len += 37;
+                put16(o + 36, l ? in.channels : 0);
+                ack_len += 38;
                 break;
             }
             // firmware over the radio (PROTOCOL §11): chunks in order into the next OTA slot

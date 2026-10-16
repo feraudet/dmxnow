@@ -69,10 +69,11 @@ def tlv(items):
     return b"".join(bytes([k, len(v)]) + v for k, v in items)
 
 
-def show_file(name, channels, steps, resume_s=5, flags=0, crc_fix=0):
-    """Stored show (PROTOCOL §10.1); channels: ("rel", offset) or ("abs", slot)."""
+def show_file(name, channels, steps, resume_s=5, count=None, crc_fix=0):
+    """Stored show (PROTOCOL §10.1); channels: ("rel", offset) or ("abs", slot).
+    count overrides the channel count of the header (u16, bytes 20-21)."""
     body = b"DXS\x01" + name.encode().ljust(16, b"\0")
-    body += struct.pack("<BBHI", len(channels), flags, resume_s, len(steps))
+    body += struct.pack("<HHI", len(channels) if count is None else count, resume_s, len(steps))
     for kind, n in channels:
         body += struct.pack("<H", (0x8000 | n) if kind == "rel" else n)
     for dur, values in steps:
@@ -100,14 +101,21 @@ def show_render(channels, steps, start_address, t):
 
 
 def show_vectors():
-    channels = [("rel", 1), ("rel", 2), ("abs", 20)]
-    steps = [(300, [10, 100, 255]), (200, [210, 100, 0]), (0, [50, 50, 50])]
-    start = 6
-    times = [0, 1, 100, 199, 200, 201, 350, 499, 500, 750, 1234, 5000]
-    good = {"name": "fire_like", "hex": show_file("feu", channels, steps).hex(), "start_address": start,
-            "show_name": "feu", "channels": len(channels), "resume_s": 5, "steps": len(steps), "loop_ms": 500,
-            "renders": [{"t": t, "slots": [[k, v] for k, v in sorted(show_render(channels, steps, start, t).items())]}
-                        for t in times]}
+    def valid(name, show_name, channels, steps, start, times):
+        return {"name": name, "hex": show_file(show_name, channels, steps).hex(), "start_address": start,
+                "show_name": show_name, "channels": len(channels), "resume_s": 5, "steps": len(steps),
+                "loop_ms": sum(d for d, _ in steps),
+                "renders": [{"t": t, "slots": [[k, v] for k, v in sorted(show_render(channels, steps, start, t).items())]}
+                            for t in times]}
+
+    good = valid("fire_like", "feu", [("rel", 1), ("rel", 2), ("abs", 20)],
+                 [(300, [10, 100, 255]), (200, [210, 100, 0]), (0, [50, 50, 50])],
+                 6, [0, 1, 100, 199, 200, 201, 350, 499, 500, 750, 1234, 5000])
+    # pixel strip behind a DMX decoder: 100 RGB pixels on slots 41 to 340 (more than 255 channels)
+    strip = [("abs", s) for s in range(41, 341)]
+    pixels = valid("strip_300", "pixels", strip,
+                   [(400, [i % 256 for i in range(300)]), (600, [255 - i % 256 for i in range(300)])],
+                   30, [0, 150, 600, 999])
     one = [("abs", 1)]
     bad = [
         {"name": "bad_crc", "hex": show_file("x", one, [(100, [1])], crc_fix=1).hex()},
@@ -115,12 +123,13 @@ def show_vectors():
         {"name": "slot_zero", "hex": show_file("x", [("abs", 0)], [(100, [1])]).hex()},
         {"name": "slot_513", "hex": show_file("x", [("abs", 513)], [(100, [1])]).hex()},
         {"name": "offset_512", "hex": show_file("x", [("rel", 512)], [(100, [1])]).hex()},
-        {"name": "too_many_channels", "hex": show_file("x", [("abs", 1)] * 33, [(100, [1] * 33)]).hex()},
+        {"name": "too_many_channels", "hex": show_file("x", [("abs", 1)] * 513, [(100, [1] * 513)]).hex()},
+        {"name": "zero_channels", "hex": show_file("x", [], [(100, [])]).hex()},
         {"name": "resume_zero", "hex": show_file("x", one, [(100, [1])], resume_s=0).hex()},
-        {"name": "flags_set", "hex": show_file("x", one, [(100, [1])], flags=1).hex()},
+        {"name": "count_mismatch", "hex": show_file("x", one, [(100, [1])], count=257).hex()},
         {"name": "truncated", "hex": show_file("x", one, [(100, [1]), (100, [2])])[:-1].hex()},
     ]
-    return {"valid": [good], "invalid": bad}
+    return {"valid": [good, pixels], "invalid": bad}
 
 
 def default_config_tlv(mac):

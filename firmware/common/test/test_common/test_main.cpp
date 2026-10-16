@@ -537,34 +537,36 @@ void test_show_crc32_check_value() {
 }
 
 void test_show_parse_and_render_like_python() {
-    JsonObject o = V["show"]["valid"][0];
-    std::vector<uint8_t> d = hex(o["hex"]);
-    d.resize(d.size() + 64, 0xFF);   // erased flash after the file: the size comes from the header
-    ShowPlayer p;
-    TEST_ASSERT_TRUE(p.load(d.data(), d.size()));
-    TEST_ASSERT_EQUAL_STRING(o["show_name"] | "", p.info().name);
-    TEST_ASSERT_EQUAL(o["channels"].as<int>(), p.info().channels);
-    TEST_ASSERT_EQUAL(o["resume_s"].as<int>(), p.info().resume_s);
-    TEST_ASSERT_EQUAL(o["steps"].as<int>(), p.info().steps);
-    TEST_ASSERT_EQUAL(o["loop_ms"].as<int>(), p.info().loop_ms);
-    TEST_ASSERT_EQUAL(d.size() - 64, p.info().size);
-    uint16_t start = o["start_address"];
-    const uint32_t t0 = 0xFFFFFF00u;   // millis() wrap during the show
-    p.restart(t0);
-    for (JsonObject r : o["renders"].as<JsonArray>()) {
-        uint8_t frame[kDmxSlots];
-        std::memset(frame, 0xAA, sizeof frame);
-        p.render(t0 + r["t"].as<uint32_t>(), start, frame);
-        int written = 0;
-        for (JsonArray kv : r["slots"].as<JsonArray>()) {
-            char msg[48];
-            snprintf(msg, sizeof msg, "t=%u slot index %d", r["t"].as<unsigned>(), kv[0].as<int>());
-            TEST_ASSERT_EQUAL_UINT8_MESSAGE(kv[1].as<int>(), frame[kv[0].as<int>()], msg);
-            ++written;
+    for (JsonObject o : V["show"]["valid"].as<JsonArray>()) {   // fire_like, strip_300 (> 255 channels)
+        std::vector<uint8_t> d = hex(o["hex"]);
+        d.resize(d.size() + 64, 0xFF);   // erased flash after the file: the size comes from the header
+        ShowPlayer p;
+        TEST_ASSERT_TRUE_MESSAGE(p.load(d.data(), d.size()), o["name"] | "");
+        TEST_ASSERT_EQUAL_STRING(o["show_name"] | "", p.info().name);
+        TEST_ASSERT_EQUAL(o["channels"].as<int>(), p.info().channels);
+        TEST_ASSERT_EQUAL(o["resume_s"].as<int>(), p.info().resume_s);
+        TEST_ASSERT_EQUAL(o["steps"].as<int>(), p.info().steps);
+        TEST_ASSERT_EQUAL(o["loop_ms"].as<int>(), p.info().loop_ms);
+        TEST_ASSERT_EQUAL(d.size() - 64, p.info().size);
+        uint16_t start = o["start_address"];
+        const uint32_t t0 = 0xFFFFFF00u;   // millis() wrap during the show
+        p.restart(t0);
+        for (JsonObject r : o["renders"].as<JsonArray>()) {
+            uint8_t frame[kDmxSlots];
+            std::memset(frame, 0xAA, sizeof frame);
+            p.render(t0 + r["t"].as<uint32_t>(), start, frame);
+            int written = 0;
+            for (JsonArray kv : r["slots"].as<JsonArray>()) {
+                char msg[64];
+                snprintf(msg, sizeof msg, "%s t=%u slot index %d", o["name"] | "", r["t"].as<unsigned>(),
+                         kv[0].as<int>());
+                TEST_ASSERT_EQUAL_UINT8_MESSAGE(kv[1].as<int>(), frame[kv[0].as<int>()], msg);
+                ++written;
+            }
+            int untouched = 0;
+            for (uint8_t b : frame) untouched += b == 0xAA;
+            TEST_ASSERT_GREATER_OR_EQUAL(int(kDmxSlots) - written, untouched);   // other slots kept
         }
-        int untouched = 0;
-        for (uint8_t b : frame) untouched += b == 0xAA;
-        TEST_ASSERT_GREATER_OR_EQUAL(int(kDmxSlots) - written, untouched);   // other slots kept
     }
 }
 

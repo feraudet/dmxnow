@@ -16,9 +16,9 @@ import zlib
 from dataclasses import dataclass, field
 
 MAGIC = b"DXS\x01"
-HEADER = struct.Struct("<4s16sBBHI")
+HEADER = struct.Struct("<4s16sHHI")  # channels u16 (was u8 + flags 0: older files read the same)
 HEADER_SIZE = HEADER.size          # 28
-MAX_CHANNELS = 32
+MAX_CHANNELS = 512                 # a whole universe (100-pixel strip: 300)
 MAX_SIZE = 0x20000                 # node partition (firmware/node/partitions.csv)
 RELATIVE = 0x8000
 WRITE_CHUNK = 192                  # SHOW_WRITE data bytes per command
@@ -74,7 +74,7 @@ class Show:
             raise ValueError("resume_s: 1 to 3600")
         if not self.steps or self.loop_ms == 0:
             raise ValueError("at least one keyframe and a loop longer than 0 ms")
-        body = bytearray(HEADER.pack(MAGIC, name.ljust(16, b"\0"), len(self.channels), 0, self.resume_s,
+        body = bytearray(HEADER.pack(MAGIC, name.ljust(16, b"\0"), len(self.channels), self.resume_s,
                                      len(self.steps)))
         for c in self.channels:
             body += struct.pack("<H", c)
@@ -89,8 +89,8 @@ class Show:
     def decode(cls, data: bytes) -> "Show":
         if len(data) < HEADER_SIZE + 4:
             raise ValueError("file too short")
-        magic, name, n, flags, resume_s, count = HEADER.unpack_from(data)
-        if magic != MAGIC or flags != 0:
+        magic, name, n, resume_s, count = HEADER.unpack_from(data)
+        if magic != MAGIC:
             raise ValueError("not a dmxnow show (DXS1)")
         size = HEADER_SIZE + 2 * n + count * (2 + n) + 4
         if len(data) != size:
@@ -132,8 +132,10 @@ def chunks(data: bytes, size: int = WRITE_CHUNK):
 
 
 def decode_info(p: bytes) -> dict:
-    """SHOW_INFO ACK data (PROTOCOL §10.2)."""
-    loaded, playing, name, size, crc, steps, loop_ms, resume_s, n = struct.unpack_from("<BB16sIIIIHB", p)
+    """SHOW_INFO ACK data (PROTOCOL §10.2). channels is u16 (38 bytes); a node firmware
+    from before the 512-channel shows sends it as u8 (37 bytes)."""
+    fmt = "<BB16sIIIIHH" if len(p) >= 38 else "<BB16sIIIIHB"
+    loaded, playing, name, size, crc, steps, loop_ms, resume_s, n = struct.unpack_from(fmt, p)
     if not loaded:
         return {"loaded": False, "playing": False}
     return {"loaded": True, "playing": bool(playing), "name": name.rstrip(b"\0").decode("utf-8", "replace"),

@@ -26,17 +26,18 @@ uint32_t crc32(const uint8_t* data, size_t len, uint32_t crc) {
     return ~crc;
 }
 
-// Layout (PROTOCOL §10.1): magic 4, name 16, channels u8, flags u8, resume_s u16,
+// Layout (PROTOCOL §10.1): magic 4, name 16, channels u16 (was channels u8 + flags u8 at 0,
+// so the older files read the same), resume_s u16,
 // steps u32, channel slots u16 x n, steps (duration_ms u16, values u8 x n) x steps, crc32.
 bool show_parse(const uint8_t* d, size_t cap, ShowInfo* info) {
     if (cap < kShowHeaderSize || std::memcmp(d, kShowMagic, 4) != 0) return false;
-    uint8_t n = d[20];
+    uint16_t n = get16(d + 20);
     uint16_t resume_s = get16(d + 22);
     uint32_t steps = get32(d + 24);
-    if (n == 0 || n > kShowMaxChannels || d[21] != 0 || resume_s == 0 || resume_s > 3600 || steps == 0) return false;
+    if (n == 0 || n > kShowMaxChannels || resume_s == 0 || resume_s > 3600 || steps == 0) return false;
     uint64_t size = uint64_t(kShowHeaderSize) + 2u * n + uint64_t(steps) * (2u + n) + 4u;
     if (size > cap) return false;
-    for (uint8_t c = 0; c < n; ++c) {
+    for (uint16_t c = 0; c < n; ++c) {
         uint16_t s = get16(d + kShowHeaderSize + 2 * c);
         bool ok = (s & kShowRelative) ? (s & ~kShowRelative) < kDmxSlots : (s >= 1 && s <= kDmxSlots);
         if (!ok) return false;
@@ -94,7 +95,7 @@ void ShowPlayer::render(uint32_t now, uint16_t start_address, uint8_t* frame) {
     const uint8_t* a = step(cur_) + 2;
     const uint8_t* b = step(next) + 2;
     const uint8_t* slots = data_ + kShowHeaderSize;
-    for (uint8_t c = 0; c < info_.channels; ++c) {
+    for (uint16_t c = 0; c < info_.channels; ++c) {
         uint16_t s = get16(slots + 2 * c);
         uint32_t idx = (s & kShowRelative) ? uint32_t(start_address) - 1 + (s & ~kShowRelative) : uint32_t(s) - 1;
         if (idx >= kDmxSlots) continue;

@@ -617,8 +617,10 @@ contrôle pour la relecture humaine.
   (`SHOW_WRITE`, commandes ciblées et authentifiées), puis `SHOW_COMMIT` vérifie la taille
   et le CRC-32. Un fichier abîmé est refusé avant tout envoi (CLI) et à la validation
   (nœud). 18 ko = 94 morceaux.
-- **Limites** : 32 canaux, 128 ko, une conduite par nœud ; ruban non adressable, donc
-  tout le ruban a la même couleur à un instant donné ; en `pwm_mode` 16 bits, MSB et LSB
+- **Limites** : 512 canaux (32 avant le 2026-10-16), 128 ko, une conduite par nœud. Sur
+  les sorties rubans du nœud (non adressables), tout le ruban a la même couleur à un
+  instant donné ; un ruban adressable derrière un décodeur DMX (SP201E) se pilote pixel
+  par pixel par la ligne DMX : 100 pixels = 300 canaux, environ 400 images clés au plus ; en `pwm_mode` 16 bits, MSB et LSB
   sont interpolés séparément (viser le mode 8 bits).
 
 ### 4.14 Mise à jour du firmware par la radio (EF-16, ADR 0017, ajout du 2026-10-15)

@@ -28,8 +28,10 @@ relais allumé au démarrage, sinon la conduite tourne sur un ruban sans courant
 dmxnow set node-2442B0 relay_power_on=1
 ```
 
-Le ruban n'est pas adressable : toute sa longueur a la même couleur à un instant donné.
-Le feu se fait dans le temps (scintillement, flambées, creux), pas le long du ruban.
+Un ruban branché sur les sorties J6 et J8 n'est pas adressable : toute sa longueur a la
+même couleur à un instant donné. Le feu se fait dans le temps (scintillement, flambées,
+creux), pas le long du ruban. Un ruban adressable passe par un décodeur sur la ligne DMX
+et se pilote pixel par pixel (§2 bis).
 
 ## 2. Générer une conduite
 
@@ -73,6 +75,52 @@ Une autre conduite (respiration, lever de soleil, orage, etc.) s'écrit de la m�
 un script qui crée un `Show`, ajoute des images clés (`step(durée_ms, valeurs)`) et
 écrit `encode()` dans un fichier. Le nœud fait un fondu linéaire d'une image à la
 suivante, puis revient à la première. Claude Code peut écrire ces scripts à la demande.
+
+## 2 bis. Ruban adressable : 20 conduites prêtes
+
+Pour le ruban WS2811 24 V de 10 m (100 pixels, ordre R, B, G) branché derrière un
+SP201E réglé sur l'adresse 41 ([cablage.md §4 bis](cablage.md)). Chaque conduite pilote
+les canaux absolus 41 à 340 de la ligne DMX, soit 3 canaux par pixel.
+
+```
+PYTHONPATH=pi python3 shows/ruban_pixels.py                      # les 20, dans shows/pixels/
+PYTHONPATH=pi python3 shows/ruban_pixels.py --brightness 50      # moitié moins lumineux
+PYTHONPATH=pi python3 shows/ruban_pixels.py --addr 1 --pixels 60 --order RGB   # autre ruban
+```
+
+![Les 20 conduites : le ruban en largeur, 4 s de temps vers le bas](figures/conduites-pixels.png)
+
+| Fichier | Effet |
+|---------|-------|
+| `01-arc-en-ciel` | Deux arcs-en-ciel qui défilent (3 s par tour) |
+| `02-fondu-couleurs` | Tout le ruban passe lentement d'une couleur à l'autre (18 s) |
+| `03-comete` | Comètes orange qui filent, une tous les 25 pixels |
+| `04-scanner` | Un point rouge qui fait l'aller-retour (2 s) |
+| `05-respiration` | Bleu qui s'allume et s'éteint doucement (4 s) |
+| `06-feu` | Braises qui scintillent tout le long du ruban |
+| `07-etoiles` | Étoiles blanches qui s'allument au hasard sur un ciel bleu nuit |
+| `08-ocean` | Vagues bleues et turquoise qui avancent |
+| `09-soleil-couchant` | Dégradé jaune, orange, rouge, violet, nuit, puis retour (48 s) |
+| `10-police` | Moitié gauche rouge, moitié droite bleue, en double éclat |
+| `11-theatre` | Chenillard ambre, un pixel sur trois |
+| `12-aurore` | Voiles verts et violets qui ondulent lentement (30 s) |
+| `13-croisement` | Comète rouge et comète bleue qui se croisent |
+| `14-chaud-froid` | Dégradé ambre vers bleu qui respire (10 s) |
+| `15-remplissage` | Le ruban se remplit d'une couleur, puis de la suivante |
+| `16-lave` | Coulée rouge et orange qui avance lentement |
+| `17-confettis` | Points de couleur au hasard qui s'éteignent en fondu |
+| `18-noel` | Rouge et vert qui s'échangent, avec un éclat doré |
+| `19-meteores` | Traînées blanc bleuté qui filent |
+| `20-coeur` | Battement de cœur rouge, plus fort au milieu du ruban |
+
+- Le nœud doit avoir un firmware du 2026-10-16 ou plus récent (512 canaux). Un firmware
+  plus ancien refuse le fichier au `show deploy` (`INVALID_ARG`), sans rien casser.
+- La ligne DMX doit sortir au moins 340 canaux : `dmxnow set node-2442B0 dmx_out_slots=340`.
+- 🔴 L'alimentation du ruban et du SP201E est sur J7 : pour que la conduite s'allume seule
+  à la mise sous tension, `dmxnow set node-2442B0 relay_power_on=1`.
+- Taille : 1 à 36 ko, soit 6 à 190 morceaux de 192 octets au déploiement.
+- Aperçu de la planche : `PYTHONPATH=pi enclosure/.venv/bin/python shows/preview_pixels.py
+  shows/pixels/*.dxs -o docs/figures/conduites-pixels.png`.
 
 ## 3. Déployer
 

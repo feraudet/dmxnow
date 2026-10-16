@@ -47,3 +47,15 @@ ruban RGBW, en boucle dès sa mise sous tension, sans Pi ni QLC+. Choix faits av
 - **Interpréteur de script dans le nœud** (Lua, bytecode maison) : plus de code embarqué
   à valider, pour un gain nul quand la conduite peut être calculée à l'avance.
 - **Envoi en broadcast** à tous les nœuds : un morceau perdu passerait inaperçu.
+
+## Amendement (2026-10-16, ruban adressable)
+
+- Limite portée de 32 à **512 canaux**, pour piloter pixel par pixel un ruban adressable
+  branché sur la ligne DMX par un décodeur (SP201E) : 100 pixels RGB = 300 canaux.
+- Le compte de canaux passe en u16 sur les octets 20 et 21 du fichier, à la place de
+  `channels` u8 et `flags` (toujours à 0). Les fichiers déjà écrits se lisent pareil. Un
+  firmware plus ancien refuse proprement un fichier de plus de 32 canaux.
+- `SHOW_INFO` renvoie `channels` en u16 (38 octets au lieu de 37) ; le Pi lit les deux.
+- Coût : 302 octets par image clé à 300 canaux, soit environ 400 images clés dans 128 ko.
+  Un motif qui défile le long du ruban prend une image clé par pixel de décalage : les
+  20 conduites de `shows/ruban_pixels.py` font de 1 à 36 ko.

@@ -222,8 +222,8 @@ class FakeDongle:
             self.show_buf, self.show = bytearray(), None
         elif status == 0 and opcode == P.OP_SHOW_INFO:
             s = self.show
-            data = (struct.pack("<BB16sIIIIHB", 1, 1, s.name.encode(), len(s.encode()), zlib.crc32(s.encode()),
-                                len(s.steps), s.loop_ms, s.resume_s, len(s.channels)) if s else bytes(37))
+            data = (struct.pack("<BB16sIIIIHH", 1, 1, s.name.encode(), len(s.encode()), zlib.crc32(s.encode()),
+                                len(s.steps), s.loop_ms, s.resume_s, len(s.channels)) if s else bytes(38))
         ack = P.build_packet(P.Header(type=P.T_ACK, net_id=self.net_id, universe=P.NO_UNIVERSE, seq=cmd_id),
                              bytes([opcode, status]) + data)
         if target in (NODE_MAC, P.BROADCAST):
